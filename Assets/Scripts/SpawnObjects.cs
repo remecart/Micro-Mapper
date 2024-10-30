@@ -235,6 +235,8 @@ public class SpawnObjects : MonoBehaviour
                 }
             }
         }
+
+        SelectObjects.instance.HighlightSelectedObject();
     }
 
     public void LoadObjectsFromScratch(float fbeat, bool resetGridPos, bool fromScratch)

@@ -32,7 +32,7 @@ public class Placement : MonoBehaviour
 
     void Update()
     {
-        if (!Settings.instance.isHovering)
+        if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting)
         {
             bufferTimeRunning -= Time.deltaTime;
             if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl)) Place();
@@ -58,6 +58,13 @@ public class Placement : MonoBehaviour
             rawImages[placementIndex].color = colors[placementIndex];
 
             if (Input.GetKey(KeyCode.LeftAlt)) AltControls();
+        }
+        else
+        {
+            foreach (Transform child in objectParent)
+            {
+                child.gameObject.SetActive(false);
+            }
         }
     }
 
@@ -350,6 +357,7 @@ public class Placement : MonoBehaviour
     {
         Vector3 mousePosition = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+        RaycastHit[] hits = Physics.RaycastAll(ray);
 
         if (Physics.Raycast(ray, out RaycastHit hitInfo))
         {
@@ -372,20 +380,39 @@ public class Placement : MonoBehaviour
 
             if (Input.GetMouseButtonDown(0))
             {
-                if (hitObject.CompareTag("Note"))
-                    altMoveCache = hitObject.GetComponent<NoteData>().note;
+                float closestDistance = float.MaxValue;
+                RaycastHit closestHit = default;
+
+                foreach (var hitNote in hits)
+                {
+                    if (hitNote.collider.CompareTag("Note"))
+                    {
+                        float distance = Vector3.Distance(ray.origin, hitNote.point);
+                        if (distance < closestDistance)
+                        {
+                            closestDistance = distance;
+                            closestHit = hitNote;
+                        }
+                    }
+                }
+
+                // If a closest hit was found, cache the note
+                if (closestDistance < float.MaxValue)
+                {
+                    altMoveCache = closestHit.collider.gameObject.GetComponent<NoteData>().note;
+                }
             }
+
             if (Input.GetMouseButtonUp(0)) altMoveCache = null;
 
             if (Input.GetMouseButton(0) && altMoveCache != null)
             {
-                RaycastHit[] hits = Physics.RaycastAll(ray);
-
                 // Find the closest object for each type
                 foreach (var hit in hits)
                 {
                     if (hit.collider.CompareTag("Grid"))
                     {
+
                         colorNotes note = altMoveCache;
                         LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Remove(note);
 
@@ -410,8 +437,6 @@ public class Placement : MonoBehaviour
                                 bufferTimeRunning = bufferTime;
                             }
 
-                            Debug.Log(angle);
-
                             int cd = Rotation(Mathf.RoundToInt(angle));
                             if (dot) cd = 8;
 
@@ -426,7 +451,9 @@ public class Placement : MonoBehaviour
                         LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
 
                         SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
-                        SpawnObjects.instance.LoadWallsBackwards(); 
+                        SpawnObjects.instance.LoadWallsBackwards();
+
+
                     }
                 }
             }

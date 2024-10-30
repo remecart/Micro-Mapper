@@ -44,7 +44,7 @@ public class BloomEffect : MonoBehaviour
 	void Start()
 	{
 		instance = this;
-		intensity = Settings.instance.config.visuals.cameraSettings.bloom;
+		intensity = Settings.instance.config.visuals.cameraSettings.bloom / 10f;
 	}
 
 	void OnRenderImage(RenderTexture source, RenderTexture destination)

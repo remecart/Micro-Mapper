@@ -131,8 +131,8 @@ public class mBot : MonoBehaviour
                 curveLines[0].SetPosition(i, GetPoint(leftSaber, lastLeft, left, i / (float)verticies));
                 curveLines[1].SetPosition(i, GetPoint(rightSaber, lastRight, right, i / (float)verticies));
 
-                Vector2 direc = curveLines[0].GetPosition(verticies - 2) - curveLines[0].GetPosition(verticies - 1);
-                curveLines[0].positionCount += 3;
+                //Vector2 direc = curveLines[0].GetPosition(verticies - 2) - curveLines[0].GetPosition(verticies - 1);
+                //curveLines[0].positionCount += 3;
             }
         }
 

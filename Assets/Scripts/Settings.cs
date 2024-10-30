@@ -115,6 +115,12 @@ public class Settings : MonoBehaviour
                     SpawnObjects.instance.spawnInMs = config.mapping.noteDistance * 100;
                     SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
                 }
+                if (ImGui.Checkbox("Box Select", ref config.mapping.selection))
+                {
+                    SelectObjects.instance.selection = config.mapping.selection;
+                    SelectObjects.instance.ClearSelection();
+                    SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                }
             }
             if (ImGui.CollapsingHeader("Colors"))
             {
@@ -450,6 +456,7 @@ public class Mapping
     public int editorScale;
     public int songSpeed;
     public float noteDistance;
+    public bool selection;
     public ColorSettings colorSettings;
 }
 

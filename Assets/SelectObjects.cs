@@ -8,11 +8,14 @@ using UnityEngine;
 public class SelectObjects : MonoBehaviour
 {
     public static SelectObjects instance;
+    public bool selection;
 
     public List<colorNotes> selectedColorNotes = new List<colorNotes>();
     public List<bombNotes> selectedBombNotes = new List<bombNotes>();
     public List<bpmEvents> selectedBpmEvents = new List<bpmEvents>();
     public List<obstacles> selectedObstacles = new List<obstacles>();
+    public List<sliders> selectedSliders = new List<sliders>();
+    public List<burstSliders> selectedBurstSliders = new List<burstSliders>();
 
     public List<Material> wallMaterials;
 
@@ -22,7 +25,14 @@ public class SelectObjects : MonoBehaviour
     void Start()
     {
         instance = this;
+        selection = Settings.instance.config.mapping.selection;
     }
+
+
+    bool clickCheck = false;
+    bool click = false;
+    Vector3 startPos;
+    Vector3 endPos;
 
     // Update is called once per frame
     void Update()
@@ -38,9 +48,39 @@ public class SelectObjects : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) DeleteObjects();
 
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.UpArrow)) OffsetBeat(SpawnObjects.instance.precision);
-        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.DownArrow)) OffsetBeat(-SpawnObjects.instance.precision);
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.UpArrow)) OffsetBeat(SpawnObjects.instance.precision);
+        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.DownArrow)) OffsetBeat(-SpawnObjects.instance.precision);
         if (Input.GetKeyDown(KeyCode.M)) MirrorSelection();
+
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetMouseButtonDown(0) && !isSelecting) StartCoroutine(Select());
+
+        if (!isSelecting)
+        {
+            preview.transform.localScale = new Vector3(0, 0, 0);
+            preview.transform.localPosition = new Vector3(0, 100000, 0);
+        }
+        else
+        {
+            if (Input.GetMouseButtonUp(0)) clickCheck = true;
+            if (Input.GetMouseButtonDown(0) && clickCheck == true) click = true;
+
+            if (selection)
+            {
+                int positiveX = 1;
+                if (endPos.x - startPos.x < 0) positiveX = -1;
+
+                int positiveY = 1;
+                if (endPos.y - startPos.y < 0) positiveY = -1;
+
+                preview.transform.position = new Vector3(startPos.x + (endPos.x - startPos.x) / 2, startPos.y + (endPos.y - startPos.y) / 2, -(SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale / 2);
+                preview.transform.localScale = new Vector3(endPos.x - startPos.x + positiveX, endPos.y - startPos.y + positiveY, (SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale);
+            }
+            else
+            {
+                preview.transform.position = new Vector3(2, 1.5f, -(SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale / 2);
+                preview.transform.localScale = new Vector3(4, 3, (SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale);
+            }
+        }
     }
 
     public void ClearSelection()
@@ -53,37 +93,188 @@ public class SelectObjects : MonoBehaviour
         HighlightSelectedObject();
     }
 
+
+    public bool isSelecting = false;
+    public GameObject preview;
+    float startCurrentBeat;
+
+    IEnumerator Select()
+    {
+        isSelecting = true;
+        Vector3 mousePosition = Input.mousePosition;
+        Ray ray = Camera.main.ScreenPointToRay(mousePosition);
+
+        RaycastHit[] hits = Physics.RaycastAll(ray);
+        RaycastHit hit = new RaycastHit();
+        bool gridFound = false;
+
+        foreach (var h in hits)
+        {
+            if (h.collider.CompareTag("Grid"))
+            {
+                hit = h;
+                gridFound = true;
+                break;
+            }
+        }
+
+        float beat = SpawnObjects.instance.currentBeat;
+
+        if (gridFound)
+        {
+            startPos = new Vector3(Mathf.RoundToInt(hit.point.x - 0.5f) + 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
+            startCurrentBeat = SpawnObjects.instance.currentBeat;
+            click = false;
+
+            List<colorNotes> selectableColorNotes = new List<colorNotes>();
+            List<bombNotes> selectableBombNotes = new List<bombNotes>();
+            List<bpmEvents> selectableBpmEvents = new List<bpmEvents>();
+            List<obstacles> selectableObstacles = new List<obstacles>();
+            List<sliders> selectableSliders = new List<sliders>();
+            List<burstSliders> selectableBurstSliders = new List<burstSliders>();
+
+            while (!Input.GetMouseButton(0))
+            {
+                yield return null;
+            }
+
+            while (!click)
+            {
+                mousePosition = Input.mousePosition;
+                ray = Camera.main.ScreenPointToRay(mousePosition);
+
+                RaycastHit[] hits2 = Physics.RaycastAll(ray);
+                RaycastHit hit2 = new RaycastHit();
+                bool gridFound2 = false;
+
+                foreach (var h in hits2)
+                {
+                    if (h.collider.CompareTag("Grid"))
+                    {
+                        hit2 = h;
+                        gridFound2 = true;
+                    }
+                }
+
+                if (gridFound2 == true)
+                {
+                    endPos = new Vector3(Mathf.RoundToInt(hit2.point.x - 0.5f) + 0.5f, Mathf.RoundToInt(hit2.point.y - 0.5f) + 0.5f, SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
+
+                    int selectedBeats = Mathf.CeilToInt(SpawnObjects.instance.currentBeat) - Mathf.FloorToInt(startCurrentBeat);
+
+                    for (int k = 0; k < selectedBeats; k++)
+                    {
+                        int currentBeatIndex = Mathf.FloorToInt(startCurrentBeat) + k;
+
+                        List<colorNotes> colorNotes = LoadMap.instance.beats[currentBeatIndex].colorNotes;
+                        foreach (var item in colorNotes)
+                        {
+                            if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
+                            {
+                                if (!selectableColorNotes.Contains(item)) selectableColorNotes.Add(item);
+                            }
+                        }
+
+                        List<bombNotes> bombNotes = LoadMap.instance.beats[currentBeatIndex].bombNotes;
+                        foreach (var item in bombNotes)
+                        {
+                            if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
+                            {
+                                if (!selectableBombNotes.Contains(item)) selectableBombNotes.Add(item);
+                            }
+                        }
+
+                        List<obstacles> obstacles = LoadMap.instance.beats[currentBeatIndex].obstacles;
+                        foreach (var item in obstacles)
+                        {
+                            if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
+                            {
+                                if (!selectableObstacles.Contains(item)) selectableObstacles.Add(item);
+                            }
+                        }
+
+                        List<sliders> sliders = LoadMap.instance.beats[currentBeatIndex].sliders;
+                        foreach (var item in sliders)
+                        {
+                            if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
+                            {
+                                if (!selectableSliders.Contains(item)) selectableSliders.Add(item);
+                            }
+                        }
+
+                        List<burstSliders> burstSliders = LoadMap.instance.beats[currentBeatIndex].burstSliders;
+                        foreach (var item in burstSliders)
+                        {
+                            if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
+                            {
+                                if (!selectableBurstSliders.Contains(item)) selectableBurstSliders.Add(item);
+                            }
+                        }
+                    }
+
+
+                    //HighlightSelectedObject();
+                }
+                else
+                {
+                    ClearSelection();
+                    preview.transform.localScale = new Vector3(0, 0, 0);
+                    preview.transform.localPosition = new Vector3(0, 100000, 0);
+                }
+                yield return new WaitForSeconds(0.05f);
+            }
+
+            selectedColorNotes.AddRange(selectableColorNotes);
+            selectedBombNotes.AddRange(selectableBombNotes);
+            selectedObstacles.AddRange(selectableObstacles);
+            //selectedSlider.AddRange(selectableSliders);
+            //selectedBurstSlider.AddRange(selectableBurstSliders);
+        }
+
+        isSelecting = false;
+        click = false;
+        clickCheck = false;
+        //SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+        yield break;
+    }
+
     public void HighlightSelectedObject()
     {
         foreach (Transform itemTransform in content.transform)
         {
             GameObject item = itemTransform.gameObject;
 
-            if (item.GetComponent<NoteData>())
+            // Cache components once to avoid repeated GetComponent calls
+            NoteData noteData = item.GetComponent<NoteData>();
+            BombData bombData = item.GetComponent<BombData>();
+            ObstacleData obstacleData = item.GetComponent<ObstacleData>();
+            BpmEventData bpmEventData = item.GetComponent<BpmEventData>();
+
+            // Check for NoteData
+            if (noteData != null)
             {
-                bool check = selectedColorNotes.Find(n => n == item.GetComponent<NoteData>().note) != null;
+                bool check = selectedColorNotes.Contains(noteData.note);
                 item.transform.GetChild(3).gameObject.SetActive(check);
             }
-            if (item.GetComponent<BombData>())
+
+            // Check for BombData
+            if (bombData != null)
             {
-                bool check = selectedBombNotes.Find(n => n == item.GetComponent<BombData>().bomb) != null;
+                bool check = selectedBombNotes.Contains(bombData.bomb);
                 item.transform.GetChild(1).gameObject.SetActive(check);
             }
-            if (item.GetComponent<ObstacleData>())
+
+            // Check for ObstacleData
+            if (obstacleData != null)
             {
-                bool check = selectedObstacles.Find(n => n == item.GetComponent<ObstacleData>().obstacle) != null;
-                if (check)
-                {
-                    item.GetComponent<LineRenderer>().material = wallMaterials[0];
-                }
-                else
-                {
-                    item.GetComponent<LineRenderer>().material = wallMaterials[1];
-                }
+                bool check = selectedObstacles.Contains(obstacleData.obstacle);
+                item.GetComponent<LineRenderer>().material = check ? wallMaterials[0] : wallMaterials[1];
             }
-            if (item.GetComponent<BpmEventData>())
+
+            // Check for BpmEventData
+            if (bpmEventData != null)
             {
-                bool check = selectedBpmEvents.Find(n => n == item.GetComponent<BpmEventData>().bpmEvent) != null;
+                bool check = selectedBpmEvents.Contains(bpmEventData.bpmEvent);
                 item.transform.GetChild(2).gameObject.SetActive(check);
             }
         }
