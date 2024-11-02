@@ -101,18 +101,20 @@ public class SpawnObjects : MonoBehaviour
         if (Input.mouseScrollDelta.y != 0 && !playing && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl))
         {
             float scroll = Input.mouseScrollDelta.y;
-            if (currentBeat + scroll * precision >= 0) currentBeat += scroll * precision;
-            LoadObjectsFromScratch(currentBeat, true, true);
-            Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
-            DrawLines.instance.DrawLinesFromScratch(currentBeat + scroll * precision, precision);
-            if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
-            SelectObjects.instance.HighlightSelectedObject();
-            UpdateTimeline();
+            if (currentBeat + scroll * precision >= 0)
+            {
+                currentBeat += scroll * precision;
+                LoadObjectsFromScratch(currentBeat, true, true);
+                Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
+                DrawLines.instance.DrawLinesFromScratch(currentBeat + scroll * precision, precision);
+                if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
+                //SelectObjects.instance.HighlightSelectedObject();
+                UpdateTimeline();
+            }
 
             if (currentBeat > BeatFromRealTime(length) && length != 0)
             {
                 currentBeat = BeatFromRealTime(length);
-                ReloadMap.instance.ReloadEverything();
             }
         }
 
