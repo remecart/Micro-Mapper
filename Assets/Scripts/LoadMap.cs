@@ -237,7 +237,7 @@ public class LoadMap : MonoBehaviour
 
     public void Load(AudioSource audio)
     {
-        int capacity = 30000;
+        int capacity = 40484; // only the real ones will understand
 
         for (int i = 0; i < capacity; i++)
         {

@@ -77,6 +77,11 @@ public class ReadMapInfo : MonoBehaviour
         // put calculate thing here
     }
 
+    private void OnDestroy()
+    {
+        if (File.Exists(Path.Combine(folderPath, "imgui.ini"))) File.Delete(Path.Combine(folderPath, "imgui.ini"));
+    }
+
     [Header("Offsets")]
     public float jumpDistance;
     public float jumpDuration;

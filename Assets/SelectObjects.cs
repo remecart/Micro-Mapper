@@ -37,9 +37,11 @@ public class SelectObjects : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetMouseButtonDown(0))
+        if (Input.GetKey(KeyCode.LeftShift))
         {
-            FindSelection();
+            if (Input.GetMouseButtonDown(0)) FindSelection();
+            if (Input.GetKeyDown(KeyCode.UpArrow)) OffsetBeat(SpawnObjects.instance.precision);
+            if (Input.GetKeyDown(KeyCode.DownArrow)) OffsetBeat(-SpawnObjects.instance.precision);
         }
         else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.A))
         {
@@ -48,8 +50,6 @@ public class SelectObjects : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) DeleteObjects();
 
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.UpArrow)) OffsetBeat(SpawnObjects.instance.precision);
-        if (Input.GetKey(KeyCode.LeftShift) && Input.GetKeyDown(KeyCode.DownArrow)) OffsetBeat(-SpawnObjects.instance.precision);
         if (Input.GetKeyDown(KeyCode.M)) MirrorSelection();
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetMouseButtonDown(0) && !isSelecting) StartCoroutine(Select());
@@ -98,6 +98,13 @@ public class SelectObjects : MonoBehaviour
     public GameObject preview;
     float startCurrentBeat;
 
+    List<colorNotes> selectableColorNotes = new List<colorNotes>();
+    List<bombNotes> selectableBombNotes = new List<bombNotes>();
+    List<bpmEvents> selectableBpmEvents = new List<bpmEvents>();
+    List<obstacles> selectableObstacles = new List<obstacles>();
+    List<sliders> selectableSliders = new List<sliders>();
+    List<burstSliders> selectableBurstSliders = new List<burstSliders>();
+
     IEnumerator Select()
     {
         isSelecting = true;
@@ -126,13 +133,6 @@ public class SelectObjects : MonoBehaviour
             startCurrentBeat = SpawnObjects.instance.currentBeat;
             click = false;
 
-            List<colorNotes> selectableColorNotes = new List<colorNotes>();
-            List<bombNotes> selectableBombNotes = new List<bombNotes>();
-            List<bpmEvents> selectableBpmEvents = new List<bpmEvents>();
-            List<obstacles> selectableObstacles = new List<obstacles>();
-            List<sliders> selectableSliders = new List<sliders>();
-            List<burstSliders> selectableBurstSliders = new List<burstSliders>();
-
             while (!Input.GetMouseButton(0))
             {
                 yield return null;
@@ -140,6 +140,14 @@ public class SelectObjects : MonoBehaviour
 
             while (!click)
             {
+                selectableColorNotes = new List<colorNotes>();
+                selectableBombNotes = new List<bombNotes>();
+                selectableBpmEvents = new List<bpmEvents>();
+                selectableObstacles = new List<obstacles>();
+                selectableSliders = new List<sliders>();
+                selectableBurstSliders = new List<burstSliders>();
+
+
                 mousePosition = Input.mousePosition;
                 ray = Camera.main.ScreenPointToRay(mousePosition);
 
@@ -254,6 +262,10 @@ public class SelectObjects : MonoBehaviour
             if (noteData != null)
             {
                 bool check = selectedColorNotes.Contains(noteData.note);
+                if (!check)
+                {
+                    check = selectableColorNotes.Contains(noteData.note);
+                }
                 item.transform.GetChild(3).gameObject.SetActive(check);
             }
 
@@ -261,6 +273,10 @@ public class SelectObjects : MonoBehaviour
             if (bombData != null)
             {
                 bool check = selectedBombNotes.Contains(bombData.bomb);
+                if (!check)
+                {
+                    check = selectableBombNotes.Contains(bombData.bomb);
+                }
                 item.transform.GetChild(1).gameObject.SetActive(check);
             }
 
@@ -268,6 +284,10 @@ public class SelectObjects : MonoBehaviour
             if (obstacleData != null)
             {
                 bool check = selectedObstacles.Contains(obstacleData.obstacle);
+                if (!check)
+                {
+                    check = selectableObstacles.Contains(obstacleData.obstacle);
+                }
                 item.GetComponent<LineRenderer>().material = check ? wallMaterials[0] : wallMaterials[1];
             }
 
@@ -275,6 +295,10 @@ public class SelectObjects : MonoBehaviour
             if (bpmEventData != null)
             {
                 bool check = selectedBpmEvents.Contains(bpmEventData.bpmEvent);
+                if (!check)
+                {
+                    check = selectableBpmEvents.Contains(bpmEventData.bpmEvent);
+                }
                 item.transform.GetChild(2).gameObject.SetActive(check);
             }
         }

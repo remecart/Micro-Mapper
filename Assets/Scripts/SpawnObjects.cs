@@ -301,6 +301,13 @@ public class SpawnObjects : MonoBehaviour
         SpawnObjectsAtBeat(beat, cbeat, fbeat, false);
     }
 
+    public float ConvertMEPos(int index)
+    {
+        float x = (float)index;
+        if (x > 999 || x < -999) x = x / 1000f - Mathf.Clamp(x, -1, 1);
+        return x;
+    }
+
     void SpawnObjectsAtBeat(int beat, float latestBeat, float earliestBeat, bool loadNewOnly)
     {
         if (beat <= BeatFromRealTime(LoadSong.instance.audioSource.clip.length) && beat >= 0)
@@ -314,7 +321,7 @@ public class SpawnObjects : MonoBehaviour
                 {
                     foreach (Transform child in content)
                     {
-                        Vector3 cache = new Vector3(noteData.x, noteData.y, PositionFromBeat(noteData.b) * editorScale);
+                        Vector3 cache = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
                         if (child.transform.localPosition == cache)
                             newObject = false;
                     }
@@ -325,7 +332,7 @@ public class SpawnObjects : MonoBehaviour
                     GameObject note = Instantiate(objects[noteData.c]);
                     note.name = "NOTE_" + noteData.c + ": b=" + noteData.b;
                     note.transform.SetParent(content);
-                    note.transform.localPosition = new Vector3(noteData.x, noteData.y, PositionFromBeat(noteData.b) * editorScale);
+                    note.transform.localPosition = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
                     note.GetComponent<NoteData>().note = noteData;
                     if (noteData.d != 8)
                     {

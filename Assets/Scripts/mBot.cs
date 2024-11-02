@@ -217,8 +217,9 @@ public class mBot : MonoBehaviour
             if (noteData.b == nextNote.b) foundNotes.Add(noteData);
         }
 
-        Vector3 lastPos = new Vector3(lastNote.x, lastNote.y, SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
-        Vector3 nextPos = new Vector3(nextNote.x, nextNote.y, SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 lastPos = new Vector3(SpawnObjects.instance.ConvertMEPos(lastNote.x), SpawnObjects.instance.ConvertMEPos(lastNote.y), SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 nextPos = new Vector3(SpawnObjects.instance.ConvertMEPos(nextNote.x), SpawnObjects.instance.ConvertMEPos(nextNote.y), SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
+
 
         Vector3 CalculatedPos;
 
@@ -306,8 +307,8 @@ public class mBot : MonoBehaviour
             if (noteData.b == nextNote.b) foundNotes.Add(noteData);
         }
 
-        Vector3 lastPos = new Vector3(lastNote.x, lastNote.y, SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
-        Vector3 nextPos = new Vector3(nextNote.x, nextNote.y, SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 lastPos = new Vector3(SpawnObjects.instance.ConvertMEPos(lastNote.x), SpawnObjects.instance.ConvertMEPos(lastNote.y), SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 nextPos = new Vector3(SpawnObjects.instance.ConvertMEPos(nextNote.x), SpawnObjects.instance.ConvertMEPos(nextNote.y), SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
 
         Vector3 CalculatedPos;
 

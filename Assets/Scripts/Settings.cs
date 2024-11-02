@@ -13,6 +13,8 @@ using static Visuals;
 using System;
 using static Audio;
 using UnityEditor;
+using Microsoft.Win32;
+using System.Diagnostics;
 
 public class Settings : MonoBehaviour
 {
@@ -24,8 +26,38 @@ public class Settings : MonoBehaviour
 
     public bool isHovering;
 
+    //private void CreateExtend()
+    //{
+    //    string appName = "MyUnityEditor";
+    //    string exePath = Process.GetCurrentProcess().MainModule.FileName;
+    //    string exeName = AppDomain.CurrentDomain.FriendlyName ?? "UnityEditor";
+
+    //    using (var txtKey = Registry.CurrentUser.CreateSubKey(@"Software\Classes\.txt"))
+    //    {
+    //        txtKey?.SetValue("", appName);
+    //    }
+
+    //    using (var appKey = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{appName}\DefaultIcon"))
+    //    {
+    //        appKey?.SetValue("", exePath);
+    //    }
+
+    //    using (var openCommand = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{appName}\shell\open\command"))
+    //    {
+    //        openCommand?.SetValue("", exePath + " \"%1\"");
+    //    }
+
+    //    using (var editCommand = Registry.CurrentUser.CreateSubKey($@"Software\Classes\{appName}\shell\edit\command"))
+    //    {
+    //        editCommand?.SetValue("", exePath + " \"%1\"");
+    //    }
+    //}
+
+
     void Start()
     {
+        //CreateExtend();
+
         instance = this;
 
         string documents = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
