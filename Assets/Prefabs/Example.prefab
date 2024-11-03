@@ -701,6 +701,7 @@ MonoBehaviour:
   generateWaveform: 0
   spectro_width: 1024
   spectro_height: 256
+  intensity: 0
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}
@@ -2247,6 +2248,7 @@ MonoBehaviour:
   generateWaveform: 1
   spectro_width: 1024
   spectro_height: 256
+  intensity: 0
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}
@@ -2596,6 +2598,7 @@ MonoBehaviour:
   generateWaveform: 1
   spectro_width: 1024
   spectro_height: 256
+  intensity: 0
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}
@@ -3042,6 +3045,7 @@ MonoBehaviour:
   generateWaveform: 0
   spectro_width: 1024
   spectro_height: 256
+  intensity: 0
   gradient:
     serializedVersion: 2
     key0: {r: 0, g: 0, b: 0, a: 1}

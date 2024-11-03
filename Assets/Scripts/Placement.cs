@@ -43,19 +43,19 @@ public class Placement : MonoBehaviour
 
             foreach (RawImage img in rawImages)
             {
-                img.color = Color.white;
+                img.color = colors[1];
             }
 
-            colors[0] = Settings.instance.config.mapping.colorSettings.leftNote;
-            colors[1] = Settings.instance.config.mapping.colorSettings.rightNote;
+            colors[2] = Settings.instance.config.mapping.colorSettings.leftNote;
+            colors[3] = Settings.instance.config.mapping.colorSettings.rightNote;
 
-            colors[0] = new Color(colors[0].r, colors[0].g, colors[0].b, 1);
-            colors[1] = new Color(colors[1].r, colors[1].g, colors[1].b, 1);
+            colors[2] = new Color(colors[2].r, colors[2].g, colors[2].b, 1);
+            colors[3] = new Color(colors[3].r, colors[3].g, colors[3].b, 1);
 
-            rawImages[5].color = colors[0];
-            rawImages[6].color = colors[1];
+            rawImages[5].color = colors[2];
+            rawImages[6].color = colors[3];
 
-            rawImages[placementIndex].color = colors[placementIndex];
+            rawImages[placementIndex].color = colors[0];
 
             if (Input.GetKey(KeyCode.LeftAlt)) AltControls();
         }

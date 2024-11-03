@@ -246,8 +246,6 @@ public class WaveformAndSpectrogram : MonoBehaviour
 
     IEnumerator GenerateWaveform()
     {
-
-
         waveformOuterColor = ((Color)Settings.instance.config.visuals.waveform.mainColor);
         waveformColor = ((Color)Settings.instance.config.visuals.waveform.innerColor);
         waveformBackgroundColor = ((Color)Settings.instance.config.visuals.waveform.backgroundColor);

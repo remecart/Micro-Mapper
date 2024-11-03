@@ -15,8 +15,8 @@ MonoBehaviour:
   Rasterizer: 0
   RasterizerFlags: 0
   Fonts:
-  - _fontAsset: {fileID: 102900000, guid: 4a43283d6c3ccef47963dab2f5810046, type: 3}
-    FontPath: Roboto-Thin.ttf
+  - _fontAsset: {fileID: 102900000, guid: 12e5f0076e2e8894182088904feee020, type: 3}
+    FontPath: FiraMono-Regular.ttf
     Config:
       FontIndexInFile: 0
       SizeInPixels: 14

@@ -53,6 +53,10 @@ public class Settings : MonoBehaviour
     //    }
     //}
 
+    public void ToggleSettings()
+    {
+        isShowing = !isShowing;
+    }
 
     void Start()
     {
@@ -433,7 +437,7 @@ public class Settings : MonoBehaviour
                     ReloadWaveform();
                 }
 
-                if (ImGui.Button("Find custom hitsound"))
+                if (ImGui.Button("Import custom hitsound"))
                 {
                     HitSoundManager.instance.OpenFilePicker();
                 }

@@ -12,6 +12,7 @@ public class LoadMap : MonoBehaviour
 {
     public static LoadMap instance;
     public GameObject text;
+    public float mappingTime;
     public enum _difficulty
     {
         Easy,
@@ -47,6 +48,8 @@ public class LoadMap : MonoBehaviour
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.P)) Save();
+
+        mappingTime += Time.deltaTime / 60f;
     }
 
     public void Save()
@@ -227,7 +230,7 @@ public class LoadMap : MonoBehaviour
         _difficultyBeatmaps difficulty = ReadMapInfo.instance.info._difficultyBeatmapSets[beatmapSet]._difficultyBeatmaps[beatmapDiff];
         string name = difficulty._beatmapFilename.ToString();
         ReadMapInfo.instance.difficulty = difficulty;
-
+        beat.customData.time = mappingTime;
         string rawJson = JsonUtility.ToJson(beat, true);
         File.WriteAllText(Path.Combine(ReadMapInfo.instance.folderPath, name), rawJson);
 
@@ -248,9 +251,7 @@ public class LoadMap : MonoBehaviour
                 obstacles = new List<obstacles>(),
                 bpmEvents = new List<bpmEvents>()
             });
-        }
-
-        Debug.Log(audio.clip.length + "  -  " + capacity);
+        };
 
         int beatmapSet = 0;
         for (int i = 0; i < ReadMapInfo.instance.info._difficultyBeatmapSets.Count; i++)
@@ -284,114 +285,127 @@ public class LoadMap : MonoBehaviour
         //string rawJson = JsonUtility.ToJson(beatV3, true);
         //File.WriteAllText(Path.Combine(ReadMapInfo.instance.folderPath, name), rawJson);
 
-        for (int i = 0; i < beatV3.colorNotes.Count; i++)
+        if (beatV3 != null)
         {
-            int b = Mathf.FloorToInt(beatV3.colorNotes[i].b);
-            beats[b].colorNotes.Add(beatV3.colorNotes[i]);
-        }
+            mappingTime = beatV3.customData.time;
+            Debug.Log("v3  -  " + mappingTime.ToString());
 
-        for (int i = 0; i < beatV3.bombNotes.Count; i++)
-        {
-            int b = Mathf.FloorToInt(beatV3.bombNotes[i].b);
-            beats[b].bombNotes.Add(beatV3.bombNotes[i]);
-        }
-
-        for (int i = 0; i < beatV3.obstacles.Count; i++)
-        {
-            int b = Mathf.FloorToInt(beatV3.obstacles[i].b);
-            beats[b].obstacles.Add(beatV3.obstacles[i]);
-        }
-
-        if (beatV3.timings != null)
-        {
-            for (int i = 0; i < beatV3.timings.Count; i++)
+            for (int i = 0; i < beatV3.colorNotes.Count; i++)
             {
-                int b = Mathf.FloorToInt(beatV3.timings[i].b);
-                beats[b].timings.Add(beatV3.timings[i]);
+                int b = Mathf.FloorToInt(beatV3.colorNotes[i].b);
+                beats[b].colorNotes.Add(beatV3.colorNotes[i]);
             }
-        }
 
-        // Place bpm change at the start for sync
-        bpmEvents bpm = new bpmEvents();
-        bpm.b = 0;
-        bpm.m = ReadMapInfo.instance.info._beatsPerMinute;
-        beats[0].bpmEvents.Add(bpm);
-        bpmEvents.Add(bpm);
+            for (int i = 0; i < beatV3.bombNotes.Count; i++)
+            {
+                int b = Mathf.FloorToInt(beatV3.bombNotes[i].b);
+                beats[b].bombNotes.Add(beatV3.bombNotes[i]);
+            }
 
-        for (int i = 0; i < beatV3.bpmEvents.Count; i++)
-        {
-            int b = Mathf.FloorToInt(beatV3.bpmEvents[i].b);
-            beats[b].bpmEvents.Add(beatV3.bpmEvents[i]);
-            bpmEvents.Add(beatV3.bpmEvents[i]);
+            for (int i = 0; i < beatV3.obstacles.Count; i++)
+            {
+                int b = Mathf.FloorToInt(beatV3.obstacles[i].b);
+                beats[b].obstacles.Add(beatV3.obstacles[i]);
+            }
+
+            if (beatV3.timings != null)
+            {
+                for (int i = 0; i < beatV3.timings.Count; i++)
+                {
+                    int b = Mathf.FloorToInt(beatV3.timings[i].b);
+                    beats[b].timings.Add(beatV3.timings[i]);
+                }
+            }
+
+            // Place bpm change at the start for sync
+            bpmEvents bpm = new bpmEvents();
+            bpm.b = 0;
+            bpm.m = ReadMapInfo.instance.info._beatsPerMinute;
+            beats[0].bpmEvents.Add(bpm);
+            bpmEvents.Add(bpm);
+
+            for (int i = 0; i < beatV3.bpmEvents.Count; i++)
+            {
+                int b = Mathf.FloorToInt(beatV3.bpmEvents[i].b);
+                beats[b].bpmEvents.Add(beatV3.bpmEvents[i]);
+                bpmEvents.Add(beatV3.bpmEvents[i]);
+            }
         }
 
         // READ V2 DATA
         beatsV2 beatv2 = JsonUtility.FromJson<beatsV2>(File.ReadAllText(Path.Combine(ReadMapInfo.instance.folderPath, name)));
 
-
-        for (int i = 0; i < beatv2._notes.Count; i++)
+        if (beatv2 != null)
         {
-            if (beatv2._notes[i]._type != 3)
+            mappingTime += beatv2._customData._time;
+            Debug.Log("v2  -  " + mappingTime.ToString());
+
+            for (int i = 0; i < beatv2._notes.Count; i++)
             {
-                colorNotes note = new colorNotes();
-                note.b = beatv2._notes[i]._time;
-                note.x = beatv2._notes[i]._lineIndex;
-                note.y = beatv2._notes[i]._lineLayer;
-                note.c = beatv2._notes[i]._type;
-                note.d = beatv2._notes[i]._cutDirection;
-                note.a = 0;
-                beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
+                if (beatv2._notes[i]._type != 3)
+                {
+                    colorNotes note = new colorNotes();
+                    note.b = beatv2._notes[i]._time;
+                    note.x = beatv2._notes[i]._lineIndex;
+                    note.y = beatv2._notes[i]._lineLayer;
+                    note.c = beatv2._notes[i]._type;
+                    note.d = beatv2._notes[i]._cutDirection;
+                    note.a = 0;
+                    beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
+                }
+                else
+                {
+                    bombNotes bomb = new bombNotes();
+                    bomb.b = beatv2._notes[i]._time;
+                    bomb.x = beatv2._notes[i]._lineIndex;
+                    bomb.y = beatv2._notes[i]._lineLayer;
+                    beats[Mathf.FloorToInt(bomb.b)].bombNotes.Add(bomb);
+                }
             }
-            else
+
+            for (int i = 0; i < beatv2._obstacles.Count; i++)
             {
-                bombNotes bomb = new bombNotes();
-                bomb.b = beatv2._notes[i]._time;
-                bomb.x = beatv2._notes[i]._lineIndex;
-                bomb.y = beatv2._notes[i]._lineLayer;
-                beats[Mathf.FloorToInt(bomb.b)].bombNotes.Add(bomb);
+                obstacles obstacle = new obstacles();
+                if (beatv2._obstacles[i]._type == 1)
+                {
+
+                    obstacle.b = beatv2._obstacles[i]._time;
+                    obstacle.x = beatv2._obstacles[i]._lineIndex;
+                    obstacle.y = 2;
+                    obstacle.d = beatv2._obstacles[i]._duration;
+                    obstacle.w = beatv2._obstacles[i]._width;
+                    obstacle.h = 3;
+                }
+                else if (beatv2._obstacles[i]._type == 0)
+                {
+                    obstacle.b = beatv2._obstacles[i]._time;
+                    obstacle.x = beatv2._obstacles[i]._lineIndex;
+                    obstacle.y = 0;
+                    obstacle.d = beatv2._obstacles[i]._duration;
+                    obstacle.w = beatv2._obstacles[i]._width;
+                    obstacle.h = 5;
+                }
+                obstacles.Add(obstacle);
+                beats[Mathf.FloorToInt(obstacle.b)].obstacles.Add(obstacle);
+            }
+
+            for (int i = 0; i < beatv2._events.Count; i++)
+            {
+                if (beatv2._events[i]._type == 100)
+                {
+                    bpmEvents bpmEvent = new bpmEvents();
+                    bpmEvent.b = beatv2._events[i]._time;
+                    // bpmEvent.x = beatv2._events[i]._type;        These don't exist in v3
+                    // bpmEvent.y = beatv2._events[i]._value;       These don't exist in v3
+                    bpmEvent.m = beatv2._events[i]._floatValue;
+
+                    beats[Mathf.FloorToInt(bpmEvent.b)].bpmEvents.Add(bpmEvent);
+                    bpmEvents.Add(bpmEvent);
+                }
             }
         }
 
-        for (int i = 0; i < beatv2._obstacles.Count; i++)
-        {
-            obstacles obstacle = new obstacles();
-            if (beatv2._obstacles[i]._type == 1)
-            {
-
-                obstacle.b = beatv2._obstacles[i]._time;
-                obstacle.x = beatv2._obstacles[i]._lineIndex;
-                obstacle.y = 2;
-                obstacle.d = beatv2._obstacles[i]._duration;
-                obstacle.w = beatv2._obstacles[i]._width;
-                obstacle.h = 3;
-            }
-            else if (beatv2._obstacles[i]._type == 0)
-            {
-                obstacle.b = beatv2._obstacles[i]._time;
-                obstacle.x = beatv2._obstacles[i]._lineIndex;
-                obstacle.y = 0;
-                obstacle.d = beatv2._obstacles[i]._duration;
-                obstacle.w = beatv2._obstacles[i]._width;
-                obstacle.h = 5;
-            }
-            obstacles.Add(obstacle);
-            beats[Mathf.FloorToInt(obstacle.b)].obstacles.Add(obstacle);
-        }
-
-        for (int i = 0; i < beatv2._events.Count; i++)
-        {
-            if (beatv2._events[i]._type == 100)
-            {
-                bpmEvents bpmEvent = new bpmEvents();
-                bpmEvent.b = beatv2._events[i]._time;
-                // bpmEvent.x = beatv2._events[i]._type;        These don't exist in v3
-                // bpmEvent.y = beatv2._events[i]._value;       These don't exist in v3
-                bpmEvent.m = beatv2._events[i]._floatValue;
-
-                beats[Mathf.FloorToInt(bpmEvent.b)].bpmEvents.Add(bpmEvent);
-                bpmEvents.Add(bpmEvent);
-            }
-        }
+        Debug.Log("qock  -  " + mappingTime.ToString());
     }
 
     public int Rotation(int level)
@@ -572,6 +586,7 @@ public class beatsV2
     public List<_notes> _notes;
     public List<_obstacles> _obstacles;
     public List<_events> _events;
+    public _customDatav2 _customData;
 }
 
 [System.Serializable]
@@ -601,4 +616,10 @@ public class _obstacles
     public int _type;
     public float _duration;
     public int _width;
+}
+
+[System.Serializable]
+public class _customDatav2
+{
+    public float _time;
 }

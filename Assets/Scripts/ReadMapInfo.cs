@@ -75,9 +75,11 @@ public class ReadMapInfo : MonoBehaviour
             info = JsonUtility.FromJson<Info>(rawData);
         }
         // put calculate thing here
+
+        Debug.Log(Path.Combine(folderPath, "imgui.ini"));
     }
 
-    private void OnDestroy()
+    void OnDestroy()
     {
         if (File.Exists(Path.Combine(folderPath, "imgui.ini"))) File.Delete(Path.Combine(folderPath, "imgui.ini"));
     }
