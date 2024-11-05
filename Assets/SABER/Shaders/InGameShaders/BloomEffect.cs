@@ -1,11 +1,7 @@
 ﻿using UnityEngine;
 using System;
 
-//spear
-// Sourced from Catlike Coding
-//https://catlikecoding.com/unity/tutorials/advanced-rendering/bloom/
-
-[ExecuteInEditMode, ImageEffectAllowedInSceneView]
+[ImageEffectAllowedInSceneView]
 public class BloomEffect : MonoBehaviour
 {
 

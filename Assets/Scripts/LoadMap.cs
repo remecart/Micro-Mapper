@@ -288,7 +288,6 @@ public class LoadMap : MonoBehaviour
         if (beatV3 != null)
         {
             mappingTime = beatV3.customData.time;
-            Debug.Log("v3  -  " + mappingTime.ToString());
 
             for (int i = 0; i < beatV3.colorNotes.Count; i++)
             {
@@ -338,7 +337,6 @@ public class LoadMap : MonoBehaviour
         if (beatv2 != null)
         {
             mappingTime += beatv2._customData._time;
-            Debug.Log("v2  -  " + mappingTime.ToString());
 
             for (int i = 0; i < beatv2._notes.Count; i++)
             {
@@ -404,8 +402,6 @@ public class LoadMap : MonoBehaviour
                 }
             }
         }
-
-        Debug.Log("qock  -  " + mappingTime.ToString());
     }
 
     public int Rotation(int level)

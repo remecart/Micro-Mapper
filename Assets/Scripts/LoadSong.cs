@@ -60,7 +60,6 @@ public class LoadSong : MonoBehaviour
     public IEnumerator LoadAudioClip(string path, AudioSource src, AudioType audioType)
     {
         string url = "file:///" + path;
-        Debug.Log("Loading audio from URL: " + url); // Log the URL to debug
 
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, audioType))
         {

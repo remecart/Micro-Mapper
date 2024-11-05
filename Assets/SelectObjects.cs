@@ -1,8 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
-
-//using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 
 public class SelectObjects : MonoBehaviour
@@ -179,7 +177,14 @@ public class SelectObjects : MonoBehaviour
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
                             {
-                                if (!selectableColorNotes.Contains(item)) selectableColorNotes.Add(item);
+                                if (!selectableColorNotes.Contains(item))
+                                {
+                                    if (selection)
+                                    {
+                                        if (PointInsideOfSelection(new Vector2(SpawnObjects.instance.ConvertMEPos(item.x), SpawnObjects.instance.ConvertMEPos(item.y)), startPos, endPos)) selectableColorNotes.Add(item);
+                                    }
+                                    else selectableColorNotes.Add(item);
+                                }
                             }
                         }
 
@@ -188,7 +193,14 @@ public class SelectObjects : MonoBehaviour
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
                             {
-                                if (!selectableBombNotes.Contains(item)) selectableBombNotes.Add(item);
+                                if (!selectableBombNotes.Contains(item))
+                                {
+                                    if (selection)
+                                    {
+                                        if (PointInsideOfSelection(new Vector2(SpawnObjects.instance.ConvertMEPos(item.x), SpawnObjects.instance.ConvertMEPos(item.y)), startPos, endPos)) selectableBombNotes.Add(item);
+                                    }
+                                    else selectableBombNotes.Add(item);
+                                }
                             }
                         }
 
@@ -197,7 +209,14 @@ public class SelectObjects : MonoBehaviour
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
                             {
-                                if (!selectableObstacles.Contains(item)) selectableObstacles.Add(item);
+                                if (!selectableObstacles.Contains(item))
+                                {
+                                    if (selection)
+                                    {
+                                        if (PointInsideOfSelection(new Vector2(SpawnObjects.instance.ConvertMEPos(item.x), SpawnObjects.instance.ConvertMEPos(item.y)), startPos, endPos)) selectableObstacles.Add(item);
+                                    }
+                                    else selectableObstacles.Add(item);
+                                }
                             }
                         }
 
@@ -221,7 +240,7 @@ public class SelectObjects : MonoBehaviour
                     }
 
 
-                    //HighlightSelectedObject();
+                    HighlightSelectedObject();
                 }
                 else
                 {
@@ -235,6 +254,13 @@ public class SelectObjects : MonoBehaviour
             selectedColorNotes.AddRange(selectableColorNotes);
             selectedBombNotes.AddRange(selectableBombNotes);
             selectedObstacles.AddRange(selectableObstacles);
+
+            selectableColorNotes = new List<colorNotes>();
+            selectableBombNotes = new List<bombNotes>();
+            selectableBpmEvents = new List<bpmEvents>();
+            selectableObstacles = new List<obstacles>();
+            selectableSliders = new List<sliders>();
+            selectableBurstSliders = new List<burstSliders>();
             //selectedSlider.AddRange(selectableSliders);
             //selectedBurstSlider.AddRange(selectableBurstSliders);
         }
@@ -245,6 +271,19 @@ public class SelectObjects : MonoBehaviour
         //SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
         yield break;
     }
+
+    public bool PointInsideOfSelection(Vector2 itemPos, Vector2 selectionStart, Vector2 selectionEnd)
+    {
+        // Calculate the min and max bounds based on start and end points
+        float minX = Mathf.Min(selectionStart.x, selectionEnd.x);
+        float maxX = Mathf.Max(selectionStart.x, selectionEnd.x);
+        float minY = Mathf.Min(selectionStart.y, selectionEnd.y);
+        float maxY = Mathf.Max(selectionStart.y, selectionEnd.y);
+
+        // Check if itemPos is within the bounds
+        return itemPos.x >= minX - 1 && itemPos.x <= maxX && itemPos.y >= minY - 1 && itemPos.y <= maxY;
+    }
+
 
     public void HighlightSelectedObject()
     {

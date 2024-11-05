@@ -119,8 +119,8 @@ public class DrawLines : MonoBehaviour
             {
                 lineRendererPrecision.SetPosition(b, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat - repeat / 2) * editorScale));
                 lineRendererPrecision.SetPosition(b + 1, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat - repeat / 2) * editorScale));
-                lineRendererPrecision.SetPosition(b + 2, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat + prec - repeat / 2) * editorScale));
-                lineRendererPrecision.SetPosition(b + 3, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat + prec - repeat / 2) * editorScale));
+                lineRendererPrecision.SetPosition(b + 2, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat + precision - repeat / 2) * editorScale));
+                lineRendererPrecision.SetPosition(b + 3, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat + precision - repeat / 2) * editorScale));
             }
             else if (i / precision + beat - repeat / 2 < 0)
             {

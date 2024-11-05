@@ -79,7 +79,7 @@ public class ReadMapInfo : MonoBehaviour
         Debug.Log(Path.Combine(folderPath, "imgui.ini"));
     }
 
-    void OnDestroy()
+    void OnApplicationQuit()
     {
         if (File.Exists(Path.Combine(folderPath, "imgui.ini"))) File.Delete(Path.Combine(folderPath, "imgui.ini"));
     }
