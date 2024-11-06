@@ -35,6 +35,8 @@ public class SelectObjects : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        HighlightSelectedObject();
+
         if (Input.GetKey(KeyCode.LeftShift))
         {
             if (Input.GetMouseButtonDown(0)) FindSelection();
@@ -52,7 +54,7 @@ public class SelectObjects : MonoBehaviour
 
         if (Input.GetKey(KeyCode.LeftControl) && Input.GetMouseButtonDown(0) && !isSelecting) StartCoroutine(Select());
 
-        if (!isSelecting)
+        if (!isSelecting || !hovering)
         {
             preview.transform.localScale = new Vector3(0, 0, 0);
             preview.transform.localPosition = new Vector3(0, 100000, 0);
@@ -70,7 +72,7 @@ public class SelectObjects : MonoBehaviour
                 int positiveY = 1;
                 if (endPos.y - startPos.y < 0) positiveY = -1;
 
-                preview.transform.position = new Vector3(startPos.x + (endPos.x - startPos.x) / 2, startPos.y + (endPos.y - startPos.y) / 2, -(SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale / 2);
+                preview.transform.position = new Vector3(endPos.x - (endPos.x - startPos.x) / 2, startPos.y + (endPos.y - startPos.y) / 2, -(SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale / 2);
                 preview.transform.localScale = new Vector3(endPos.x - startPos.x + positiveX, endPos.y - startPos.y + positiveY, (SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale);
             }
             else
@@ -91,7 +93,7 @@ public class SelectObjects : MonoBehaviour
         HighlightSelectedObject();
     }
 
-
+    bool hovering = false;
     public bool isSelecting = false;
     public GameObject preview;
     float startCurrentBeat;
@@ -162,17 +164,19 @@ public class SelectObjects : MonoBehaviour
                     }
                 }
 
+                hovering = gridFound2;
+
                 if (gridFound2 == true)
                 {
                     endPos = new Vector3(Mathf.RoundToInt(hit2.point.x - 0.5f) + 0.5f, Mathf.RoundToInt(hit2.point.y - 0.5f) + 0.5f, SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
 
-                    int selectedBeats = Mathf.CeilToInt(SpawnObjects.instance.currentBeat) - Mathf.FloorToInt(startCurrentBeat);
+                    int selectedBeats = Mathf.CeilToInt(SpawnObjects.instance.currentBeat) - Mathf.FloorToInt(startCurrentBeat) + 2;
 
                     for (int k = 0; k < selectedBeats; k++)
                     {
                         int currentBeatIndex = Mathf.FloorToInt(startCurrentBeat) + k;
 
-                        List<colorNotes> colorNotes = LoadMap.instance.beats[currentBeatIndex].colorNotes;
+                        List<colorNotes> colorNotes = LoadMap.instance.beats[currentBeatIndex - 1].colorNotes;
                         foreach (var item in colorNotes)
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
@@ -188,7 +192,7 @@ public class SelectObjects : MonoBehaviour
                             }
                         }
 
-                        List<bombNotes> bombNotes = LoadMap.instance.beats[currentBeatIndex].bombNotes;
+                        List<bombNotes> bombNotes = LoadMap.instance.beats[currentBeatIndex - 1].bombNotes;
                         foreach (var item in bombNotes)
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
@@ -204,7 +208,7 @@ public class SelectObjects : MonoBehaviour
                             }
                         }
 
-                        List<obstacles> obstacles = LoadMap.instance.beats[currentBeatIndex].obstacles;
+                        List<obstacles> obstacles = LoadMap.instance.beats[currentBeatIndex - 1].obstacles;
                         foreach (var item in obstacles)
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
@@ -220,27 +224,32 @@ public class SelectObjects : MonoBehaviour
                             }
                         }
 
-                        List<sliders> sliders = LoadMap.instance.beats[currentBeatIndex].sliders;
+                        List<sliders> sliders = LoadMap.instance.beats[currentBeatIndex - 1].sliders;
                         foreach (var item in sliders)
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
                             {
-                                if (!selectableSliders.Contains(item)) selectableSliders.Add(item);
+                                if (selection)
+                                {
+                                    if (PointInsideOfSelection(new Vector2(SpawnObjects.instance.ConvertMEPos(item.x), SpawnObjects.instance.ConvertMEPos(item.y)), startPos, endPos)) selectedSliders.Add(item);
+                                }
+                                else selectedSliders.Add(item);
                             }
                         }
 
-                        List<burstSliders> burstSliders = LoadMap.instance.beats[currentBeatIndex].burstSliders;
+                        List<burstSliders> burstSliders = LoadMap.instance.beats[currentBeatIndex - 1].burstSliders;
                         foreach (var item in burstSliders)
                         {
                             if (item.b >= startCurrentBeat && item.b <= SpawnObjects.instance.currentBeat)
                             {
-                                if (!selectableBurstSliders.Contains(item)) selectableBurstSliders.Add(item);
+                                if (selection)
+                                {
+                                    if (PointInsideOfSelection(new Vector2(SpawnObjects.instance.ConvertMEPos(item.x), SpawnObjects.instance.ConvertMEPos(item.y)), startPos, endPos)) selectedBurstSliders.Add(item);
+                                }
+                                else selectedBurstSliders.Add(item);
                             }
                         }
                     }
-
-
-                    HighlightSelectedObject();
                 }
                 else
                 {
@@ -254,6 +263,8 @@ public class SelectObjects : MonoBehaviour
             selectedColorNotes.AddRange(selectableColorNotes);
             selectedBombNotes.AddRange(selectableBombNotes);
             selectedObstacles.AddRange(selectableObstacles);
+            selectedSliders.AddRange(selectedSliders);
+            selectedBurstSliders.AddRange(selectedBurstSliders);
 
             selectableColorNotes = new List<colorNotes>();
             selectableBombNotes = new List<bombNotes>();

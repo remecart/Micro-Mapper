@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class mBot : MonoBehaviour
 {
@@ -36,7 +37,29 @@ public class mBot : MonoBehaviour
 
     public List<LineRenderer> curveLines;
 
+    public RawImage img;
+    public List<Texture2D> textures;
+
     // Start is called before the first frame update
+
+    public void ToggleMBot()
+    {
+        playing = !playing;
+
+        int index = playing ? 1 : 0;
+
+        img.texture = textures[index];
+
+        var leftTrail = leftSaber.transform.GetChild(0).GetChild(3).GetComponent<TrailRenderer>();
+        var rightTrail = rightSaber.transform.GetChild(0).GetChild(3).GetComponent<TrailRenderer>();
+
+        leftTrail.Clear();
+        rightTrail.Clear();
+
+        leftSaber.transform.GetChild(0).gameObject.SetActive(playing);
+        rightSaber.transform.GetChild(0).gameObject.SetActive(playing);
+    }
+
     void Start()
     {
         // Initialization if needed
@@ -146,21 +169,29 @@ public class mBot : MonoBehaviour
         
         if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.enableMBot))
         {
-            playing = !playing;
+            ToggleMBot(); 
         }
 
-        if (playing && SpawnObjects.instance.playing)
+        if (playing)
         {
-            leftSaber.transform.GetChild(0).gameObject.SetActive(true);
-            rightSaber.transform.GetChild(0).gameObject.SetActive(true);
-
             UpdateSaberPositionAndRotation(leftSaber, lastLeft, left);
             UpdateSaberPositionAndRotation(rightSaber, lastRight, right);
         }
+
+        var leftTrail = leftSaber.transform.GetChild(0).GetChild(3).GetComponent<TrailRenderer>();
+        var rightTrail = rightSaber.transform.GetChild(0).GetChild(3).GetComponent<TrailRenderer>();
+
+        if (!SpawnObjects.instance.playing)
+        {
+            leftTrail.enabled = false;
+            rightTrail.enabled = false;
+            leftTrail.Clear();
+            rightTrail.Clear();
+        }
         else
         {
-            leftSaber.transform.GetChild(0).gameObject.SetActive(false);
-            rightSaber.transform.GetChild(0).gameObject.SetActive(false);
+            leftTrail.enabled = true;
+            rightTrail.enabled = true;
         }
     }
 

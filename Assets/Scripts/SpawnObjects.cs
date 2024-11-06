@@ -108,7 +108,6 @@ public class SpawnObjects : MonoBehaviour
                 Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
                 DrawLines.instance.DrawLinesFromScratch(currentBeat + scroll * precision, precision);
                 if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
-                //SelectObjects.instance.HighlightSelectedObject();
                 UpdateTimeline();
             }
 
@@ -237,7 +236,6 @@ public class SpawnObjects : MonoBehaviour
                 }
             }
         }
-
         SelectObjects.instance.HighlightSelectedObject();
     }
 

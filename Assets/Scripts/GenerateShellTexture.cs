@@ -30,7 +30,7 @@ public class GenerateShellTexture : MonoBehaviour
         }
         else
         {
-            transform.localPosition = new Vector3(0, 0, -((i + 1) * height / layers));
+            transform.localPosition = new Vector3(0, 0, -(i * height / layers));
             float threshold = 1.0f / layers * i;
 
             MeshRenderer meshRenderer = GetComponent<MeshRenderer>();

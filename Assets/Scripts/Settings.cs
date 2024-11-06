@@ -22,9 +22,10 @@ public class Settings : MonoBehaviour
 
     [Header("Load Settings")]
     public Config config;
-    public string file;
-
+    private string file;
     public bool isHovering;
+
+    public Keybinds Keybinds;
 
     //private void CreateExtend()
     //{
@@ -77,6 +78,8 @@ public class Settings : MonoBehaviour
         }
         else
             config = JsonUtility.FromJson<Config>(File.ReadAllText(file));
+
+        config.keybinds = Keybinds;
     }
 
     void OnDestroy()
@@ -154,7 +157,6 @@ public class Settings : MonoBehaviour
                 if (ImGui.Checkbox("Box Select", ref config.mapping.selection))
                 {
                     SelectObjects.instance.selection = config.mapping.selection;
-                    SelectObjects.instance.ClearSelection();
                     SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
                 }
             }
