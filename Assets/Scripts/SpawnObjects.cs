@@ -127,16 +127,24 @@ public class SpawnObjects : MonoBehaviour
 
         if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepForward))
         {
-            currentBeat += precision;
+            currentBeat = currentBeat + precision;
             LoadObjectsFromScratch(currentBeat, true, true);
-            timeSlider.value = currentBeat / LoadMap.instance.beats.Count;
+            DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+            Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
+            timeSlider.onValueChanged = new Slider.SliderEvent();
+            timeSlider.value = currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+            timeSlider.onValueChanged = sliderEvent;
         }
 
         if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepBackward))
         {
-            currentBeat -= precision;
+            currentBeat = currentBeat - precision;
             LoadObjectsFromScratch(currentBeat, true, true);
-            timeSlider.value = currentBeat / LoadMap.instance.beats.Count;
+            DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+            Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
+            timeSlider.onValueChanged = new Slider.SliderEvent();
+            timeSlider.value = currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+            timeSlider.onValueChanged = sliderEvent;
             LoadWallsBackwards();
         }
 
@@ -582,5 +590,54 @@ public class SpawnObjects : MonoBehaviour
         }
 
         return beat;
+    }
+}
+
+
+// UndoRedoManager class for managing a List<MyClass>
+public class UndoRedoManager<T>
+{
+    private Stack<List<T>> undoStack = new Stack<List<T>>();
+    private Stack<List<T>> redoStack = new Stack<List<T>>();
+    private List<T> currentList;
+
+    public UndoRedoManager(List<T> initialList)
+    {
+        currentList = new List<T>(initialList);
+    }
+
+    public void SaveState()
+    {
+        undoStack.Push(new List<T>(currentList));
+        redoStack.Clear(); // Clear redo stack on new action
+    }
+
+    public void Undo()
+    {
+        if (undoStack.Count > 0)
+        {
+            redoStack.Push(new List<T>(currentList));
+            currentList = undoStack.Pop();
+        }
+    }
+
+    public void Redo()
+    {
+        if (redoStack.Count > 0)
+        {
+            undoStack.Push(new List<T>(currentList));
+            currentList = redoStack.Pop();
+        }
+    }
+
+    public List<T> GetCurrentList()
+    {
+        return new List<T>(currentList);
+    }
+
+    public void UpdateCurrentList(List<T> newList)
+    {
+        SaveState();
+        currentList = new List<T>(newList);
     }
 }

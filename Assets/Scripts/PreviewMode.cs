@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 public class PreviewMode : MonoBehaviour
 {
+    public static PreviewMode instance;
     public List<GameObject> gameObjects;
     public bool Enabled = true;
     public RawImage img;
@@ -23,6 +24,7 @@ public class PreviewMode : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        instance = this;
         if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.previewMap)) {
             Toggle();
         }

@@ -44,12 +44,14 @@ public class LoadMap : MonoBehaviour
     {
         instance = this;
     }
-
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.S)) Save();
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.S))
+        {
+            Save();
+        }
 
-        mappingTime += Time.deltaTime / 60f;
+        mappingTime += Time.unscaledDeltaTime / 60f;
     }
 
     public void Save()

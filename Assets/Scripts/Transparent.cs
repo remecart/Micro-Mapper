@@ -9,6 +9,8 @@ public class Transparent : MonoBehaviour
     public List<Material> material;
     public bool updateColor;
     private bool getAllMaterials;
+    public Texture2D tex;
+    public Texture2D tex2;
 
     void Start()
     {
@@ -46,6 +48,8 @@ public class Transparent : MonoBehaviour
         {
             foreach (var item in material)
             {
+                if (!PreviewMode.instance.Enabled) item.SetTexture("_ScreenspaceTexture", tex);
+                else item.SetTexture("_ScreenspaceTexture", tex2);
                 item.SetFloat("_Transparent", 0f);
             }
         }

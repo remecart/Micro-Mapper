@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
@@ -43,9 +44,11 @@ public class SelectObjects : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.UpArrow)) OffsetBeat(SpawnObjects.instance.precision);
             if (Input.GetKeyDown(KeyCode.DownArrow)) OffsetBeat(-SpawnObjects.instance.precision);
         }
-        else if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.A))
+        else if (Input.GetKey(KeyCode.LeftControl))
         {
-            ClearSelection();
+            if (Input.GetKeyDown(KeyCode.A)) ClearSelection();
+            if (Input.GetKeyDown(KeyCode.C)) CopySelection();
+            if (Input.GetKeyDown(KeyCode.V)) PasteSelection();
         }
 
         if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) DeleteObjects();
@@ -81,7 +84,128 @@ public class SelectObjects : MonoBehaviour
                 preview.transform.localScale = new Vector3(4, 3, (SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) - SpawnObjects.instance.PositionFromBeat(startCurrentBeat)) * SpawnObjects.instance.editorScale);
             }
         }
+
     }
+    public beatsV3 copiedObjects = new beatsV3();
+
+    public void CopySelection()
+    {
+        // Find the earliest beat
+        float lowestBeat = Mathf.Infinity;
+
+        foreach (var item in selectedColorNotes)
+        {
+            if (lowestBeat > item.b) lowestBeat = item.b;
+        }
+        foreach (var item in selectedBombNotes)
+        {
+            if (lowestBeat > item.b) lowestBeat = item.b;
+        }
+        foreach (var item in selectedObstacles)
+        {
+            if (lowestBeat > item.b) lowestBeat = item.b;
+        }
+
+        // Initialize copiedObjects
+        copiedObjects = new beatsV3();
+
+        // Manually copy each item and adjust `b`
+        foreach (var item in selectedColorNotes)
+        {
+            colorNotes adjustedItem = new colorNotes
+            {
+                b = item.b - lowestBeat,
+                x = item.x,
+                y = item.y,
+                a = item.a,
+                c = item.c,
+                d = item.d
+            };
+            copiedObjects.colorNotes.Add(adjustedItem);
+        }
+
+        foreach (var item in selectedBombNotes)
+        {
+            bombNotes adjustedItem = new bombNotes
+            {
+                b = item.b - lowestBeat,
+                x = item.x,
+                y = item.y
+            };
+            copiedObjects.bombNotes.Add(adjustedItem);
+        }
+
+        foreach (var item in selectedObstacles)
+        {
+            obstacles adjustedItem = new obstacles
+            {
+                b = item.b - lowestBeat,
+                x = item.x,
+                y = item.y,
+                d = item.d,
+                h = item.h,
+                w = item.w
+            };
+            copiedObjects.obstacles.Add(adjustedItem);
+        }
+
+        SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+    }
+
+    public void PasteSelection()
+    {
+        // Clear any previous selections
+        ClearSelection();
+
+        // Manually copy each item from copiedObjects, adjust `b`, and add to selection
+        foreach (var item in copiedObjects.colorNotes)
+        {
+            colorNotes adjustedItem = new colorNotes
+            {
+                b = item.b + SpawnObjects.instance.currentBeat,
+                x = item.x,
+                y = item.y,
+                a = item.a,
+                c = item.c,
+                d = item.d
+            };
+            LoadMap.instance.beats[Mathf.FloorToInt(adjustedItem.b)].colorNotes.Add(adjustedItem);
+            selectedColorNotes.Add(adjustedItem);  // Automatically add to selection
+        }
+
+        foreach (var item in copiedObjects.bombNotes)
+        {
+            bombNotes adjustedItem = new bombNotes
+            {
+                b = item.b + SpawnObjects.instance.currentBeat,
+                x = item.x,
+                y = item.y
+            };
+            LoadMap.instance.beats[Mathf.FloorToInt(adjustedItem.b)].bombNotes.Add(adjustedItem);
+            selectedBombNotes.Add(adjustedItem);  // Automatically add to selection
+        }
+
+        foreach (var item in copiedObjects.obstacles)
+        {
+            obstacles adjustedItem = new obstacles
+            {
+                b = item.b + SpawnObjects.instance.currentBeat,
+                x = item.x,
+                y = item.y,
+                d = item.d,
+                h = item.h,
+                w = item.w
+            };
+            LoadMap.instance.beats[Mathf.FloorToInt(adjustedItem.b)].obstacles.Add(adjustedItem);
+            selectedObstacles.Add(adjustedItem);  // Automatically add to selection
+        }
+
+        // Refresh to ensure the pasted items are visible and selected
+        SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+        HighlightSelectedObject();
+    }
+
+
 
     public void ClearSelection()
     {
