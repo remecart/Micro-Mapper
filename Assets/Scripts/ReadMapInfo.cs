@@ -24,6 +24,7 @@ public class ReadMapInfo : MonoBehaviour
     void Start()
     {
         instance = this;
+
         string infoPath = "info.dat";
 
         if (!folderPath.Contains("info.dat"))
@@ -37,6 +38,11 @@ public class ReadMapInfo : MonoBehaviour
             if (arguments.Length > 1 && arguments[1].Trim() != "")
             {
                 folderPath = Path.GetDirectoryName(arguments[1]) + "\\";
+            }
+
+            if (!File.Exists(Path.Combine(folderPath, infoPath)))
+            {
+                DasKracht.instance.TargetFunction();
             }
 
             string rawData = File.ReadAllText(Path.Combine(folderPath, infoPath));
@@ -73,10 +79,8 @@ public class ReadMapInfo : MonoBehaviour
         {
             string rawData = File.ReadAllText(Path.Combine(folderPath, infoPath));
             info = JsonUtility.FromJson<Info>(rawData);
-        }
-        // put calculate thing here
 
-        Debug.Log(Path.Combine(folderPath, "imgui.ini"));
+        }
     }
 
     void OnApplicationQuit()

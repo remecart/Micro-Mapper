@@ -111,13 +111,10 @@ public class mBot : MonoBehaviour
         {
             LeftSaberColor = newLeftSaberColor;
             Color.RGBToHSV(LeftSaberColor, out var H, out var S, out var V);
-            var HandleColor = Color.HSVToRGB(H, S / 2f, 0.4f);
+            var HandleColor = Color.HSVToRGB(H, S, V - .6f);
             HandleColor.a = 1f; // Ensure alpha is at max
 
-            var BladeColor = Color.HSVToRGB(H, S / 2f, 0.95f);
-            BladeColor.a = 1f; // Ensure alpha is at max
-
-            LeftSaberMaterials[0].color = BladeColor;
+            LeftSaberMaterials[0].color = LeftSaberColor;
             LeftSaberMaterials[1].color = HandleColor;
         }
 
@@ -125,13 +122,10 @@ public class mBot : MonoBehaviour
         {
             RightSaberColor = newRightSaberColor;
             Color.RGBToHSV(RightSaberColor, out var H, out var S, out var V);
-            var HandleColor = Color.HSVToRGB(H, S / 2f, 0.4f);
+            var HandleColor = Color.HSVToRGB(H, S, V - .6f);
             HandleColor.a = 1f; // Ensure alpha is at max
 
-            var BladeColor = Color.HSVToRGB(H, S / 2f, 0.95f);
-            BladeColor.a = 1f; // Ensure alpha is at max
-
-            RightSaberMaterials[0].color = BladeColor;
+            RightSaberMaterials[0].color = RightSaberColor;
             RightSaberMaterials[1].color = HandleColor;
         }
     }
@@ -149,6 +143,9 @@ public class mBot : MonoBehaviour
             curveLines[0].positionCount = verticies;
             curveLines[1].positionCount = verticies;
 
+            GetNextNote();
+            GetLastNote();
+
             for (int i = 0; i < verticies; i++)
             {
                 curveLines[0].SetPosition(i, GetPoint(leftSaber, lastLeft, left, i / (float)verticies));
@@ -156,6 +153,15 @@ public class mBot : MonoBehaviour
 
                 //Vector2 direc = curveLines[0].GetPosition(verticies - 2) - curveLines[0].GetPosition(verticies - 1);
                 //curveLines[0].positionCount += 3;
+            }
+        }
+        
+        if (!PreviewMode.instance.Enabled)
+        {
+            if (curveLines[0].positionCount != 0)
+            {
+                curveLines[0].positionCount = 0;
+                curveLines[1].positionCount = 0;
             }
         }
 
@@ -210,7 +216,7 @@ public class mBot : MonoBehaviour
         if (lastNote == null) lastNote = new colorNotes();
 
         float durationLeft = nextNote.b - lastNote.b;
-        float point = (currentBeat - lastNote.b) / durationLeft;
+        float point = Mathf.Clamp01((currentBeat - lastNote.b) / durationLeft);
 
         int cutDirection1 = lastNote.d;
         float angle1 = SpawnObjects.instance.Rotation(cutDirection1) - 90;
@@ -295,6 +301,9 @@ public class mBot : MonoBehaviour
         saber.transform.localPosition = new Vector3((CalculatedPos.x - 2) * positionMultiplier / 10 + xoffset, CalculatedPos.y * positionMultiplier / 10 + 1f, saber.transform.localPosition.z);
     }
 
+
+    public Transform previewGrid;
+
     public Vector3 GetPoint(GameObject saber, colorNotes lastNote, colorNotes nextNote, float time)
     {
         if (nextNote == null) nextNote = new colorNotes();
@@ -353,15 +362,11 @@ public class mBot : MonoBehaviour
         {
             // Calculate the position on the Bezier curve
             Vector2 bezierPos = GetPointOnBezierCurve(lastPos, nextPos, angle1, angle2, point);
-            CalculatedPos = new Vector3(bezierPos.x + 0.5f, bezierPos.y + 0.5f, planeOffset);
+            CalculatedPos = new Vector3(bezierPos.x + 0.5f, bezierPos.y + 0.5f, previewGrid.position.z);
         }
 
         return CalculatedPos;
     }
-
-
-
-
 
     public Vector2 GetPointOnBezierCurve(Vector2 pointA, Vector2 pointB, float angleA, float angleB, float time)
     {

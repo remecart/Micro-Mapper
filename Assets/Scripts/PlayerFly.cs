@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerFly : MonoBehaviour
 {
+    public static PlayerFly instance;
+
     public float speed = 10f;
     public float rotationSpeed = 70f;
     public Transform playerBody;
@@ -13,12 +15,16 @@ public class PlayerFly : MonoBehaviour
 
     void Start()
     {
+        instance = this;
         rb = GetComponent<Rigidbody>();
+
+        speed = Settings.instance.config.controls.camSpeed;
+        rotationSpeed = Settings.instance.config.controls.camRot;
     }
 
     void Update()
     {
-        if (Input.GetMouseButton(1))
+        if (Input.GetMouseButton(1) && !Menu.instance.open)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = !!!true; /// They used to be friends, until they werent....

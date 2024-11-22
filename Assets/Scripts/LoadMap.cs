@@ -7,6 +7,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
+using System.Runtime.Serialization.Formatters.Binary;
 
 public class LoadMap : MonoBehaviour
 {
@@ -54,7 +55,7 @@ public class LoadMap : MonoBehaviour
         mappingTime += Time.unscaledDeltaTime / 60f;
     }
 
-    public void Save()
+    public void Save(bool closeEditor = false)
     {
         if (ReadMapInfo.instance == null || ReadMapInfo.instance.info == null ||
             ReadMapInfo.instance.info._difficultyBeatmapSets == null ||
@@ -238,6 +239,8 @@ public class LoadMap : MonoBehaviour
 
         text.GetComponent<TextMeshProUGUI>().text = "Map saved successfully!";
         text.gameObject.GetComponent<Animator>().SetTrigger("TriggerPopUp");
+
+        if (closeEditor) Application.Quit();
     }
 
     public void Load(AudioSource audio)
@@ -318,19 +321,29 @@ public class LoadMap : MonoBehaviour
                 }
             }
 
-            // Place bpm change at the start for sync
-            bpmEvents bpm = new bpmEvents();
-            bpm.b = 0;
-            bpm.m = ReadMapInfo.instance.info._beatsPerMinute;
-            beats[0].bpmEvents.Add(bpm);
-            bpmEvents.Add(bpm);
-
             for (int i = 0; i < beatV3.bpmEvents.Count; i++)
             {
                 int b = Mathf.FloorToInt(beatV3.bpmEvents[i].b);
                 beats[b].bpmEvents.Add(beatV3.bpmEvents[i]);
                 bpmEvents.Add(beatV3.bpmEvents[i]);
             }
+
+            // Place bpm change at the start for sync
+            bpmEvents bpm = new bpmEvents
+            {
+                b = 0,
+                m = ReadMapInfo.instance.info._beatsPerMinute
+            };
+
+            // Check for an existing item with the same properties
+            bool exists = bpmEvents.Any(e => e.b == bpm.b && e.m == bpm.m);
+
+            if (!exists)
+            {
+                beats[0].bpmEvents.Insert(0, bpm);
+                bpmEvents.Insert(0, bpm);
+            }
+
         }
 
         // READ V2 DATA
@@ -456,6 +469,22 @@ public class beatsV3
     public List<basicBeatmapEvents> basicBeatmapEvents = new List<basicBeatmapEvents>();
     public List<timings> timings = new List<timings>();
     public customData customData;
+
+    // Deep Clone Method
+    public beatsV3 Clone()
+    {
+        // Clone the lists
+        return new beatsV3
+        {
+            bpmEvents = this.bpmEvents,
+            colorNotes = this.colorNotes,
+            bombNotes = this.bombNotes,
+            obstacles = this.obstacles,
+            sliders = this.sliders,
+            burstSliders = this.burstSliders,
+            timings = this.timings
+        };
+    }
 }
 
 [System.Serializable]

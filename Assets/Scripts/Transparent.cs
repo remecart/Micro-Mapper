@@ -48,7 +48,7 @@ public class Transparent : MonoBehaviour
         {
             foreach (var item in material)
             {
-                if (!PreviewMode.instance.Enabled) item.SetTexture("_ScreenspaceTexture", tex);
+                if (PreviewMode.instance != null && !PreviewMode.instance.Enabled) item.SetTexture("_ScreenspaceTexture", tex);
                 else item.SetTexture("_ScreenspaceTexture", tex2);
                 item.SetFloat("_Transparent", 0f);
             }

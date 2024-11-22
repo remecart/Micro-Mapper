@@ -15,6 +15,7 @@ using static Audio;
 using UnityEditor;
 using Microsoft.Win32;
 using System.Diagnostics;
+using Skybox = Visuals.Skybox;
 
 public class Settings : MonoBehaviour
 {
@@ -68,16 +69,21 @@ public class Settings : MonoBehaviour
         string documents = System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments);
         file = Path.Combine(documents, "Micro Mapper", "settings.json");
 
-        if (!File.Exists(file))
+        if (!File.Exists(file) && Directory.Exists(Path.Combine(documents, "Micro Mapper")))
         {
-            if (!Directory.Exists(Path.Combine(documents, "Micro Mapper"))) 
-                Directory.CreateDirectory(Path.Combine(documents, "Micro Mapper"));
-            
+            string raw = JsonUtility.ToJson(config, true);
+            File.WriteAllText(file, raw);
+        }
+        else if (!Directory.Exists(Path.Combine(documents, "Micro Mapper")))
+        {
+            Directory.CreateDirectory(Path.Combine(documents, "Micro Mapper"));
             string raw = JsonUtility.ToJson(config, true);
             File.WriteAllText(file, raw);
         }
         else
+        {
             config = JsonUtility.FromJson<Config>(File.ReadAllText(file));
+        }
 
         config.keybinds = Keybinds;
     }
@@ -106,12 +112,13 @@ public class Settings : MonoBehaviour
         {
             isShowing = !isShowing;
         }
-        
-        if (isShowing)
+
+        if (isShowing && !Menu.instance.open)
         {
-            //ImGui.ShowDemoWindow();
-            ImGui.Begin("Settings", ImGuiWindowFlags.NoResize | ImGuiWindowFlags.NoCollapse);
-            ImGui.SetWindowSize(new Vector2(400, 600));
+            ImGui.ShowDemoWindow();
+            //ImGui.SetNextWindowPos(new Vector2((Screen.width - 450) / 2, (Screen.height - 650) / 2));
+            ImGui.Begin("Settings", ImGuiWindowFlags.NoCollapse);
+            ImGui.SetWindowSize(new Vector2(450, 650));
 
             isHovering = ImGui.IsWindowHovered();
 
@@ -121,6 +128,7 @@ public class Settings : MonoBehaviour
                 Mapping();
                 Graphics();
                 Audio();
+                Controls();
                 MBot();
             }
 
@@ -134,7 +142,7 @@ public class Settings : MonoBehaviour
     {
         if (ImGui.BeginTabItem("Mapping"))
         {
-            if (ImGui.CollapsingHeader("Editor Options"))
+            if (ImGui.TreeNodeEx("Editor Options", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.SliderInt("Editor Scale", ref config.mapping.editorScale, 4, 40))
                 {
@@ -159,13 +167,56 @@ public class Settings : MonoBehaviour
                     SelectObjects.instance.selection = config.mapping.selection;
                     SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
                 }
+
+                ImGui.TreePop();
             }
-            if (ImGui.CollapsingHeader("Colors"))
+            if (ImGui.TreeNodeEx("Mapping Extensions", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if (ImGui.Checkbox("Enable ME", ref config.mapping.mappingExtensions.enabled))
+                {
+                    Placement.instance.enableME = config.mapping.mappingExtensions.enabled;
+                    Placement.instance.ReloadGrid();
+                    SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                }
+                if (ImGui.InputInt("Grid Y-Pos", ref config.mapping.mappingExtensions.gridYPos))
+                {
+                    config.mapping.mappingExtensions.gridYPos = Mathf.Clamp(config.mapping.mappingExtensions.gridYPos, 0, 10);
+                    Placement.instance.gridYPos = config.mapping.mappingExtensions.gridYPos;
+                    Placement.instance.ReloadGrid();
+                    SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                }
+                if (ImGui.InputInt("Grid width", ref config.mapping.mappingExtensions.gridWidth))
+                {
+                    config.mapping.mappingExtensions.gridWidth = Mathf.Clamp(config.mapping.mappingExtensions.gridWidth, 1, 100);
+                    Placement.instance.MEgridSize.x = config.mapping.mappingExtensions.gridWidth;
+                    Placement.instance.ReloadGrid();
+                    SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                }
+                if (ImGui.InputInt("Grid height", ref config.mapping.mappingExtensions.gridHeight))
+                {
+                    config.mapping.mappingExtensions.gridHeight = Mathf.Clamp(config.mapping.mappingExtensions.gridHeight, 1, 100);
+                    Placement.instance.MEgridSize.y = config.mapping.mappingExtensions.gridHeight;
+                    Placement.instance.ReloadGrid();
+                    SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                }
+
+                if (ImGui.SliderInt("Precision", ref config.mapping.mappingExtensions.precision, 1, 16))
+                {
+                    Placement.instance.MEprecision = config.mapping.mappingExtensions.precision;
+                    Placement.instance.ReloadGrid();
+                    SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                }
+
+                ImGui.TreePop();
+            }
+            if (ImGui.TreeNodeEx("Colors", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 ImGui.ColorEdit4("Left Note", ref config.mapping.colorSettings.leftNote);
                 ImGui.ColorEdit4("Left Arrow", ref config.mapping.colorSettings.leftNoteArrow);
                 ImGui.ColorEdit4("Right Note", ref config.mapping.colorSettings.rightNote);
                 ImGui.ColorEdit4("Right Arrow", ref config.mapping.colorSettings.rightNoteArrow);
+
+                ImGui.TreePop();
             }
             ImGui.EndTabItem();
         }
@@ -175,7 +226,7 @@ public class Settings : MonoBehaviour
     {
         if (ImGui.BeginTabItem("Graphics"))
         {
-            if (ImGui.CollapsingHeader("Camera"))
+            if (ImGui.TreeNodeEx("Camera", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.SliderInt("FOV", ref config.visuals.cameraSettings.fov, 65, 110))
                 {
@@ -185,13 +236,54 @@ public class Settings : MonoBehaviour
                 {
                     BloomEffect.instance.intensity = config.visuals.cameraSettings.bloom / 10f;
                 }
+
+                string[] _resNames = new string[]
+                {
+                    "Sky1",
+                    "Sky2",
+                    "Sky3",
+                    "Default"
+                };
+
+                int index = config.visuals.skybox switch
+                {
+                    Skybox.Sky1 => 0,
+                    Skybox.Sky2 => 1,
+                    Skybox.Sky3 => 2,
+                    _ => 3
+                };
+
+                HitSoundManager.instance.hitsoundIndex = index;
+
+                if (ImGui.Combo("Pick Skybox", ref index, _resNames, _resNames.Length))
+                {
+                    switch (_resNames[index])
+                    {
+                        case "Sky1":
+                            config.visuals.skybox = Visuals.Skybox.Sky1;
+                            break;
+                        case "Sky2":
+                            config.visuals.skybox = Visuals.Skybox.Sky2;
+                            break;
+                        case "Sky3":
+                            config.visuals.skybox = Visuals.Skybox.Sky3;
+                            break;
+                        case "Default":
+                            config.visuals.skybox = Visuals.Skybox.Default;
+                            break;
+                    }
+
+                    SkyboxManager.instance.ReloadSkybox(index);
+                }
+
+                ImGui.TreePop();
             }
 
-                string[] _names = new string[]
-            {
+            string[] _names = new string[]
+        {
                 "Spectrogram",
                 "Waveform"
-            };
+        };
 
             int _index = config.visuals.audioVisualizer switch
             {
@@ -214,7 +306,7 @@ public class Settings : MonoBehaviour
                 ReloadWaveform();
             }
 
-            if (ImGui.CollapsingHeader("Spectrogram"))
+            if (ImGui.TreeNodeEx("Spectrogram", ImGuiTreeNodeFlags.DefaultOpen))
             {
 
                 if (ImGui.SliderFloat("Intensity", ref config.visuals.spectrogram.intensity, 0, 1))
@@ -249,7 +341,7 @@ public class Settings : MonoBehaviour
                     _ => 0 // Default to 0 (Low) if the resolution does not match
                 };
 
-                if (ImGui.Combo("Resolution                               .", ref index, _resNames, _resNames.Length))
+                if (ImGui.Combo("Resolution ", ref index, _resNames, _resNames.Length))
                 {
                     switch (_resNames[index])
                     {
@@ -266,9 +358,11 @@ public class Settings : MonoBehaviour
 
                     ReloadSpectrogram();
                 }
+
+                ImGui.TreePop();
             }
 
-            if (ImGui.CollapsingHeader("Waveform"))
+            if (ImGui.TreeNodeEx("Waveform", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 string[] _resNames = new string[]
                 {
@@ -316,6 +410,7 @@ public class Settings : MonoBehaviour
 
                 }
 
+                ImGui.TreePop();
                 //ImGuiNative.
             }
 
@@ -323,11 +418,53 @@ public class Settings : MonoBehaviour
         }
     }
 
+    void Controls()
+    {
+        if (ImGui.BeginTabItem("Controls"))
+        {
+            if (ImGui.TreeNodeEx("Camera Controls", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if (ImGui.SliderFloat("Movement Speed", ref config.controls.camSpeed, 10, 30))
+                {
+                    PlayerFly.instance.speed = config.controls.camSpeed;
+                }
+                if (ImGui.SliderFloat("Rotation Speed", ref config.controls.camRot, 0.33f, 3.5f))
+                {
+                    PlayerFly.instance.rotationSpeed = config.controls.camRot;
+                }
+
+                ImGui.TreePop();
+            }
+
+            if (ImGui.TreeNodeEx("Invert Controls", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if (ImGui.Checkbox("Invert Angle", ref config.controls.invertNoteAngle))
+                {
+                    Placement.instance.invertControls = config.controls.invertNoteAngle;
+                }
+                if (ImGui.Checkbox("Invert Precision Scroll", ref config.controls.invertPrecisionScroll))
+                {
+                    SpawnObjects.instance.invertPrecisionScroll = config.controls.invertPrecisionScroll;
+                }
+                if (ImGui.Checkbox("Invert Wall Scroll", ref config.controls.invertWallScroll))
+                {
+                    Placement.instance.invertWallScroll = config.controls.invertWallScroll;
+                }
+                if (ImGui.Checkbox("Invert Timeline Scroll", ref config.controls.invertTimelineScroll))
+                {
+                    SpawnObjects.instance.invertTimelineScroll = config.controls.invertTimelineScroll;
+                }
+
+                ImGui.TreePop();
+            }
+            ImGui.EndTabItem();
+        }
+    }
     void MBot()
     {
         if (ImGui.BeginTabItem("mBot"))
         {
-            if (ImGui.CollapsingHeader("Swing Settings"))
+            if (ImGui.TreeNodeEx("Swing Settings", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.SliderFloat("Intensity", ref config.mBot.mBotSettings.intensity, 0.25f, 3))
                 {
@@ -353,9 +490,11 @@ public class Settings : MonoBehaviour
                 {
                     mBot.instance.visualizeSwings = config.mBot.mBotSettings.visualizeSwings;
                 }
+
+                ImGui.TreePop();
             }
 
-            if (ImGui.CollapsingHeader("Sabers"))
+            if (ImGui.TreeNodeEx("Sabers", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.SliderFloat("Saber Width", ref config.mBot.mBotSaber.saberWidth, 1, 10))
                 {
@@ -373,6 +512,8 @@ public class Settings : MonoBehaviour
                 {
                     mBot.instance.trailLength = config.mBot.mBotSaber.trailLength;
                 }
+
+                ImGui.TreePop();
             }
             ImGui.EndTabItem();
         }
@@ -382,7 +523,7 @@ public class Settings : MonoBehaviour
     {
         if (ImGui.BeginTabItem("Audio"))
         {
-            if (ImGui.CollapsingHeader("Volume"))
+            if (ImGui.TreeNodeEx("Volume", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.SliderFloat("Music", ref config.audio.music, 0, 1))
                 {
@@ -392,13 +533,19 @@ public class Settings : MonoBehaviour
                 {
                     HitSoundManager.instance.audioSource.volume = config.audio.hitsound;
                 }
+                if (ImGui.SliderFloat("Timing", ref config.audio.timing, 0, 1))
+                {
+                    TimingNoteManager.instance.audioSource.volume = config.audio.timing;
+                }
                 if (ImGui.SliderFloat("Metronome", ref config.audio.metronome, 0, 1))
                 {
                     Metronome.instance.audioSource.volume = config.audio.metronome;
                 }
+
+                ImGui.TreePop();
             }
 
-            if (ImGui.CollapsingHeader("Hitsounds"))
+            if (ImGui.TreeNodeEx("Hitsounds", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 string[] _resNames = new string[]
                 {
@@ -444,7 +591,56 @@ public class Settings : MonoBehaviour
                     HitSoundManager.instance.OpenFilePicker();
                 }
 
+                ImGui.TreePop();
             }
+
+            if (ImGui.TreeNodeEx("Timings", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                string[] _resNames = new string[]
+                {
+                    "MicroMapper",
+                    "Rabbit",
+                    "osu!",
+                    "Custom"
+                };
+
+                int index = config.audio.timings switch
+                {
+                    Hitsound.MicroMapper => 0,
+                    Hitsound.Rabbit => 1,
+                    Hitsound.osu => 2,
+                    _ => 3
+                };
+
+                TimingNoteManager.instance.hitsoundIndex = index;
+
+                if (ImGui.Combo("Pick Timing", ref index, _resNames, _resNames.Length))
+                {
+                    switch (_resNames[index]) // Corrected strings here
+                    {
+                        case "MicroMapper":
+                            config.audio.timings = Hitsound.MicroMapper;
+                            break;
+                        case "Rabbit":
+                            config.audio.timings = Hitsound.Rabbit;
+                            break;
+                        case "osu!":
+                            config.audio.timings = Hitsound.osu;
+                            break;
+                        case "Custom":
+                            config.audio.timings = Hitsound.Custom;
+                            break;
+                    }
+                }
+
+                if (ImGui.Button("Import custom timing"))
+                {
+                    TimingNoteManager.instance.OpenFilePicker();
+                }
+
+                ImGui.TreePop();
+            }
+
             ImGui.EndTabItem();
         }
     }
@@ -476,6 +672,7 @@ public class Config
     public Visuals visuals;
     public Audio audio;
     public Keybinds keybinds;
+    public Controls controls;
     public MBot mBot;
 }
 
@@ -496,17 +693,38 @@ public class Mapping
     public float noteDistance;
     public bool selection;
     public ColorSettings colorSettings;
+    public MappingExtensions mappingExtensions;
+}
+
+[System.Serializable]
+public class MappingExtensions
+{
+    public bool enabled;
+    public bool allowPlacementOutsideOfGrid;
+    public int gridYPos;
+    public int gridWidth;
+    public int gridHeight;
+    public int precision;
 }
 
 [System.Serializable]
 public class Visuals
 {
+    public enum Skybox
+    {
+        Sky1,
+        Sky2,
+        Sky3,
+        Default
+    }
+
     public enum AudioVisualizer
     {
         Spectrogram,
         Waveform
     }
 
+    public Skybox skybox;
     public AudioVisualizer audioVisualizer;
     public Spectrogram spectrogram;
     public Waveform waveform;
@@ -546,8 +764,10 @@ public class Audio
 {
     public float music;
     public float hitsound;
+    public float timing;
     public float metronome;
     public Hitsound hitsounds;
+    public Hitsound timings;
 
     public enum Hitsound
     {
@@ -558,6 +778,18 @@ public class Audio
     }
 
     public string customSoundPath;
+    public string customTimingSoundPath;
+}
+
+[System.Serializable]
+public class Controls
+{
+    public float camSpeed;
+    public float camRot;
+    public bool invertNoteAngle;
+    public bool invertWallScroll;
+    public bool invertTimelineScroll;
+    public bool invertPrecisionScroll;
 }
 
 [System.Serializable]

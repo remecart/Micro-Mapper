@@ -7,6 +7,7 @@ public class PreviewMode : MonoBehaviour
 {
     public static PreviewMode instance;
     public List<GameObject> gameObjects;
+    public List<GameObject> uiElements;
     public bool Enabled = true;
     public RawImage img;
     public List<Texture2D> textures;
@@ -38,6 +39,11 @@ public class PreviewMode : MonoBehaviour
         foreach (var item in gameObjects)
         {
             item.transform.localPosition = new Vector3(item.transform.localPosition.x, item.transform.localPosition.y + a, item.transform.localPosition.z);
+        }
+
+        foreach (var item in uiElements)
+        {
+            item.SetActive(!Enabled);
         }
 
         if (Enabled)

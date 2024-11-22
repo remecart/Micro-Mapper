@@ -1,4 +1,5 @@
 using SFB;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -20,7 +21,7 @@ public class HitSoundManager : MonoBehaviour
     public float length;
     public AudioSource audioSource;
     public GameObject hitsound;
-    
+
     void Start()
     {
         instance = this;
@@ -53,23 +54,55 @@ public class HitSoundManager : MonoBehaviour
     {
         if (string.IsNullOrEmpty(path))
         {
+            Debug.LogError("Invalid path provided.");
             yield break;
         }
 
-        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip("file://" + path, audioType))
+        string fileUrl = "file://" + path;
+
+        using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(fileUrl, audioType))
         {
             yield return www.SendWebRequest();
 
-            if (www.result != UnityWebRequest.Result.ConnectionError || www.result != UnityWebRequest.Result.ProtocolError)
+            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
             {
-                hitsounds[3] = DownloadHandlerAudioClip.GetContent(www);
+                yield break;
+            }
+
+            AudioClip clip = DownloadHandlerAudioClip.GetContent(www);
+            if (clip != null)
+            {
+                hitsounds[3] = clip;
                 Settings.instance.config.audio.customSoundPath = path;
             }
+
         }
     }
 
+
+    float cachevolume;
+
     void Update()
     {
+        if (cachevolume != 0 && audioSource.volume == 0)
+        {
+            for (int i = this.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(this.transform.GetChild(i).gameObject);
+            }
+
+            cachevolume = audioSource.volume;
+        }
+        else if (cachevolume != audioSource.volume)
+        {
+            for (int i = this.transform.childCount - 1; i >= 0; i--)
+            {
+                this.transform.GetChild(i).GetComponent<AudioSource>().volume = audioSource.volume;
+            }
+
+            cachevolume = audioSource.volume;
+        }
+
         playing = SpawnObjects.instance.playing;
 
         //time = SpawnObjects.instance.currentBeat;
@@ -82,7 +115,7 @@ public class HitSoundManager : MonoBehaviour
 
         if (playing)
         {
-            if (cache == false )
+            if (cache == false)
             {
                 GetNextNote();
             }
@@ -98,7 +131,8 @@ public class HitSoundManager : MonoBehaviour
                 cache = false;
             }
         }
-        else {
+        else
+        {
             cache = false;
             audioSource.Stop();
         }

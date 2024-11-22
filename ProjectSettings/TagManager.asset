@@ -13,6 +13,9 @@ TagManager:
   - BpmEvent
   - Canvas
   - Objects
+  - Timing
+  - TimingGrid
+  - BpmGrid
   layers:
   - Default
   - TransparentFX

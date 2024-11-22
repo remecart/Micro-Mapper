@@ -5,6 +5,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using Unity.VisualScripting;
+using System;
 
 public class SpawnObjects : MonoBehaviour
 {
@@ -29,6 +30,10 @@ public class SpawnObjects : MonoBehaviour
     public Slider timeSlider;
     public TMP_InputField numberator;
     public TMP_InputField denominator;
+    public Transform BpmChangeSpawm;
+    public Transform TimingSpawn;
+    public bool invertPrecisionScroll;
+    public bool invertTimelineScroll;
 
     public void ChangeTime(Slider slider)
     {
@@ -58,6 +63,10 @@ public class SpawnObjects : MonoBehaviour
         instance = this;
         //ChangePrecision();
         spawnInMs = Settings.instance.config.mapping.noteDistance * 100;
+        invertPrecisionScroll = Settings.instance.config.controls.invertPrecisionScroll;
+        invertTimelineScroll = Settings.instance.config.controls.invertTimelineScroll;
+
+        LoadObjectsFromScratch(1, true, true);
     }
 
     void UpdateTimeline()
@@ -98,15 +107,41 @@ public class SpawnObjects : MonoBehaviour
         }
         else currentBeatPlay = Mathf.FloorToInt(currentBeat);
 
+        if (Input.GetKey(KeyCode.LeftControl))
+        {
+            int prec = int.Parse(denominator.text);
+            int a = invertPrecisionScroll ? -1 : 1;
+
+            if (Input.mouseScrollDelta.y * a > 0)
+            {
+                if (Mathf.RoundToInt(prec * 2) <= 99)
+                {
+                    prec = Mathf.RoundToInt(prec * 2);
+                    denominator.text = prec.ToString();
+                    ChangePrecision();
+                }
+            }
+            if (Input.mouseScrollDelta.y * a < 0)
+            {
+                if (Mathf.RoundToInt(prec / 2) >= 1)
+                {
+                    prec = Mathf.RoundToInt(prec / 2);
+                    denominator.text = prec.ToString();
+                    ChangePrecision();
+                }
+            }
+        }
+
         if (Input.mouseScrollDelta.y != 0 && !playing && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl))
         {
             float scroll = Input.mouseScrollDelta.y;
-            if (currentBeat + scroll * precision >= 0)
+            int a = invertTimelineScroll ? -1 : 1;
+            if (currentBeat + scroll * precision * a >= 0)
             {
-                currentBeat += scroll * precision;
+                currentBeat += scroll * precision * a;
                 LoadObjectsFromScratch(currentBeat, true, true);
                 Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
-                DrawLines.instance.DrawLinesFromScratch(currentBeat + scroll * precision, precision);
+                DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
                 if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
                 UpdateTimeline();
             }
@@ -316,110 +351,148 @@ public class SpawnObjects : MonoBehaviour
         return x;
     }
 
+    public int ConvertToMEPos(float x)
+    {
+        int y;
+        if (x >= 0) y = 1;
+        else y = -1;
+
+        x = (x + y) * 1000f;
+        return (int)x;
+    }
+
     void SpawnObjectsAtBeat(int beat, float latestBeat, float earliestBeat, bool loadNewOnly)
     {
-        if (beat <= BeatFromRealTime(LoadSong.instance.audioSource.clip.length) && beat >= 0)
+        if (LoadSong.instance.audioSource.clip != null)
         {
-            List<colorNotes> notes = LoadMap.instance.beats[beat].colorNotes;
-            foreach (var noteData in notes)
+            if (beat <= BeatFromRealTime(LoadSong.instance.audioSource.clip.length) && beat >= 0)
             {
-                bool newObject = true;
-
-                if (loadNewOnly)
+                List<colorNotes> notes = LoadMap.instance.beats[beat].colorNotes;
+                foreach (var noteData in notes)
                 {
-                    foreach (Transform child in content)
+                    bool newObject = true;
+
+                    if (loadNewOnly)
                     {
-                        Vector3 cache = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
-                        if (child.transform.localPosition == cache)
-                            newObject = false;
+                        foreach (Transform child in content)
+                        {
+                            Vector3 cache = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
+                            if (child.transform.localPosition == cache)
+                                newObject = false;
+                        }
+                    }
+
+                    if (noteData.b <= latestBeat && noteData.b >= earliestBeat && newObject)
+                    {
+                        GameObject note = Instantiate(objects[noteData.c]);
+                        note.name = "NOTE_" + noteData.c + ": b=" + noteData.b;
+                        note.transform.SetParent(content);
+                        note.transform.localPosition = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
+                        note.GetComponent<NoteData>().note = noteData;
+                        if (noteData.d != 8)
+                        {
+                            note.transform.rotation = Quaternion.Euler(0, 0, Rotation(noteData.d));
+                            note.transform.GetChild(1).gameObject.SetActive(false);
+                        }
+                        else note.transform.GetChild(0).gameObject.SetActive(false);
+                    }
+
+                }
+
+                // Load Bomb Objects
+                List<bombNotes> bombs = LoadMap.instance.beats[beat].bombNotes;
+                foreach (var bombData in bombs)
+                {
+                    bool newObject = true;
+
+                    if (loadNewOnly)
+                    {
+                        foreach (Transform child in content)
+                        {
+                            Vector3 cache = new Vector3(bombData.x, bombData.y, PositionFromBeat(bombData.b) * editorScale);
+                            if (child.transform.localPosition == cache)
+                                newObject = false;
+                        }
+                    }
+
+                    if (bombData.b <= latestBeat && bombData.b >= earliestBeat && newObject)
+                    {
+                        GameObject bomb = Instantiate(objects[2]);
+                        bomb.transform.SetParent(content);
+                        bomb.transform.localPosition = new Vector3(bombData.x, bombData.y, PositionFromBeat(bombData.b) * editorScale);
+                        bomb.GetComponent<BombData>().bomb = bombData;
                     }
                 }
 
-                if (noteData.b <= latestBeat && noteData.b >= earliestBeat && newObject)
+                // Load Bomb Objects
+                List<timings> timings = LoadMap.instance.beats[beat].timings;
+                foreach (var timingData in timings)
                 {
-                    GameObject note = Instantiate(objects[noteData.c]);
-                    note.name = "NOTE_" + noteData.c + ": b=" + noteData.b;
-                    note.transform.SetParent(content);
-                    note.transform.localPosition = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
-                    note.GetComponent<NoteData>().note = noteData;
-                    if (noteData.d != 8)
+                    bool newObject = true;
+
+                    if (loadNewOnly)
                     {
-                        note.transform.rotation = Quaternion.Euler(0, 0, Rotation(noteData.d));
-                        note.transform.GetChild(1).gameObject.SetActive(false);
+                        foreach (Transform child in content)
+                        {
+                            Vector3 cache = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0, PositionFromBeat(timingData.b) * editorScale);
+                            if (child.transform.localPosition == cache)
+                                newObject = false;
+                        }
                     }
-                    else note.transform.GetChild(0).gameObject.SetActive(false);
-                }
 
-            }
-
-            // Load Bomb Objects
-            List<bombNotes> bombs = LoadMap.instance.beats[beat].bombNotes;
-            foreach (var bombData in bombs)
-            {
-                bool newObject = true;
-
-                if (loadNewOnly)
-                {
-                    foreach (Transform child in content)
+                    if (timingData.b <= latestBeat && timingData.b >= earliestBeat && newObject)
                     {
-                        Vector3 cache = new Vector3(bombData.x, bombData.y, PositionFromBeat(bombData.b) * editorScale);
-                        if (child.transform.localPosition == cache)
-                            newObject = false;
+                        GameObject timing = Instantiate(objects[5]);
+                        timing.transform.SetParent(content);
+                        timing.transform.localPosition = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0, PositionFromBeat(timingData.b) * editorScale);
+                        timing.GetComponent<TimingData>().timings = timingData;
                     }
                 }
 
-                if (bombData.b <= latestBeat && bombData.b >= earliestBeat && newObject)
+                List<obstacles> obstacles = LoadMap.instance.beats[beat].obstacles;
+                foreach (var obstacleData in obstacles)
                 {
-                    GameObject bomb = Instantiate(objects[2]);
-                    bomb.transform.SetParent(content);
-                    bomb.transform.localPosition = new Vector3(bombData.x, bombData.y, PositionFromBeat(bombData.b) * editorScale);
-                    bomb.GetComponent<BombData>().bomb = bombData;
-                }
-            }
+                    bool newObject = true;
 
-            List<obstacles> obstacles = LoadMap.instance.beats[beat].obstacles;
-            foreach (var obstacleData in obstacles)
-            {
-                bool newObject = true;
+                    if (loadNewOnly)
+                    {
+                        foreach (Transform child in content)
+                        {
+                            var scaleZ = (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) * editorScale;
+                            Vector3 cache = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
+                            if (child.transform.localPosition == cache)
+                                newObject = false;
+                        }
+                    }
 
-                if (loadNewOnly)
-                {
-                    foreach (Transform child in content)
+                    if (obstacleData.b <= latestBeat && obstacleData.b >= earliestBeat && newObject)
                     {
                         var scaleZ = (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) * editorScale;
-                        Vector3 cache = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
-                        if (child.transform.localPosition == cache)
-                            newObject = false;
+                        GameObject obstacle = Instantiate(objects[4]);
+                        obstacle.transform.SetParent(content);
+                        obstacle.transform.localPosition = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
+                        obstacle.transform.localScale = new Vector3(obstacleData.w, obstacleData.h, scaleZ);
+                        obstacle.name = obstacle.name + beat;
+                        obstacle.GetComponent<ObstacleData>().obstacle = obstacleData;
                     }
                 }
 
-                if (obstacleData.b <= latestBeat && obstacleData.b >= earliestBeat && newObject)
+                // Load Bpm Objects
+                List<bpmEvents> bpmChanges = LoadMap.instance.beats[beat].bpmEvents;
+                foreach (var bpmChangeData in bpmChanges)
                 {
-                    var scaleZ = (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) * editorScale;
-                    GameObject obstacle = Instantiate(objects[4]);
-                    obstacle.transform.SetParent(content);
-                    obstacle.transform.localPosition = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
-                    obstacle.transform.localScale = new Vector3(obstacleData.w, obstacleData.h, scaleZ);
-                    obstacle.name = obstacle.name + beat;
-                    obstacle.GetComponent<ObstacleData>().obstacle = obstacleData;
+                    if (bpmChangeData.b <= latestBeat && bpmChangeData.b >= earliestBeat)
+                    {
+                        GameObject bpmChange = Instantiate(objects[3]);
+                        bpmChange.transform.SetParent(content);
+                        bpmChange.transform.localPosition = new Vector3(BpmChangeSpawm.position.x -0.5f, 0, PositionFromBeat(bpmChangeData.b) * editorScale);
+                        bpmChange.transform.GetChild(0).gameObject.GetComponent<TextMeshPro>().text = bpmChangeData.m.ToString();
+                        bpmChange.GetComponent<BpmEventData>().bpmEvent = bpmChangeData;
+                    }
                 }
             }
-
-            // Load Bpm Objects
-            List<bpmEvents> bpmChanges = LoadMap.instance.beats[beat].bpmEvents;
-            foreach (var bpmChangeData in bpmChanges)
-            {
-                if (bpmChangeData.b <= latestBeat && bpmChangeData.b >= earliestBeat)
-                {
-                    GameObject bpmChange = Instantiate(objects[3]);
-                    bpmChange.transform.SetParent(content);
-                    bpmChange.transform.localPosition = new Vector3(11.5f, 0, PositionFromBeat(bpmChangeData.b) * editorScale);
-                    bpmChange.transform.GetChild(0).gameObject.GetComponent<TextMeshPro>().text = bpmChangeData.m.ToString();
-                    bpmChange.GetComponent<BpmEventData>().bpmEvent = bpmChangeData;
-                }
-            }
+            SelectObjects.instance.HighlightSelectedObject();
         }
-        SelectObjects.instance.HighlightSelectedObject();
     }
 
     public int Rotation(int level)
@@ -593,51 +666,4 @@ public class SpawnObjects : MonoBehaviour
     }
 }
 
-
 // UndoRedoManager class for managing a List<MyClass>
-public class UndoRedoManager<T>
-{
-    private Stack<List<T>> undoStack = new Stack<List<T>>();
-    private Stack<List<T>> redoStack = new Stack<List<T>>();
-    private List<T> currentList;
-
-    public UndoRedoManager(List<T> initialList)
-    {
-        currentList = new List<T>(initialList);
-    }
-
-    public void SaveState()
-    {
-        undoStack.Push(new List<T>(currentList));
-        redoStack.Clear(); // Clear redo stack on new action
-    }
-
-    public void Undo()
-    {
-        if (undoStack.Count > 0)
-        {
-            redoStack.Push(new List<T>(currentList));
-            currentList = undoStack.Pop();
-        }
-    }
-
-    public void Redo()
-    {
-        if (redoStack.Count > 0)
-        {
-            undoStack.Push(new List<T>(currentList));
-            currentList = redoStack.Pop();
-        }
-    }
-
-    public List<T> GetCurrentList()
-    {
-        return new List<T>(currentList);
-    }
-
-    public void UpdateCurrentList(List<T> newList)
-    {
-        SaveState();
-        currentList = new List<T>(newList);
-    }
-}

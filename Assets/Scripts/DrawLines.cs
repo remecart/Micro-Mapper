@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using Unity.VisualScripting.Antlr3.Runtime.Tree;
+using UnityEditor;
 using UnityEngine;
 
 public class DrawLines : MonoBehaviour
@@ -103,33 +104,26 @@ public class DrawLines : MonoBehaviour
         float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) - fbeat;
         float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) - fbeat;
         int repeat = Mathf.CeilToInt(end - start);
-
-        //int max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
         int beat = Mathf.CeilToInt(fbeat);
 
         int b = 0;
-
         for (int i = 0; i < repeat * precision + precision; i++)
         {
-            float a = i / precision + beat + repeat / 2;
+            float currentBeat = i / precision + beat - repeat / 2;
+            if (currentBeat < 0) continue; // Skip negative positions
 
-            b = i * 4;
-            lineRendererPrecision.positionCount = lineRendererPrecision.positionCount + 4;
-            if (i / precision + beat - repeat / 2 >= 0) // && i / precision + beat + repeat / 2 < max + repeat + precision
-            {
-                lineRendererPrecision.SetPosition(b, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat - repeat / 2) * editorScale));
-                lineRendererPrecision.SetPosition(b + 1, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat - repeat / 2) * editorScale));
-                lineRendererPrecision.SetPosition(b + 2, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat + precision - repeat / 2) * editorScale));
-                lineRendererPrecision.SetPosition(b + 3, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i / precision + beat + precision - repeat / 2) * editorScale));
-            }
-            else if (i / precision + beat - repeat / 2 < 0)
-            {
-                lineRendererPrecision.SetPosition(0, new Vector3(-laneIndex, 0, 0));
-            }
-            //else if (i / precision + beat + repeat / 2 > max + repeat)
-            //{
-            //    lineRendererPrecision.SetPosition(0, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(max) * editorScale));
-            //}
+            // Set the four corner positions for each line segment
+            b = lineRendererPrecision.positionCount;
+            lineRendererPrecision.positionCount += 4;
+
+            float beatPosition = SpawnObjects.instance.PositionFromBeat(currentBeat) * editorScale;
+            float nextBeatPosition = SpawnObjects.instance.PositionFromBeat(currentBeat + 1 / precision) * editorScale;
+
+            // Assign positions for each segment precisely
+            lineRendererPrecision.SetPosition(b, new Vector3(laneIndex, 0, beatPosition));
+            lineRendererPrecision.SetPosition(b + 1, new Vector3(-laneIndex, 0, beatPosition));
+            lineRendererPrecision.SetPosition(b + 2, new Vector3(-laneIndex, 0, nextBeatPosition));
+            lineRendererPrecision.SetPosition(b + 3, new Vector3(laneIndex, 0, nextBeatPosition));
         }
 
         int edited = 0;
@@ -148,14 +142,6 @@ public class DrawLines : MonoBehaviour
             edited++;
             lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 1, new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
         }
-        //lineRendererPrecision.positionCount = lineRendererPrecision.positionCount + laneIndex * 2 - 1;
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 7, new Vector3(2, 0, lineRendererPrecision.GetPosition(0).z));
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 6, new Vector3(1, 0, lineRendererPrecision.GetPosition(0).z));
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 5, new Vector3(1, 0, lineRendererPrecision.GetPosition(b + 3).z));
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 4, new Vector3(0, 0, lineRendererPrecision.GetPosition(b + 3).z));
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 3, new Vector3(0, 0, lineRendererPrecision.GetPosition(0).z));
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 2, new Vector3(-1, 0, lineRendererPrecision.GetPosition(0).z));
-        //lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 1, new Vector3(-1, 0, lineRendererPrecision.GetPosition(b + 3).z));
     }
 
     public void FixPositions()
