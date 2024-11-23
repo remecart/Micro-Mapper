@@ -15,7 +15,7 @@ public class Menu : MonoBehaviour
     private void Update()
     {
         open = this.gameObject.transform.GetChild(0).gameObject.activeSelf;
-        if (Input.GetKeyDown(KeyCode.Escape))
+        if (Input.GetKeyDown(KeyCode.Escape) && !Bookmarks.instance.openMenu)
         {
             if (open) Continue();
             else OpenMenu();

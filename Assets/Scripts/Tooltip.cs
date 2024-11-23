@@ -4,18 +4,18 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Button))]
 public class Tooltip : MonoBehaviour, IPointerEnterHandler,IPointerExitHandler
 {
     public string text;
     public GameObject tooltipPrefab;
     private GameObject tooltip;
-    
+    public int offset = -40;
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (tooltip == null)
         {
-            tooltip = Instantiate(tooltipPrefab, new Vector3(transform.position.x, transform.position.y - 40, transform.position.z), Quaternion.identity);
+            tooltip = Instantiate(tooltipPrefab, new Vector3(transform.position.x, transform.position.y + offset, transform.position.z), Quaternion.identity);
             GameObject tooltipsParent = GameObject.FindWithTag("Tooltips");
             if (tooltipsParent != null)
             {

@@ -18,7 +18,7 @@ public class Bookmarks : MonoBehaviour
     [SerializeField] private List<GameObject> bookmarks = new List<GameObject>();
 
     public static Bookmarks instance;
-
+    public bool openMenu;
 
     private Color FloatToColor(List<float> floats)
     {
@@ -36,14 +36,37 @@ public class Bookmarks : MonoBehaviour
         timeline = SpawnObjects.instance.timeSlider;
     }
 
+    private void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape) && !Menu.instance.open)
+        {
+            CloseBookmark();
+        }
+        if (!openMenu)
+        {
+            if (Input.GetKeyDown(KeyCode.B))
+            {
+                ToggleBookmark();
+            }
+        }
+        else
+        {
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                AddBookmarkToList();
+            }
+        }
+    }
     public void ToggleBookmark()
     {
         bookmarkMenu.SetActive(true);
+        openMenu = true;
     }
 
     private void CloseBookmark()
     {
         bookmarkMenu.SetActive(false);
+        openMenu = false;
     }
 
     public void AddBookmarkToList()
@@ -86,6 +109,7 @@ public class Bookmarks : MonoBehaviour
     private void CreateAndPlaceBookmark(bookmarks bookmark)
     {
         var newBookmark = Instantiate(bookmarkPrefab, parent);
+        newBookmark.GetComponent<BookmarkData>().bookmark = bookmark;
         AddEventTrigger(newBookmark);
         SetBookmarkColor(newBookmark, FloatToColor(bookmark.c));
         SetBookmarkPosition(newBookmark, bookmark.b);
@@ -111,7 +135,7 @@ public class Bookmarks : MonoBehaviour
     private void SetBookmarkPosition(GameObject newBookmark, float beat)
     {
         var parentsParent = parent.parent.GetComponent<RectTransform>();
-        var pos = CalculatePosition(beat, parentsParent.rect.width);
+        var pos = CalculatePosition(beat, parentsParent.rect.width - 20);
         var rect = newBookmark.GetComponent<RectTransform>();
         rect.anchoredPosition = new Vector2(pos, rect.anchoredPosition.y);
     }
@@ -133,7 +157,7 @@ public class Bookmarks : MonoBehaviour
         DrawLines.instance.DrawLinesFromScratch(bookmark.b, SpawnObjects.instance.precision);
     }
 
-    private void MoveSlider(float value)
+    public void MoveSlider(float value)
     {
         Slider.SliderEvent sliderEvent = timeline.onValueChanged;
         timeline.onValueChanged = new Slider.SliderEvent();

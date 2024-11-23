@@ -36,7 +36,7 @@ public class Placement : MonoBehaviour
     public GameObject spectro;
     public GameObject spectroLine;
         
-    public bool allowFusedNotePlacement = false;
+    public bool allowFusedNotePlacement = true;
 
     void Start()
     {
@@ -103,7 +103,7 @@ public class Placement : MonoBehaviour
 
     void Update()
     {
-        if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting && !DrawInEditor.instance.drawing && !Menu.instance.open)
+        if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu)
         {
             bufferTimeRunning -= Time.deltaTime;
             if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl)) Place();
@@ -657,13 +657,12 @@ public class Placement : MonoBehaviour
         note.d = d;
 
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
+        if (KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) || allowFusedNotePlacement)
         {
             UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
             LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes.Add(note);
         }
         else
-
         {
             UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
 

@@ -43,8 +43,54 @@ public class DrawLines : MonoBehaviour
         FixPositions();
     }
 
+    public void DrawXue(float fbeat, float precision, LineRenderer lineRenderer, LineRenderer lineRendererPrecision, float laneIndex)
+    {
+        float editorScale = SpawnObjects.instance.editorScale;
+        lineRenderer.positionCount = 0;
+
+        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) - fbeat;
+        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) - fbeat;
+        int repeat = Mathf.CeilToInt(end - start);
+
+        int max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+        int beat = Mathf.CeilToInt(fbeat);
+
+        int b = 0;
+
+        for (int i = 0; i < repeat + 1; i++)
+        {
+            b = i * 6;
+            lineRenderer.positionCount = lineRenderer.positionCount + 4;
+            if (i + beat - repeat / 2 >= 0) // && i + beat + repeat / 2 < max + repeat + 3
+            {
+                lineRenderer.SetPosition(b, new Vector3(0, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 1, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 2, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 5, new Vector3(0, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+            }
+            else if (i + beat - repeat / 2 < 0)
+            {
+                lineRenderer.SetPosition(0, new Vector3(-laneIndex, 0, 0));
+            }
+            //else if (i + beat + repeat / 2 > max + repeat)
+            //{
+            //    lineRenderer.SetPosition(0, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(max) * editorScale));
+            //}
+        }
+
+        lineRenderer.positionCount = lineRenderer.positionCount + 1;
+        lineRenderer.SetPosition(lineRenderer.positionCount - 1, new Vector3(laneIndex, 0, lineRenderer.GetPosition(0).z));
+
+    }
+
     public void DrawBeatsFromScratch(float fbeat, float precision, LineRenderer lineRenderer, LineRenderer lineRendererPrecision, float laneIndex)
     {
+        if (lineRenderer.gameObject.name.ToLower() == "xue")
+        {
+            DrawXue(fbeat, precision, lineRenderer, lineRendererPrecision, laneIndex);
+            return;
+        }
+
         DrawLinesWithPrecision(fbeat, precision, lineRendererPrecision, laneIndex);
         float editorScale = SpawnObjects.instance.editorScale;
         lineRenderer.positionCount = 0;

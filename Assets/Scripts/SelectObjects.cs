@@ -41,7 +41,7 @@ public class SelectObjects : MonoBehaviour
         GenerateText();
         HighlightSelectedObject();
 
-        if (!Settings.instance.isHovering && !DrawInEditor.instance.drawing && !Menu.instance.open)
+        if (!Settings.instance.isHovering && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -870,7 +870,7 @@ public class SelectObjects : MonoBehaviour
                     {
                         item.d = Invert(item.d);
                         item.x = InvertXAxis(item.x);
-                        item.a = item.a + 180;
+                        //item.a = item.a + 180; // Those who know, know that 
                     }
                     if (item.c == 0) item.c = 1; else item.c = 0;
                     LoadMap.instance.beats[Mathf.FloorToInt(item.b)].colorNotes.Add(item);

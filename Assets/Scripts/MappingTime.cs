@@ -27,6 +27,6 @@ public class MappingTime : MonoBehaviour
         int minutes = Mathf.FloorToInt(currentTime / 60f) % 60;
         int seconds = Mathf.FloorToInt(currentTime) % 60;
 
-        text.text = $"{hours:D2}:{minutes:D2}:{seconds:D2}";
+        text.text = $" {hours:D2}:{minutes:D2}:{seconds:D2}";
     }
 }

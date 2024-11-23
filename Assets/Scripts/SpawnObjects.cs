@@ -26,7 +26,6 @@ public class SpawnObjects : MonoBehaviour
     private float offsetCache;
     public TextMeshPro currentBeatText;
     public TextMeshProUGUI editorScaleText;
-    public Slider EditorScaleSlider;
     public Slider timeSlider;
     public TMP_InputField numberator;
     public TMP_InputField denominator;
@@ -248,10 +247,9 @@ public class SpawnObjects : MonoBehaviour
 
 
     }
-
     public void LoadWallsBackwards()
     {
-        float check = 256;
+        float check = 400;
 
         foreach (Transform child in content.transform)
         {
@@ -261,19 +259,40 @@ public class SpawnObjects : MonoBehaviour
 
         for (int i = 0; i < check; i++)
         {
-            if (Mathf.FloorToInt(currentBeat - i) >= 0)
+            if (Mathf.FloorToInt(currentBeat - i + 200) >= 0)
             {
-                List<obstacles> obstacles = LoadMap.instance.beats[Mathf.FloorToInt(currentBeat - i + Mathf.CeilToInt(spawnOffset))].obstacles;
+                List<obstacles> obstacles = LoadMap.instance.beats[Mathf.FloorToInt(currentBeat - i + 200 + Mathf.CeilToInt(spawnOffset))].obstacles;
+
                 foreach (var obstacleData in obstacles)
                 {
-                    if (obstacleData.b + obstacleData.d > currentBeat - spawnOffset)
+                    // Calculate the start and end beats based on the duration (d can be positive or negative)
+                    float obstacleStart = obstacleData.b;
+                    float obstacleEnd = obstacleData.b + obstacleData.d;
+
+                    // If the duration is negative, swap the start and end
+                    if (obstacleData.d < 0)
                     {
-                        var scaleZ = (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) * editorScale;
+                        obstacleStart = obstacleEnd;
+                        obstacleEnd = obstacleData.b;
+                    }
+
+                    // Ensure that both obstacles will appear at the same time if they overlap
+                    if (obstacleEnd > currentBeat - 12 && obstacleStart < currentBeat + 12)
+                    {
+                        var scaleZ = (PositionFromBeat(obstacleEnd) - PositionFromBeat(obstacleStart)) * editorScale;
+
                         GameObject obstacle = Instantiate(objects[4]);
                         obstacle.transform.SetParent(content);
-                        obstacle.transform.localPosition = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
+
+                        // Positioning based on obstacle's position data (adjusting X/Y and beat-based Z)
+                        obstacle.transform.localPosition = new Vector3(
+                            obstacleData.x + (float)obstacleData.w / 2 - 0.5f,
+                            obstacleData.y + obstacleData.h / 2 - 0.5f,
+                            PositionFromBeat(obstacleStart) * editorScale + 0.5f * scaleZ
+                        );
+
                         obstacle.transform.localScale = new Vector3(obstacleData.w, obstacleData.h, scaleZ);
-                        obstacle.name = obstacle.name + obstacleData.b;
+                        obstacle.name = obstacle.name + obstacleStart;
                         obstacle.GetComponent<ObstacleData>().obstacle = obstacleData;
                     }
                 }
@@ -282,18 +301,39 @@ public class SpawnObjects : MonoBehaviour
         SelectObjects.instance.HighlightSelectedObject();
     }
 
+
+
+
     public void LoadObjectsFromScratch(float fbeat, bool resetGridPos, bool fromScratch)
     {
         foreach (Transform child in content.transform)
         {
-            if (!child.GetComponent<ObstacleData>())
+            var obstacleData = child.GetComponent<ObstacleData>();
+
+            if (!obstacleData)
             {
                 Destroy(child.gameObject);
             }
             else
             {
-                if (child.transform.localPosition.z < PositionFromBeat(currentBeat - spawnOffset - child.gameObject.GetComponent<ObstacleData>().obstacle.d / 2f) * editorScale)
+                float obstacleStart = obstacleData.obstacle.b;
+                float obstacleEnd = obstacleStart + obstacleData.obstacle.d;
+
+                // Ensure proper ordering even if d is negative
+                if (obstacleEnd < obstacleStart)
+                {
+                    float temp = obstacleStart;
+                    obstacleStart = obstacleEnd;
+                    obstacleEnd = temp;
+                }
+
+                float obstacleCenter = (obstacleStart + obstacleEnd) / 2f;
+                float obstaclePositionZ = PositionFromBeat(currentBeat - spawnOffset + 5 - obstacleCenter) * editorScale;
+
+                if (child.transform.localPosition.z < obstaclePositionZ)
+                {
                     Destroy(child.gameObject);
+                }
             }
         }
 
@@ -323,19 +363,35 @@ public class SpawnObjects : MonoBehaviour
     {
         foreach (Transform child in content.transform)
         {
-            if (child.transform.localPosition.z < PositionFromBeat(currentBeat - spawnOffset) * editorScale)
+            var obstacleData = child.GetComponent<ObstacleData>();
+
+            if (child.transform.localPosition.z < PositionFromBeat(currentBeat - 12) * editorScale)
             {
-                if (!child.GetComponent<ObstacleData>())
+                if (!obstacleData)
                 {
                     Destroy(child.gameObject);
                 }
                 else
                 {
-                    if (child.transform.localPosition.z < PositionFromBeat(currentBeat - spawnOffset - child.gameObject.GetComponent<ObstacleData>().obstacle.d) * editorScale)
+                    float obstacleStart = obstacleData.obstacle.b;
+                    float obstacleEnd = obstacleStart + obstacleData.obstacle.d;
+
+                    // Ensure proper ordering even if d is negative
+                    if (obstacleEnd < obstacleStart)
+                    {
+                        float temp = obstacleStart;
+                        obstacleStart = obstacleEnd;
+                        obstacleEnd = temp;
+                    }
+
+                    if (child.transform.localPosition.z < PositionFromBeat(currentBeat - 12 - obstacleEnd) * editorScale)
+                    {
                         Destroy(child.gameObject);
+                    }
                 }
             }
         }
+
 
         Grid.localPosition = new Vector3(2, 0, PositionFromBeat(fbeat - spawnOffset) * editorScale);
 

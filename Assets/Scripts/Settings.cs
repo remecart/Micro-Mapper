@@ -116,9 +116,9 @@ public class Settings : MonoBehaviour
             isShowing = !isShowing;
         }
 
-        if (isShowing && !Menu.instance.open)
+        if (isShowing && !Menu.instance.open && !Bookmarks.instance.openMenu)
         {
-            ImGui.ShowDemoWindow();
+            //ImGui.ShowDemoWindow();
             //ImGui.SetNextWindowPos(new Vector2((Screen.width - 450) / 2, (Screen.height - 650) / 2));
             ImGui.Begin("Settings", ImGuiWindowFlags.NoCollapse);
             ImGui.SetWindowSize(new Vector2(450, 650));

@@ -24,7 +24,7 @@ public class PlayerFly : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetMouseButton(1) && !Menu.instance.open)
+        if (Input.GetMouseButton(1) && !Menu.instance.open && !Bookmarks.instance.openMenu)
         {
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = !!!true; /// They used to be friends, until they werent....

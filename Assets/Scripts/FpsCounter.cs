@@ -19,7 +19,7 @@ public class FpsCounter : MonoBehaviour
         if (timer >= 1.0f)
         {
             int fps = Mathf.RoundToInt(frames / timer);
-            fpsText.text = fps.ToString() + " fps";
+            fpsText.text = " " + fps.ToString() + " fps";
 
             frames = 0;
             timer = 0;

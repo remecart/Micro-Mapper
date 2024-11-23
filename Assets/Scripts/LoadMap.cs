@@ -605,6 +605,7 @@ public class customData
 {
     public float time;
     public List<bookmarks> bookmarks;
+    public bool bookmarksUseOfficialBpmEvents = true;
 }
 
 
