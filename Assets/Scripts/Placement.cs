@@ -35,6 +35,8 @@ public class Placement : MonoBehaviour
     public List<GameObject> Lines;
     public GameObject spectro;
     public GameObject spectroLine;
+        
+    public bool allowFusedNotePlacement = false;
 
     void Start()
     {
@@ -621,7 +623,7 @@ public class Placement : MonoBehaviour
         note.c = c;
         note.d = d;
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement))
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes)
             {
@@ -659,7 +661,7 @@ public class Placement : MonoBehaviour
             bomb.y = Mathf.FloorToInt(y);
         }
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement))
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].bombNotes)
             {
@@ -688,7 +690,7 @@ public class Placement : MonoBehaviour
         timing.b = b;
         timing.t = t;
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement))
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].timings)
             {
@@ -717,7 +719,7 @@ public class Placement : MonoBehaviour
         bpmEvent.b = b;
         bpmEvent.m = m;
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement))
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents)
             {

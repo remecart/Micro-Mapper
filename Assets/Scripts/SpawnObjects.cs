@@ -611,20 +611,27 @@ public class SpawnObjects : MonoBehaviour
     {
         List<bpmEvents> bpms = LoadMap.instance.bpmEvents;
         float realTime = 0;
-        float previousBpm = ReadMapInfo.instance.info._beatsPerMinute; ;
+        float previousBpm = ReadMapInfo.instance.info._beatsPerMinute;
         float previousBeat = 0;
 
         foreach (var bpmEvent in bpms)
         {
+            // If the beat is before this BPM event, calculate the time and break.
             if (beat <= bpmEvent.b)
             {
                 realTime += (beat - previousBeat) * (60f / previousBpm);
                 return realTime;
             }
+
+            // If the beat is past this BPM event, accumulate time.
             realTime += (bpmEvent.b - previousBeat) * (60f / previousBpm);
+        
+            // Update previousBpm and previousBeat for the next iteration
             previousBpm = bpmEvent.m;
             previousBeat = bpmEvent.b;
         }
+
+        // In case the beat is after the last BPM event
         realTime += (beat - previousBeat) * (60f / previousBpm);
         return realTime;
     }
@@ -633,36 +640,33 @@ public class SpawnObjects : MonoBehaviour
     public float BeatFromRealTime(float realTime)
     {
         List<bpmEvents> bpms = LoadMap.instance.bpmEvents;
-        float beat = 0;
-        float accumulatedTime = 0;
+        double accumulatedTime = 0.0;
 
         for (int i = 0; i < bpms.Count; i++)
         {
             if (i + 1 < bpms.Count)
             {
-                float nextBeatTime = bpms[i + 1].b;
-                float bpmDuration = (nextBeatTime - bpms[i].b) * (60f / bpms[i].m);
+                // Calculate the duration until the next BPM change (use double for accuracy)
+                double nextBeatTime = bpms[i + 1].b;
+                double bpmDuration = (nextBeatTime - bpms[i].b) * (60.0 / bpms[i].m);
 
                 if (accumulatedTime + bpmDuration >= realTime)
                 {
-                    float remainingTime = realTime - accumulatedTime;
-                    beat = bpms[i].b + (remainingTime / (60f / bpms[i].m));
-                    return beat;
+                    double remainingTime = realTime - accumulatedTime;
+                    return (float)(bpms[i].b + (remainingTime / (60.0 / bpms[i].m)));
                 }
-                else
-                {
-                    accumulatedTime += bpmDuration;
-                }
+
+                accumulatedTime += bpmDuration;
             }
             else
             {
-                float remainingTime = realTime - accumulatedTime;
-                beat = bpms[i].b + (remainingTime / (60f / bpms[i].m));
-                return beat;
+                // Calculate for the last BPM event
+                double remainingTime = realTime - accumulatedTime;
+                return (float)(bpms[i].b + (remainingTime / (60.0 / bpms[i].m)));
             }
         }
 
-        return beat;
+        return bpms.Count > 0 ? (float)bpms[bpms.Count - 1].b : 0f;
     }
 }
 

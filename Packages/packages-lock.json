@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "com.realgames.dear-imgui": {
-      "version": "file:C:/ImGUI/dear-imgui-unity",
+      "version": "file:A:/dear-imgui-unity",
       "depth": 0,
       "source": "local",
       "dependencies": {
