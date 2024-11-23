@@ -107,7 +107,7 @@ public class Placement : MonoBehaviour
         {
             bufferTimeRunning -= Time.deltaTime;
             if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl)) Place();
-            if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.changeNoteType)) SwitchNoteType();
+            if (Input.GetMouseButtonDown(2)) SwitchNoteType();
 
             if (placementIndex == 0) left = true;
             else if (placementIndex == 1) left = false;
@@ -324,7 +324,7 @@ public class Placement : MonoBehaviour
             GameObject preview = objectParent.transform.GetChild(4).gameObject;
             preview.SetActive(true);
             preview.transform.GetChild(0).GetComponent<TextMeshPro>().text = input.text;
-            preview.transform.localPosition = new Vector3(SpawnObjects.instance.BpmChangeSpawm.transform.position.x -2f, 0.5f, 0);
+            preview.transform.localPosition = new Vector3(SpawnObjects.instance.BpmChangeSpawm.transform.position.x - 2f, 0.5f, 0);
 
             if (Input.GetMouseButtonDown(0)) PlaceBpmChange(SpawnObjects.instance.currentBeat, float.Parse(input.text));
         }
@@ -453,10 +453,16 @@ public class Placement : MonoBehaviour
         }
     }
 
-    private colorNotes altMoveCache;
+    private colorNotes altNoteMoveCache;
+    private bombNotes altBombMoveCache;
 
     void AltControls()
     {
+        foreach (Transform child in objectParent)
+        {
+            child.gameObject.SetActive(false);
+        }
+
         Vector3 mousePosition = Input.mousePosition;
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
@@ -489,7 +495,7 @@ public class Placement : MonoBehaviour
 
                 foreach (var hitNote in hits)
                 {
-                    if (hitNote.collider.CompareTag("Note"))
+                    if (hitNote.collider.CompareTag("Note") || hitNote.collider.CompareTag("Bomb"))
                     {
                         float distance = Vector3.Distance(ray.origin, hitNote.point);
                         if (distance < closestDistance)
@@ -503,60 +509,81 @@ public class Placement : MonoBehaviour
                 // If a closest hit was found, cache the note
                 if (closestDistance < float.MaxValue)
                 {
-                    altMoveCache = closestHit.collider.gameObject.GetComponent<NoteData>().note;
+                    if (closestHit.collider.gameObject.GetComponent<NoteData>()) altNoteMoveCache = closestHit.collider.gameObject.GetComponent<NoteData>().note;
+                    if (closestHit.collider.gameObject.GetComponent<BombData>()) altBombMoveCache = closestHit.collider.gameObject.GetComponent<BombData>().bomb;
                 }
             }
 
-            if (Input.GetMouseButtonUp(0)) altMoveCache = null;
+            if (Input.GetMouseButtonUp(0)) altNoteMoveCache = null;
+            if (Input.GetMouseButtonUp(0)) altBombMoveCache = null;
 
-            if (Input.GetMouseButton(0) && altMoveCache != null)
+            if (Input.GetMouseButton(0))
             {
-                // Find the closest object for each type
-                foreach (var hit in hits)
+                if (altNoteMoveCache != null || altBombMoveCache != null)
                 {
-                    if (hit.collider.CompareTag("Grid"))
+                    // Find the closest object for each type
+                    foreach (var hit in hits)
                     {
-                        colorNotes note = altMoveCache;
-                        LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Remove(note);
-
-                        Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
-                        note.b = SpawnObjects.instance.currentBeat;
-                        note.x = Mathf.FloorToInt(pos.x + 2);
-                        note.y = Mathf.FloorToInt(pos.y);
-
-                        Vector2 direction = new Vector2();
-                        float angle = 0;
-
-                        if (!invertControls) direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-                        else direction = new Vector2(-Input.GetAxisRaw("Horizontal"), -Input.GetAxisRaw("Vertical"));
-
-                        if (direction != new Vector2() && bufferTimeRunning <= 0)
+                        if (hit.collider.CompareTag("Grid"))
                         {
-                            dot = false;
-                            angle = ClampAngle(Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90);
-
-                            if (direction.x != 0 && direction.y != 0)
+                            if (altNoteMoveCache != null)
                             {
-                                bufferTimeRunning = bufferTime;
+                                colorNotes note = altNoteMoveCache;
+                                LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Remove(note);
+
+                                Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+                                note.b = SpawnObjects.instance.currentBeat;
+                                note.x = Mathf.FloorToInt(pos.x + 2);
+                                note.y = Mathf.FloorToInt(pos.y);
+
+                                Vector2 direction = new Vector2();
+                                float angle = 0;
+
+                                if (!invertControls) direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+                                else direction = new Vector2(-Input.GetAxisRaw("Horizontal"), -Input.GetAxisRaw("Vertical"));
+
+                                if (direction != new Vector2() && bufferTimeRunning <= 0)
+                                {
+                                    dot = false;
+                                    angle = ClampAngle(Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90);
+
+                                    if (direction.x != 0 && direction.y != 0)
+                                    {
+                                        bufferTimeRunning = bufferTime;
+                                    }
+
+                                    int cd = Rotation(Mathf.RoundToInt(angle));
+                                    if (dot) cd = 8;
+
+                                    note.d = cd;
+                                }
+
+                                if (Input.GetKeyDown(KeyCode.F))
+                                {
+                                    dot = true;
+                                }
+
+                                LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
+
+                                SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                                SpawnObjects.instance.LoadWallsBackwards();
                             }
+                            else if (altBombMoveCache != null)
+                            {
+                                bombNotes bomb = altBombMoveCache;
+                                LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Remove(bomb);
 
-                            int cd = Rotation(Mathf.RoundToInt(angle));
-                            if (dot) cd = 8;
+                                Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+                                bomb.b = SpawnObjects.instance.currentBeat;
+                                bomb.x = Mathf.FloorToInt(pos.x + 2);
+                                bomb.y = Mathf.FloorToInt(pos.y);
 
-                            note.d = cd;
+                                LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Add(bomb);
+
+                                SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                                SpawnObjects.instance.LoadWallsBackwards();
+                            }
                         }
-
-                        if (Input.GetKeyDown(KeyCode.F))
-                        {
-                            dot = true;
-                        }
-
-                        LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
-
-                        SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
-                        SpawnObjects.instance.LoadWallsBackwards();
-
-
                     }
                 }
             }
@@ -578,6 +605,9 @@ public class Placement : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(mousePosition);
         RaycastHit[] hits = Physics.RaycastAll(ray);
 
+        // Sort hits by distance to process the closest hit first
+        hits = hits.OrderBy(h => h.distance).ToArray();
+
         foreach (var h in hits)
         {
             if (h.collider.CompareTag("Note"))
@@ -585,16 +615,20 @@ public class Placement : MonoBehaviour
                 colorNotes note = h.collider.gameObject.GetComponent<NoteData>().note;
                 int beatIndex = Mathf.FloorToInt(note.b);
 
+                // Check beatIndex validity
                 if (beatIndex < 1 || beatIndex > LoadMap.instance.beats.Count)
                 {
                     continue;
                 }
 
-                foreach (var item in LoadMap.instance.beats[beatIndex - 1].colorNotes)
+                var beat = LoadMap.instance.beats[beatIndex];
+
+                foreach (var item in beat.colorNotes)
                 {
+                    // Debug to confirm if note matches
                     if (item == note)
                     {
-                        UndoRedoManager.instance.SaveState(LoadMap.instance.beats[beatIndex - 1], beatIndex, false);
+                        UndoRedoManager.instance.SaveState(beat, beatIndex, false);
                         item.c = (item.c == 0) ? 1 : 0;
                         SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, false, true);
                     }
@@ -602,7 +636,6 @@ public class Placement : MonoBehaviour
             }
         }
     }
-
 
     void PlaceNote(float b, float x, float y, int c, int d)
     {
@@ -623,23 +656,55 @@ public class Placement : MonoBehaviour
         note.c = c;
         note.d = d;
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
-        {
-            foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes)
-            {
-                if (item.x == note.x && item.y == note.y && item.b == note.b)
-                {
-                    stackedCheck = true;
-                    break;
-                }
-            }
-        }
 
-        if (!stackedCheck)
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
         {
             UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
             LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes.Add(note);
         }
+        else
+
+        {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
+
+            // Collect items to be removed in a separate list
+            var itemsToRemove = new List<colorNotes>();
+            foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes)
+            {
+                if (item.x == note.x && item.y == note.y && item.b == note.b)
+                {
+                    itemsToRemove.Add(item);
+                }
+            }
+
+            // Remove the collected items
+            foreach (var item in itemsToRemove)
+            {
+                LoadMap.instance.beats[Mathf.FloorToInt(item.b)].colorNotes.Remove(item);
+            }
+
+            // Add the new note
+            LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes.Add(note);
+        }
+
+
+        //if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement))
+        //{
+        //    foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes)
+        //    {
+        //        if (item.x == note.x && item.y == note.y && item.b == note.b)
+        //        {
+        //            stackedCheck = true;
+        //            break;
+        //        }
+        //    }
+        //}
+
+        //if (!stackedCheck)
+        //{
+        //    UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
+        //    LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes.Add(note);
+        //}
 
         SpawnObjects.instance.LoadObjectsFromScratch(b, true, true);
     }

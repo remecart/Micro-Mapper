@@ -54,6 +54,11 @@ public class SelectObjects : MonoBehaviour
                 if (Input.GetKeyDown(KeyCode.A)) ClearSelection();
                 if (Input.GetKeyDown(KeyCode.C)) CopySelection();
                 if (Input.GetKeyDown(KeyCode.V)) PasteSelection();
+                Vector2 vec = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+                if (vec != Vector2.zero)
+                {
+                    if (ArrowVector() != new Vector2Int()) OffsetPosition(Placement.instance.MEprecision, ArrowVector());
+                }
             }
 
             if (Input.GetKeyDown(KeyCode.Delete) || Input.GetKeyDown(KeyCode.Backspace)) DeleteObjects();
@@ -405,7 +410,7 @@ public class SelectObjects : MonoBehaviour
 
                         if (currentBeatIndex < 1 || currentBeatIndex > LoadMap.instance.beats.Count)
                         {
-                            continue; 
+                            continue;
                         }
 
                         List<colorNotes> colorNotes = LoadMap.instance.beats[currentBeatIndex - 1].colorNotes;
@@ -751,6 +756,98 @@ public class SelectObjects : MonoBehaviour
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
         }
     }
+
+    public Vector2Int ArrowVector()
+    {
+        Vector2Int vector = new Vector2Int();
+
+        // Check arrow key inputs
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            vector.y += 1;
+        }
+        if (Input.GetKeyDown(KeyCode.DownArrow))
+        {
+            vector.y -= 1;
+        }
+        if (Input.GetKeyDown(KeyCode.LeftArrow))
+        {
+            vector.x -= 1;
+        }
+        if (Input.GetKeyDown(KeyCode.RightArrow))
+        {
+            vector.x += 1;
+        }
+
+        return vector;
+    }
+
+    void OffsetPosition(float MEPrecision, Vector2Int vec)
+    {
+        if (selectedColorNotes.Count != 0 || selectedBombNotes.Count != 0 || selectedObstacles.Count != 0 || selectedSliders.Count != 0 || selectedBurstSliders.Count != 0 || selectedBpmEvents.Count != 0 || selectedTimings.Count != 0)
+        {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[40484], 40484, false);
+
+            foreach (var item in selectedColorNotes)
+            {
+                colorNotes note = LoadMap.instance.beats[Mathf.FloorToInt(item.b)].colorNotes.Find(n => n.Equals(item));
+
+                if (note != null)
+                {
+                    UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(item.b)], Mathf.FloorToInt(item.b), true);
+                    LoadMap.instance.beats[Mathf.FloorToInt(item.b)].colorNotes.Remove(item);
+                    if (item.x < 999 && item.x > -999) item.x += vec.x;
+                    else
+                    {
+                        if (item.x > 999 && item.x + Mathf.RoundToInt((vec.x * 1000) / MEPrecision) < 999) item.x += -2000;
+                        else if (item.x < -999 && item.x + Mathf.RoundToInt((vec.x * 1000) / MEPrecision) > -999) item.x += +2000;
+                        item.x += Mathf.RoundToInt((vec.x * 1000) / MEPrecision);
+                    }
+
+                    if (item.y < 999 && item.y > -999) item.y += vec.y;
+                    else
+                    {
+                        if (item.y > 999 && item.y + Mathf.RoundToInt((vec.y * 1000) / MEPrecision) < 999) item.y += -2000;
+                        else if (item.y < -999 && item.y + Mathf.RoundToInt((vec.y * 1000) / MEPrecision) > -999) item.y += +2000;
+                        item.y += Mathf.RoundToInt((vec.y * 1000) / MEPrecision);
+                    }
+                    LoadMap.instance.beats[Mathf.FloorToInt(item.b)].colorNotes.Add(item);
+                }
+            }
+
+            foreach (var item in selectedBombNotes)
+            {
+                bombNotes bomb = LoadMap.instance.beats[Mathf.FloorToInt(item.b)].bombNotes.Find(n => n.Equals(item));
+
+                if (bomb != null)
+                {
+                    UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(item.b)], Mathf.FloorToInt(item.b), true);
+                    LoadMap.instance.beats[Mathf.FloorToInt(item.b)].bombNotes.Remove(item);
+
+                    if (item.x < 999 && item.y > -999) item.x += vec.x;
+                    else
+                    {
+                        item.x += Mathf.RoundToInt((vec.x * 1000) / MEPrecision);
+                        if (item.x < 999 && item.x > -999) item.x -= 2000;
+                    }
+                    if (item.y < 999 && item.y > -999) item.y += vec.y;
+                    else
+                    {
+                        item.y += Mathf.RoundToInt((vec.y * 1000) / MEPrecision);
+                        if (item.y < 999 && item.y > -999) item.y -= 2000;
+                    }
+
+
+                    UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(item.b)], Mathf.FloorToInt(item.b), true);
+                    LoadMap.instance.beats[Mathf.FloorToInt(item.b)].bombNotes.Add(item);
+                }
+            }
+
+            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+            SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+        }
+    }
+
     void MirrorSelection()
     {
         if (selectedColorNotes.Count != 0 || selectedBombNotes.Count != 0 || selectedObstacles.Count != 0 || selectedSliders.Count != 0 || selectedBurstSliders.Count != 0)

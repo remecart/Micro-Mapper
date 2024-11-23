@@ -39,10 +39,13 @@ public class LoadMap : MonoBehaviour
     public List<beatsV3> beats;
     [HideInInspector]
     public List<bpmEvents> bpmEvents;
+    [HideInInspector]
     public List<obstacles> obstacles;
+
     
     public List<bookmarks> bookmarks;
 
+    [HideInInspector]
     public SpawnObjects spawnObjects;
 
     void Start()
@@ -89,6 +92,7 @@ public class LoadMap : MonoBehaviour
         };
 
         beat.version = "3.3.0";
+        beat.customData.bookmarks = bookmarks;
 
         beat.customData.bookmarks = bookmarks;  
         for (int i = 0; i < beats.Count - 1; i++)
@@ -297,6 +301,7 @@ public class LoadMap : MonoBehaviour
 
         if (beatV3 != null)
         {
+            bookmarks = beatV3.customData.bookmarks;
             mappingTime = beatV3.customData.time;
             bookmarks = beatV3.customData.bookmarks;
             for (int i = 0; i < beatV3.colorNotes.Count; i++)
@@ -475,6 +480,12 @@ public class beatsV3
     public List<basicBeatmapEvents> basicBeatmapEvents = new List<basicBeatmapEvents>();
     public List<timings> timings = new List<timings>();
     public customData customData;
+    public List<timings> waypoints = new List<timings>();
+    public List<timings> colorBoostBeatmapEvents = new List<timings>();
+    public List<timings> lightColorEventBoxGroups = new List<timings>();
+    public List<timings> vfxEventBoxGroups = new List<timings>();
+    public List<timings> _fxEventsCollection = new List<timings>();
+    public List<timings> basicEventTypesWithKeywords = new List<timings>();
 
     // Deep Clone Method
     public beatsV3 Clone()

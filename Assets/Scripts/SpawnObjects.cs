@@ -625,7 +625,6 @@ public class SpawnObjects : MonoBehaviour
 
             // If the beat is past this BPM event, accumulate time.
             realTime += (bpmEvent.b - previousBeat) * (60f / previousBpm);
-        
             // Update previousBpm and previousBeat for the next iteration
             previousBpm = bpmEvent.m;
             previousBeat = bpmEvent.b;
