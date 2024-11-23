@@ -41,8 +41,10 @@ public class LoadMap : MonoBehaviour
     public List<bpmEvents> bpmEvents;
     [HideInInspector]
     public List<obstacles> obstacles;
-    [HideInInspector]
+
+    
     public List<bookmarks> bookmarks;
+
     [HideInInspector]
     public SpawnObjects spawnObjects;
 
@@ -92,6 +94,7 @@ public class LoadMap : MonoBehaviour
         beat.version = "3.3.0";
         beat.customData.bookmarks = bookmarks;
 
+        beat.customData.bookmarks = bookmarks;  
         for (int i = 0; i < beats.Count - 1; i++)
         {
             if (beats[i] == null)
@@ -300,7 +303,7 @@ public class LoadMap : MonoBehaviour
         {
             bookmarks = beatV3.customData.bookmarks;
             mappingTime = beatV3.customData.time;
-
+            bookmarks = beatV3.customData.bookmarks;
             for (int i = 0; i < beatV3.colorNotes.Count; i++)
             {
                 int b = Mathf.FloorToInt(beatV3.colorNotes[i].b);
@@ -424,6 +427,7 @@ public class LoadMap : MonoBehaviour
                 }
             }
         }
+        Bookmarks.instance.LoadBookmarks();
     }
 
     public int Rotation(int level)
@@ -609,7 +613,7 @@ public class bookmarks
 {
     public float b;
     public string n;
-    public Color c;
+    public List<float> c;
 }
 
 [System.Serializable]

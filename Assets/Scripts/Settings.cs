@@ -86,6 +86,9 @@ public class Settings : MonoBehaviour
         }
 
         config.keybinds = Keybinds;
+        
+        QualitySettings.vSyncCount = config.visuals.vsync ? 1 : 0;
+
     }
 
     void OnDestroy()
@@ -236,6 +239,11 @@ public class Settings : MonoBehaviour
                 {
                     BloomEffect.instance.intensity = config.visuals.cameraSettings.bloom / 10f;
                 }
+                
+                if(ImGui.Checkbox("VSync", ref config.visuals.vsync))
+                {
+                    QualitySettings.vSyncCount = config.visuals.vsync ? 1 : 0;
+                }  
 
                 string[] _resNames = new string[]
                 {
@@ -729,6 +737,8 @@ public class Visuals
     public Spectrogram spectrogram;
     public Waveform waveform;
     public CameraSettings cameraSettings;
+    public bool vsync;
+
 }
 
 [System.Serializable]

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,9 +10,11 @@ using UnityEngine.Rendering;
 
 public class GetMapInfoUI : MonoBehaviour
 {
+    private static readonly int SpriteTexture = Shader.PropertyToID("_MainTex");
+    
     bool applied;
 
-    public RawImage cover;
+    public Material cover;
     public TextMeshProUGUI songName;
     public TextMeshProUGUI songArtist;
     public TextMeshProUGUI difficulty;
@@ -34,6 +37,7 @@ public class GetMapInfoUI : MonoBehaviour
     }
 
 
+    // ReSharper disable Unity.PerformanceAnalysis
     void ApplyCover()
     {
         byte[] imageData = File.ReadAllBytes(ReadMapInfo.instance.folderPath + "\\" + ReadMapInfo.instance.info._coverImageFilename);
@@ -42,8 +46,7 @@ public class GetMapInfoUI : MonoBehaviour
         Texture2D texture = new Texture2D(2, 2); // Adjust the size as needed
         texture.LoadImage(imageData);
 
-        // Set the loaded texture to the RawImage component
-        cover.texture = texture;
+        cover.SetTexture(SpriteTexture, texture);
         applied = true;
     }
 }
