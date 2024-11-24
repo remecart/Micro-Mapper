@@ -170,6 +170,11 @@ public class Settings : MonoBehaviour
                     SelectObjects.instance.selection = config.mapping.selection;
                     SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
                 }
+                
+                if (ImGui.Checkbox("Double Tap To Place Notes", ref config.mapping.allowDoubleTapping))
+                {
+                    Placement.instance.allowDoubleTapping = config.mapping.allowDoubleTapping;
+                }
 
                 ImGui.TreePop();
             }
@@ -700,6 +705,7 @@ public class Mapping
     public int songSpeed;
     public float noteDistance;
     public bool selection;
+    public bool allowDoubleTapping;
     public ColorSettings colorSettings;
     public MappingExtensions mappingExtensions;
 }

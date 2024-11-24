@@ -6,7 +6,7 @@ public class PlayerFly : MonoBehaviour
 {
     public static PlayerFly instance;
 
-    public float speed = 10f;
+    public float speed = 14f;
     public float rotationSpeed = 70f;
     public Transform playerBody;
     float xRotation = 0;
@@ -43,7 +43,26 @@ public class PlayerFly : MonoBehaviour
             playerBodyRotation.z = 0;
             playerBody.localEulerAngles = playerBodyRotation;
 
-            Vector3 moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")) * (Time.deltaTime * speed);
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                // Move down
+                playerBody.localPosition -= new Vector3(0, 1, 0) * (Time.deltaTime * speed);
+            }
+            
+            if (Input.GetKey(KeyCode.Space))
+            {
+                // Move up
+                playerBody.localPosition += new Vector3(0, 1, 0) * (Time.deltaTime * speed);
+            }
+
+            var spd = speed;
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                // Move faster
+                spd = speed + 10f;
+            }
+
+            Vector3 moveDirection = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")) * (Time.deltaTime * spd);
             moveDirection = transform.TransformDirection(moveDirection);
             playerBody.localPosition += moveDirection;
         }

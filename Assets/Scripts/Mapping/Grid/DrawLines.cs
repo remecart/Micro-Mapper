@@ -14,7 +14,9 @@ public class DrawLines : MonoBehaviour
     public int distance;
     public BeatNumbers bn;
     public List<BeatLines> lines;
+
     private bool audioCheckOnStart;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -43,51 +45,62 @@ public class DrawLines : MonoBehaviour
         FixPositions();
     }
 
-    public void DrawXue(float fbeat, float precision, LineRenderer lineRenderer, LineRenderer lineRendererPrecision, float laneIndex)
+    public void DrawXue(float fbeat, float precision, LineRenderer lineRenderer, LineRenderer lineRendererPrecision,
+        float laneIndex)
     {
         float editorScale = SpawnObjects.instance.editorScale;
         lineRenderer.positionCount = 0;
 
-        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) - fbeat;
-        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) - fbeat;
+        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) -
+                      fbeat;
+        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) -
+                    fbeat;
         int repeat = Mathf.CeilToInt(end - start);
 
         int max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
         int beat = Mathf.CeilToInt(fbeat);
 
+        foreach (Transform child in BeatNumbers.instance.parent.transform)
+        {
+            Destroy(child.gameObject);
+        }
+
         int b = 0;
 
         for (int i = 0; i < repeat + 1; i++)
         {
-            b = i * 6;
+            b = i * 4;
+
+            // Removed outline creation
             lineRenderer.positionCount = lineRenderer.positionCount + 4;
-            if (i + beat - repeat / 2 >= 0) // && i + beat + repeat / 2 < max + repeat + 3
+            if (i + beat - repeat / 2 >= 0)
             {
-                lineRenderer.SetPosition(b, new Vector3(0, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
-                lineRenderer.SetPosition(b + 1, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
-                lineRenderer.SetPosition(b + 2, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
-                lineRenderer.SetPosition(b + 5, new Vector3(0, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                // Only keeping necessary positions
+                lineRenderer.SetPosition(b,
+                    new Vector3(0, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 1,
+                    new Vector3(0, 0, SpawnObjects.instance.PositionFromBeat(i + beat + 1 - repeat / 2) * editorScale));
+
+                BeatNumbers.instance.SpawnNumber(i + beat - repeat / 2);
             }
             else if (i + beat - repeat / 2 < 0)
             {
-                lineRenderer.SetPosition(0, new Vector3(-laneIndex, 0, 0));
+                lineRenderer.SetPosition(0, new Vector3(0, 0, 0));
             }
-            //else if (i + beat + repeat / 2 > max + repeat)
-            //{
-            //    lineRenderer.SetPosition(0, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(max) * editorScale));
-            //}
         }
 
-        lineRenderer.positionCount = lineRenderer.positionCount + 1;
-        lineRenderer.SetPosition(lineRenderer.positionCount - 1, new Vector3(laneIndex, 0, lineRenderer.GetPosition(0).z));
+        BeatNumbers.instance.SpawnNumber(beat - repeat / 2 + 1);
 
+        lineRenderer.positionCount = lineRenderer.positionCount + 1;
+        lineRenderer.SetPosition(lineRenderer.positionCount - 1, new Vector3(0, 0, lineRenderer.GetPosition(0).z));
     }
 
-    public void DrawBeatsFromScratch(float fbeat, float precision, LineRenderer lineRenderer, LineRenderer lineRendererPrecision, float laneIndex)
+    public void DrawBeatsFromScratch(float fbeat, float precision, LineRenderer lineRenderer,
+        LineRenderer lineRendererPrecision, float laneIndex)
     {
-        if (lineRenderer.gameObject.name.ToLower() == "xue")
+        if (lineRenderer.transform.parent.gameObject.name.ToLower() == "xue")
         {
-            DrawXue(fbeat, precision, lineRenderer, lineRendererPrecision, laneIndex);
+            //DrawXue(fbeat, precision, lineRenderer, lineRendererPrecision, laneIndex);
             return;
         }
 
@@ -95,8 +108,10 @@ public class DrawLines : MonoBehaviour
         float editorScale = SpawnObjects.instance.editorScale;
         lineRenderer.positionCount = 0;
 
-        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) - fbeat;
-        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) - fbeat;
+        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) -
+                      fbeat;
+        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) -
+                    fbeat;
         int repeat = Mathf.CeilToInt(end - start);
 
         int max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
@@ -115,10 +130,18 @@ public class DrawLines : MonoBehaviour
             lineRenderer.positionCount = lineRenderer.positionCount + 4;
             if (i + beat - repeat / 2 >= 0) // && i + beat + repeat / 2 < max + repeat + 3
             {
-                lineRenderer.SetPosition(b, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
-                lineRenderer.SetPosition(b + 1, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
-                lineRenderer.SetPosition(b + 2, new Vector3(-laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat + 1 - repeat / 2) * editorScale));
-                lineRenderer.SetPosition(b + 3, new Vector3(laneIndex, 0, SpawnObjects.instance.PositionFromBeat(i + beat + 1 - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b,
+                    new Vector3(laneIndex, 0,
+                        SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 1,
+                    new Vector3(-laneIndex, 0,
+                        SpawnObjects.instance.PositionFromBeat(i + beat - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 2,
+                    new Vector3(-laneIndex, 0,
+                        SpawnObjects.instance.PositionFromBeat(i + beat + 1 - repeat / 2) * editorScale));
+                lineRenderer.SetPosition(b + 3,
+                    new Vector3(laneIndex, 0,
+                        SpawnObjects.instance.PositionFromBeat(i + beat + 1 - repeat / 2) * editorScale));
 
                 BeatNumbers.instance.SpawnNumber(i + beat - repeat / 2);
             }
@@ -135,7 +158,8 @@ public class DrawLines : MonoBehaviour
         BeatNumbers.instance.SpawnNumber(beat - repeat / 2 + 1);
 
         lineRenderer.positionCount = lineRenderer.positionCount + 1;
-        lineRenderer.SetPosition(lineRenderer.positionCount - 1, new Vector3(laneIndex, 0, lineRenderer.GetPosition(0).z));
+        lineRenderer.SetPosition(lineRenderer.positionCount - 1,
+            new Vector3(laneIndex, 0, lineRenderer.GetPosition(0).z));
 
         //FixPositions();
     }
@@ -147,8 +171,10 @@ public class DrawLines : MonoBehaviour
         float editorScale = SpawnObjects.instance.editorScale;
         lineRendererPrecision.positionCount = 0;
 
-        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) - fbeat;
-        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) - fbeat;
+        float start = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) - distance) -
+                      fbeat;
+        float end = SpawnObjects.instance.BeatFromPosition(SpawnObjects.instance.PositionFromBeat(fbeat) + distance) -
+                    fbeat;
         int repeat = Mathf.CeilToInt(end - start);
         int beat = Mathf.CeilToInt(fbeat);
 
@@ -176,25 +202,32 @@ public class DrawLines : MonoBehaviour
 
         lineRendererPrecision.positionCount = lineRendererPrecision.positionCount + 2;
 
-        lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 2, new Vector3(0, 0, lineRendererPrecision.GetPosition(b + 3).z));
-        lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 1, new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
+        lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 2,
+            new Vector3(0, 0, lineRendererPrecision.GetPosition(b + 3).z));
+        lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 1,
+            new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
 
         for (int i = 0; i < laneIndex * 2; i++)
         {
             lineRendererPrecision.positionCount = lineRendererPrecision.positionCount + 3;
 
-            lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 3, new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(0).z));
-            lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 2, new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
+            lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 3,
+                new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(0).z));
+            lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 2,
+                new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
             edited++;
-            lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 1, new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
+            lineRendererPrecision.SetPosition(lineRendererPrecision.positionCount - 1,
+                new Vector3(laneIndex - edited, 0, lineRendererPrecision.GetPosition(b + 3).z));
         }
     }
 
     public void FixPositions()
     {
-
         float lowerBound = 0;
-        float upperBound = SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length)) * SpawnObjects.instance.editorScale;
+        float upperBound =
+            SpawnObjects.instance.PositionFromBeat(
+                SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length)) *
+            SpawnObjects.instance.editorScale;
 
         foreach (var item in lines)
         {

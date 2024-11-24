@@ -35,7 +35,9 @@ public class Placement : MonoBehaviour
     public List<GameObject> Lines;
     public GameObject spectro;
     public GameObject spectroLine;
-        
+    
+    public bool allowDoubleTapping = true;
+
     public bool allowFusedNotePlacement = true;
 
     void Start()
@@ -44,12 +46,15 @@ public class Placement : MonoBehaviour
         allowOutsideOfGrid = Settings.instance.config.mapping.mappingExtensions.allowPlacementOutsideOfGrid;
         gridYPos = Settings.instance.config.mapping.mappingExtensions.gridYPos;
         MEprecision = Settings.instance.config.mapping.mappingExtensions.precision;
-        MEgridSize = new Vector2Int(Settings.instance.config.mapping.mappingExtensions.gridWidth, Settings.instance.config.mapping.mappingExtensions.gridHeight);
+        MEgridSize = new Vector2Int(Settings.instance.config.mapping.mappingExtensions.gridWidth,
+            Settings.instance.config.mapping.mappingExtensions.gridHeight);
 
         input.text = ReadMapInfo.instance.info._beatsPerMinute.ToString();
         invertControls = Settings.instance.config.controls.invertNoteAngle;
         invertWallScroll = Settings.instance.config.controls.invertWallScroll;
 
+        allowDoubleTapping = Settings.instance.config.mapping.allowDoubleTapping;
+        
         instance = this;
         foreach (GameObject item in objects)
         {
@@ -103,10 +108,12 @@ public class Placement : MonoBehaviour
 
     void Update()
     {
-        if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu)
+        if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting && !DrawInEditor.instance.drawing &&
+            !Menu.instance.open && !Bookmarks.instance.openMenu)
         {
             bufferTimeRunning -= Time.deltaTime;
-            if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl)) Place();
+            if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) &&
+                !Input.GetKey(KeyCode.LeftControl)) Place();
             if (Input.GetMouseButtonDown(2)) SwitchNoteType();
 
             if (placementIndex == 0) left = true;
@@ -157,6 +164,64 @@ public class Placement : MonoBehaviour
         placementIndex = index;
     }
 
+    private int previousDirection = 1;
+    private float timeSinceLastKeyPress;
+
+    private void DoubleTapToPlace(Vector2 pos, GameObject preview)
+    {
+        if (timeSinceLastKeyPress > 0.4f)
+        {
+            return;
+        }
+
+        if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A) && previousDirection == 7)
+        {
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.A))
+            {
+                PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+            }
+        }
+        else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D) && previousDirection == 6)
+        {
+            if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.D))
+            {
+                PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+            }
+        }
+        else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A) && previousDirection == 5)
+        {
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.A))
+            {
+                PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+            }
+        }
+        else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D) && previousDirection == 4)
+        {
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.D))
+            {
+                PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+            }
+        }
+        else if (Input.GetKeyDown(KeyCode.S) && previousDirection == 0)
+        {
+            PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+        }
+        else if (Input.GetKeyDown(KeyCode.D) && previousDirection == 2)
+        {
+            PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+        }
+        else if (Input.GetKeyDown(KeyCode.A) && previousDirection == 3)
+        {
+            PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+        }
+        else if (Input.GetKeyDown(KeyCode.W) && previousDirection == 1)
+        {
+            PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
+        }
+    }
+    
+    private bool skipNextTurn = false;
+    
     void Place()
     {
         Vector3 mousePosition = Input.mousePosition;
@@ -216,22 +281,28 @@ public class Placement : MonoBehaviour
                         Mathf.Round((hit.point.y) * MEprecision) / MEprecision,
                         0
                     );
-                else pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+                else
+                    pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f,
+                        Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
 
                 preview.transform.localPosition = pos;
 
                 Vector2 direction = new Vector2();
-                float angle = 0;
+                float angle;
 
-                if (!invertControls) direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+                if (!invertControls)
+                    direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
                 else direction = new Vector2(-Input.GetAxisRaw("Horizontal"), -Input.GetAxisRaw("Vertical"));
+
 
                 if (direction != new Vector2() && bufferTimeRunning <= 0)
                 {
                     dot = false;
                     angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90;
-                    objectParent.transform.GetChild(0).transform.eulerAngles = new Vector3(preview.transform.eulerAngles.x, preview.transform.eulerAngles.y, angle);
-                    objectParent.transform.GetChild(1).transform.eulerAngles = new Vector3(preview.transform.eulerAngles.x, preview.transform.eulerAngles.y, angle);
+                    objectParent.transform.GetChild(0).transform.eulerAngles =
+                        new Vector3(preview.transform.eulerAngles.x, preview.transform.eulerAngles.y, angle);
+                    objectParent.transform.GetChild(1).transform.eulerAngles =
+                        new Vector3(preview.transform.eulerAngles.x, preview.transform.eulerAngles.y, angle);
                 }
 
                 if (direction.x != 0 && direction.y != 0)
@@ -259,7 +330,30 @@ public class Placement : MonoBehaviour
                 int cd = 8;
                 if (!dot) cd = Rotation((int)preview.transform.eulerAngles.z);
 
-                if (Input.GetMouseButtonDown(0)) PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, cd);
+                if (allowDoubleTapping)
+                {
+                    DoubleTapToPlace(pos, preview);
+                }
+
+                if (direction == Vector2.zero)
+                {
+                    timeSinceLastKeyPress += Time.deltaTime;
+                }
+                else
+                {
+                    timeSinceLastKeyPress = 0;
+                }
+                
+                if (Input.GetMouseButtonDown(0))
+                    PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, cd);
+
+                if (!skipNextTurn)
+                {
+                    previousDirection = cd;
+                }
+
+                skipNextTurn = cd is 4 or 5 or 6 or 7;
+
             }
             else if (placementIndex == 2)
             {
@@ -271,7 +365,9 @@ public class Placement : MonoBehaviour
                         Mathf.Round((hit.point.y) * MEprecision) / MEprecision,
                         0
                     );
-                else pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+                else
+                    pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f,
+                        Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
 
                 preview.transform.localPosition = pos;
 
@@ -288,7 +384,8 @@ public class Placement : MonoBehaviour
                 }
                 else if (!isPlacingWall)
                 {
-                    preview.transform.localPosition = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, 2.25f, 0);
+                    preview.transform.localPosition =
+                        new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, 2.25f, 0);
                     preview.transform.localScale = new Vector3(1, 4.5f, 0.125f);
                 }
 
@@ -308,11 +405,14 @@ public class Placement : MonoBehaviour
             GameObject preview = objectParent.transform.GetChild(5).gameObject;
             preview.SetActive(true);
 
-            Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+            Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f,
+                Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
 
             preview.transform.localPosition = pos;
 
-            if (Input.GetMouseButtonDown(0)) PlaceTiming(SpawnObjects.instance.currentBeat, Mathf.FloorToInt(pos.x - Lines[1].transform.position.x + 3));
+            if (Input.GetMouseButtonDown(0))
+                PlaceTiming(SpawnObjects.instance.currentBeat,
+                    Mathf.FloorToInt(pos.x - Lines[1].transform.position.x + 3));
         }
         else if (bpmGridFound)
         {
@@ -324,7 +424,8 @@ public class Placement : MonoBehaviour
             GameObject preview = objectParent.transform.GetChild(4).gameObject;
             preview.SetActive(true);
             preview.transform.GetChild(0).GetComponent<TextMeshPro>().text = input.text;
-            preview.transform.localPosition = new Vector3(SpawnObjects.instance.BpmChangeSpawm.transform.position.x - 2f, 0.5f, 0);
+            preview.transform.localPosition =
+                new Vector3(SpawnObjects.instance.BpmChangeSpawm.transform.position.x - 2f, 0.5f, 0);
 
             if (Input.GetMouseButtonDown(0)) PlaceBpmChange(SpawnObjects.instance.currentBeat, float.Parse(input.text));
         }
@@ -352,7 +453,8 @@ public class Placement : MonoBehaviour
         RaycastHit[] hits = Physics.RaycastAll(ray);
 
         // Initialize lists for storing closest distances and corresponding game objects
-        List<float> closest = new List<float> { Mathf.Infinity, Mathf.Infinity, Mathf.Infinity, Mathf.Infinity, Mathf.Infinity };
+        List<float> closest = new List<float>
+            { Mathf.Infinity, Mathf.Infinity, Mathf.Infinity, Mathf.Infinity, Mathf.Infinity };
         List<GameObject> closestObj = new List<GameObject> { null, null, null, null, null };
 
         // Find the closest object for each type
@@ -408,46 +510,48 @@ public class Placement : MonoBehaviour
                 colorNotes note = closestType.GetComponent<NoteData>().note;
                 List<colorNotes> itemsToRemove = new List<colorNotes>();
 
-                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(note.b)], Mathf.FloorToInt(note.b), false);
+                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(note.b)],
+                    Mathf.FloorToInt(note.b), false);
                 LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Remove(note);
-
             }
             else if (closestType.CompareTag("Bomb"))
             {
                 bombNotes bomb = closestType.GetComponent<BombData>().bomb;
                 List<bombNotes> itemsToRemove = new List<bombNotes>();
 
-                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)], Mathf.FloorToInt(bomb.b), false);
+                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)],
+                    Mathf.FloorToInt(bomb.b), false);
                 LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Remove(bomb);
-
             }
             else if (closestType.CompareTag("Timing"))
             {
                 timings timing = closestType.GetComponent<TimingData>().timings;
                 List<bombNotes> itemsToRemove = new List<bombNotes>();
 
-                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(timing.b)], Mathf.FloorToInt(timing.b), false);
+                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(timing.b)],
+                    Mathf.FloorToInt(timing.b), false);
                 LoadMap.instance.beats[Mathf.FloorToInt(timing.b)].timings.Remove(timing);
-
             }
             else if (closestType.CompareTag("Obstacle"))
             {
                 obstacles obstacle = closestType.GetComponent<ObstacleData>().obstacle;
                 List<obstacles> itemsToRemove = new List<obstacles>();
 
-                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)], Mathf.FloorToInt(obstacle.b), false);
+                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)],
+                    Mathf.FloorToInt(obstacle.b), false);
                 LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)].obstacles.Remove(obstacle);
-
             }
             else if (closestType.CompareTag("BpmEvent"))
             {
                 bpmEvents bpmEvents = closestType.GetComponent<BpmEventData>().bpmEvent;
                 List<bpmEvents> itemsToRemove = new List<bpmEvents>();
 
-                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bpmEvents.b)], Mathf.FloorToInt(bpmEvents.b), false);
+                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bpmEvents.b)],
+                    Mathf.FloorToInt(bpmEvents.b), false);
                 LoadMap.instance.beats[Mathf.FloorToInt(bpmEvents.b)].bpmEvents.Remove(bpmEvents);
                 LoadMap.instance.bpmEvents.Remove(bpmEvents);
             }
+
             // Reload objects after deletion
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
         }
@@ -477,7 +581,8 @@ public class Placement : MonoBehaviour
                 if (hitObject.CompareTag("Obstacle"))
                 {
                     obstacles item = hitObject.GetComponent<ObstacleData>().obstacle;
-                    obstacles obstacle = LoadMap.instance.beats[Mathf.FloorToInt(item.b)].obstacles.Find(n => n.Equals(item));
+                    obstacles obstacle = LoadMap.instance.beats[Mathf.FloorToInt(item.b)].obstacles
+                        .Find(n => n.Equals(item));
                     int a = invertWallScroll ? -1 : 1;
 
                     if (Input.mouseScrollDelta.y > 0) obstacle.d += SpawnObjects.instance.precision * a;
@@ -509,8 +614,10 @@ public class Placement : MonoBehaviour
                 // If a closest hit was found, cache the note
                 if (closestDistance < float.MaxValue)
                 {
-                    if (closestHit.collider.gameObject.GetComponent<NoteData>()) altNoteMoveCache = closestHit.collider.gameObject.GetComponent<NoteData>().note;
-                    if (closestHit.collider.gameObject.GetComponent<BombData>()) altBombMoveCache = closestHit.collider.gameObject.GetComponent<BombData>().bomb;
+                    if (closestHit.collider.gameObject.GetComponent<NoteData>())
+                        altNoteMoveCache = closestHit.collider.gameObject.GetComponent<NoteData>().note;
+                    if (closestHit.collider.gameObject.GetComponent<BombData>())
+                        altBombMoveCache = closestHit.collider.gameObject.GetComponent<BombData>().bomb;
                 }
             }
 
@@ -531,7 +638,8 @@ public class Placement : MonoBehaviour
                                 colorNotes note = altNoteMoveCache;
                                 LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Remove(note);
 
-                                Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+                                Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f,
+                                    Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
                                 note.b = SpawnObjects.instance.currentBeat;
                                 note.x = Mathf.FloorToInt(pos.x + 2);
                                 note.y = Mathf.FloorToInt(pos.y);
@@ -539,8 +647,12 @@ public class Placement : MonoBehaviour
                                 Vector2 direction = new Vector2();
                                 float angle = 0;
 
-                                if (!invertControls) direction = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-                                else direction = new Vector2(-Input.GetAxisRaw("Horizontal"), -Input.GetAxisRaw("Vertical"));
+                                if (!invertControls)
+                                    direction = new Vector2(Input.GetAxisRaw("Horizontal"),
+                                        Input.GetAxisRaw("Vertical"));
+                                else
+                                    direction = new Vector2(-Input.GetAxisRaw("Horizontal"),
+                                        -Input.GetAxisRaw("Vertical"));
 
                                 if (direction != new Vector2() && bufferTimeRunning <= 0)
                                 {
@@ -565,7 +677,8 @@ public class Placement : MonoBehaviour
 
                                 LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
 
-                                SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                                SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true,
+                                    true);
                                 SpawnObjects.instance.LoadWallsBackwards();
                             }
                             else if (altBombMoveCache != null)
@@ -573,14 +686,16 @@ public class Placement : MonoBehaviour
                                 bombNotes bomb = altBombMoveCache;
                                 LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Remove(bomb);
 
-                                Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
+                                Vector3 pos = new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f,
+                                    Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, 0);
                                 bomb.b = SpawnObjects.instance.currentBeat;
                                 bomb.x = Mathf.FloorToInt(pos.x + 2);
                                 bomb.y = Mathf.FloorToInt(pos.y);
 
                                 LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Add(bomb);
 
-                                SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+                                SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true,
+                                    true);
                                 SpawnObjects.instance.LoadWallsBackwards();
                             }
                         }
@@ -596,7 +711,6 @@ public class Placement : MonoBehaviour
         if (angle < 0) angle += 360;
         return angle;
     }
-
 
 
     void SwitchNoteType()
@@ -653,18 +767,22 @@ public class Placement : MonoBehaviour
             note.x = Mathf.FloorToInt(x + 2);
             note.y = Mathf.FloorToInt(y);
         }
+
         note.c = c;
         note.d = d;
 
 
-        if (KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) || allowFusedNotePlacement)
+        if (KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) ||
+            allowFusedNotePlacement)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b),
+                false);
             LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes.Add(note);
         }
         else
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b), false);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(b)], Mathf.FloorToInt(note.b),
+                false);
 
             // Collect items to be removed in a separate list
             var itemsToRemove = new List<colorNotes>();
@@ -725,7 +843,8 @@ public class Placement : MonoBehaviour
             bomb.y = Mathf.FloorToInt(y);
         }
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) &&
+            !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].bombNotes)
             {
@@ -739,7 +858,8 @@ public class Placement : MonoBehaviour
 
         if (!stackedCheck)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)], Mathf.FloorToInt(bomb.b), false);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)],
+                Mathf.FloorToInt(bomb.b), false);
             LoadMap.instance.beats[Mathf.FloorToInt(b)].bombNotes.Add(bomb);
         }
 
@@ -754,7 +874,8 @@ public class Placement : MonoBehaviour
         timing.b = b;
         timing.t = t;
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) &&
+            !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].timings)
             {
@@ -768,7 +889,8 @@ public class Placement : MonoBehaviour
 
         if (!stackedCheck)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(timing.b)], Mathf.FloorToInt(timing.b), false);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(timing.b)],
+                Mathf.FloorToInt(timing.b), false);
             LoadMap.instance.beats[Mathf.FloorToInt(b)].timings.Add(timing);
         }
 
@@ -783,7 +905,8 @@ public class Placement : MonoBehaviour
         bpmEvent.b = b;
         bpmEvent.m = m;
 
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) && !allowFusedNotePlacement)
+        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) &&
+            !allowFusedNotePlacement)
         {
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents)
             {
@@ -797,7 +920,8 @@ public class Placement : MonoBehaviour
 
         if (!stackedCheck)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bpmEvent.b)], Mathf.FloorToInt(bpmEvent.b), false);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bpmEvent.b)],
+                Mathf.FloorToInt(bpmEvent.b), false);
             LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents.Add(bpmEvent);
             LoadMap.instance.bpmEvents.Add(bpmEvent);
             LoadMap.instance.bpmEvents = LoadMap.instance.bpmEvents.OrderBy(x => x.b).ToList();
@@ -833,7 +957,10 @@ public class Placement : MonoBehaviour
 
         if (gridFound)
         {
-            Vector3 startPos = new Vector3(Mathf.RoundToInt(hit.point.x - 0.5f) + 0.5f, Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f, SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
+            Vector3 startPos = new Vector3(Mathf.RoundToInt(hit.point.x - 0.5f) + 0.5f,
+                Mathf.RoundToInt(hit.point.y - 0.5f) + 0.5f,
+                SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) *
+                SpawnObjects.instance.editorScale);
             Vector3 endPos = new Vector3();
 
             bool click = false;
@@ -863,7 +990,10 @@ public class Placement : MonoBehaviour
 
                 if (gridFound2 == true)
                 {
-                    endPos = new Vector3(Mathf.RoundToInt(hit2.point.x - 0.5f) + 0.5f, Mathf.RoundToInt(hit2.point.y - 0.5f) + 0.5f, SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
+                    endPos = new Vector3(Mathf.RoundToInt(hit2.point.x - 0.5f) + 0.5f,
+                        Mathf.RoundToInt(hit2.point.y - 0.5f) + 0.5f,
+                        SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) *
+                        SpawnObjects.instance.editorScale);
 
                     if (Input.GetMouseButtonUp(0)) clickCheck = true;
                     if (Input.GetMouseButtonDown(0) && clickCheck == true) click = true;
@@ -873,15 +1003,24 @@ public class Placement : MonoBehaviour
 
                     if (hit2.point.y < 1.49f)
                     {
-                        preview.transform.position = new Vector3(startPos.x + (endPos.x - startPos.x) / 2, 2f, startPos.z + (endPos.z - startPos.z) / 2 - SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
-                        preview.transform.localScale = new Vector3(endPos.x - startPos.x + positive, 5f, endPos.z - startPos.z);
+                        preview.transform.position = new Vector3(startPos.x + (endPos.x - startPos.x) / 2, 2f,
+                            startPos.z + (endPos.z - startPos.z) / 2 -
+                            SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) *
+                            SpawnObjects.instance.editorScale);
+                        preview.transform.localScale =
+                            new Vector3(endPos.x - startPos.x + positive, 5f, endPos.z - startPos.z);
                     }
                     else
                     {
-                        preview.transform.position = new Vector3(startPos.x + (endPos.x - startPos.x) / 2, 3, startPos.z + (endPos.z - startPos.z) / 2 - SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) * SpawnObjects.instance.editorScale);
-                        preview.transform.localScale = new Vector3(endPos.x - startPos.x + positive, 3, endPos.z - startPos.z);
+                        preview.transform.position = new Vector3(startPos.x + (endPos.x - startPos.x) / 2, 3,
+                            startPos.z + (endPos.z - startPos.z) / 2 -
+                            SpawnObjects.instance.PositionFromBeat(SpawnObjects.instance.currentBeat) *
+                            SpawnObjects.instance.editorScale);
+                        preview.transform.localScale =
+                            new Vector3(endPos.x - startPos.x + positive, 3, endPos.z - startPos.z);
                     }
                 }
+
                 yield return null;
             }
 
@@ -908,7 +1047,8 @@ public class Placement : MonoBehaviour
 
             if (!stackedCheck)
             {
-                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(wall.b)], Mathf.FloorToInt(wall.b), false);
+                UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(wall.b)],
+                    Mathf.FloorToInt(wall.b), false);
                 LoadMap.instance.beats[Mathf.FloorToInt(beat)].obstacles.Add(wall);
             }
         }

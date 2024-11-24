@@ -109,6 +109,7 @@ public class Bookmarks : MonoBehaviour
     private void CreateAndPlaceBookmark(bookmarks bookmark)
     {
         var newBookmark = Instantiate(bookmarkPrefab, parent);
+        newBookmark.gameObject.name = $"Bookmark {bookmark.n}";
         newBookmark.GetComponent<BookmarkData>().bookmark = bookmark;
         AddEventTrigger(newBookmark);
         SetBookmarkColor(newBookmark, FloatToColor(bookmark.c));
