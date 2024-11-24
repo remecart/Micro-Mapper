@@ -1182,7 +1182,7 @@ MonoBehaviour:
         - m_Target: {fileID: 1093831945}
           m_TargetAssemblyTypeName: LoadMap, Assembly-CSharp
           m_MethodName: Save
-          m_Mode: 1
+          m_Mode: 6
           m_Arguments:
             m_ObjectArgument: {fileID: 0}
             m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -2194,6 +2194,7 @@ MonoBehaviour:
   - {fileID: 370551683}
   spectro: {fileID: 199330393}
   spectroLine: {fileID: 470190245}
+  allowDoubleTapping: 1
   allowFusedNotePlacement: 0
   input: {fileID: 854905464}
 --- !u!114 &229227520
@@ -5431,6 +5432,7 @@ MonoBehaviour:
       songSpeed: 10
       noteDistance: 6
       selection: 0
+      allowDoubleTapping: 0
       colorSettings:
         leftNote: {x: 0.65, y: 0, z: 0, w: 0}
         leftNoteArrow: {x: 1, y: 1, z: 1, w: 0}
@@ -9822,8 +9824,8 @@ MonoBehaviour:
     _noteJumpStartBeatOffset: 0
     _beatmapColorSchemeIdx: 0
     _environmentNameIdx: 0
-  folderPath: A:\BS Version Archive\BSManager\BSInstances\1.29.1\Beat Saber_Data\CustomWIPLevels\I
-    don't wna cry
+  folderPath: C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\CustomWIPLevels\_7_
+    Altars of Apostasy - ultrakill
   loadmap: {fileID: 1093831945}
   jumpDistance: 0
   jumpDuration: 0
