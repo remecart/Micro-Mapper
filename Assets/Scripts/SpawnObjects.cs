@@ -9,6 +9,15 @@ using System;
 
 public class SpawnObjects : MonoBehaviour
 {
+    private (int,int)[] precisionArray = new []
+    {
+        (1, 1),
+        (1, 2)
+    };
+
+    private int currentIndex = 0;
+    
+    
     public static SpawnObjects instance;
     public float currentBeat;
     public float precision;
@@ -39,7 +48,9 @@ public class SpawnObjects : MonoBehaviour
         if (!playing)
         {
             LoadWallsBackwards();
-            currentBeat = Mathf.RoundToInt(slider.value * Mathf.RoundToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
+            currentBeat = Mathf.RoundToInt(slider.value *
+                                           Mathf.RoundToInt(
+                                               BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
             LoadObjectsFromScratch(currentBeat, true, true);
             DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
         }
@@ -79,7 +90,21 @@ public class SpawnObjects : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        gameObject.transform.parent.parent.transform.position = new Vector3(0, 0, PositionFromBeat(currentBeat) * -editorScale);
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            currentIndex++;
+            if (currentIndex >= precisionArray.Length)
+            {
+                currentIndex = 0;
+            }
+            numberator.text = precisionArray[currentIndex].Item1.ToString();
+            denominator.text = precisionArray[currentIndex].Item2.ToString();
+            
+            ChangePrecision();
+        }
+        
+        gameObject.transform.parent.parent.transform.position =
+            new Vector3(0, 0, PositionFromBeat(currentBeat) * -editorScale);
         editorScale = Settings.instance.config.mapping.editorScale;
         currentBeatText.text = (Mathf.FloorToInt(currentBeat / precision) * precision).ToString();
 
@@ -93,6 +118,7 @@ public class SpawnObjects : MonoBehaviour
             currentBeat = BeatFromRealTime(length);
             ReloadMap.instance.ReloadEverything();
         }
+
         if (playing)
         {
             if (currentBeat > currentBeatPlay + 1)
@@ -117,21 +143,25 @@ public class SpawnObjects : MonoBehaviour
                 {
                     prec = Mathf.RoundToInt(prec * 2);
                     denominator.text = prec.ToString();
+                    precisionArray[currentIndex] = (int.Parse(numberator.text), prec);
                     ChangePrecision();
                 }
             }
+
             if (Input.mouseScrollDelta.y * a < 0)
             {
                 if (Mathf.RoundToInt(prec / 2) >= 1)
                 {
                     prec = Mathf.RoundToInt(prec / 2);
                     denominator.text = prec.ToString();
+                    precisionArray[currentIndex] = (int.Parse(numberator.text), prec);
                     ChangePrecision();
                 }
             }
         }
 
-        if (Input.mouseScrollDelta.y != 0 && !playing && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl))
+        if (Input.mouseScrollDelta.y != 0 && !playing && !Input.GetKey(KeyCode.LeftShift) &&
+            !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl))
         {
             float scroll = Input.mouseScrollDelta.y;
             int a = invertTimelineScroll ? -1 : 1;
@@ -157,7 +187,8 @@ public class SpawnObjects : MonoBehaviour
             DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
         }
 
-        spawnOffset = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000) - BeatFromRealTime(GetRealTimeFromBeat(currentBeat));
+        spawnOffset = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000) -
+                      BeatFromRealTime(GetRealTimeFromBeat(currentBeat));
 
         if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepForward))
         {
@@ -166,7 +197,8 @@ public class SpawnObjects : MonoBehaviour
             DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
             Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
             timeSlider.onValueChanged = new Slider.SliderEvent();
-            timeSlider.value = currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+            timeSlider.value =
+                currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
             timeSlider.onValueChanged = sliderEvent;
         }
 
@@ -177,12 +209,13 @@ public class SpawnObjects : MonoBehaviour
             DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
             Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
             timeSlider.onValueChanged = new Slider.SliderEvent();
-            timeSlider.value = currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+            timeSlider.value =
+                currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
             timeSlider.onValueChanged = sliderEvent;
             LoadWallsBackwards();
         }
 
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap))
+        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) && !Input.GetMouseButton((int)MouseButton.Right))
         {
             if (!playing)
             {
@@ -244,12 +277,11 @@ public class SpawnObjects : MonoBehaviour
         }
 
         if (GetRealTimeFromBeat(currentBeat) >= length) playing = false;
-
-
     }
+
     public void LoadWallsBackwards()
     {
-        float check = 400;
+        float check = 256;
 
         foreach (Transform child in content.transform)
         {
@@ -259,9 +291,10 @@ public class SpawnObjects : MonoBehaviour
 
         for (int i = 0; i < check; i++)
         {
-            if (Mathf.FloorToInt(currentBeat - i + 200) >= 0)
+            if (Mathf.FloorToInt(currentBeat - i) >= 0)
             {
-                List<obstacles> obstacles = LoadMap.instance.beats[Mathf.FloorToInt(currentBeat - i + 200 + Mathf.CeilToInt(spawnOffset))].obstacles;
+                List<obstacles> obstacles = LoadMap.instance
+                    .beats[Mathf.FloorToInt(currentBeat - i  + Mathf.CeilToInt(spawnOffset))].obstacles;
 
                 foreach (var obstacleData in obstacles)
                 {
@@ -272,8 +305,7 @@ public class SpawnObjects : MonoBehaviour
                     // If the duration is negative, swap the start and end
                     if (obstacleData.d < 0)
                     {
-                        obstacleStart = obstacleEnd;
-                        obstacleEnd = obstacleData.b;
+                        (obstacleStart, obstacleEnd) = (obstacleEnd, obstacleStart);
                     }
 
                     // Ensure that both obstacles will appear at the same time if they overlap
@@ -298,10 +330,9 @@ public class SpawnObjects : MonoBehaviour
                 }
             }
         }
+
         SelectObjects.instance.HighlightSelectedObject();
     }
-
-
 
 
     public void LoadObjectsFromScratch(float fbeat, bool resetGridPos, bool fromScratch)
@@ -328,7 +359,8 @@ public class SpawnObjects : MonoBehaviour
                 }
 
                 float obstacleCenter = (obstacleStart + obstacleEnd) / 2f;
-                float obstaclePositionZ = PositionFromBeat(currentBeat - spawnOffset + 5 - obstacleCenter) * editorScale;
+                float obstaclePositionZ =
+                    PositionFromBeat(currentBeat - spawnOffset + 5 - obstacleCenter) * editorScale;
 
                 if (child.transform.localPosition.z < obstaclePositionZ)
                 {
@@ -384,7 +416,8 @@ public class SpawnObjects : MonoBehaviour
                         obstacleEnd = temp;
                     }
 
-                    if (child.transform.localPosition.z < PositionFromBeat(currentBeat - 12 - obstacleEnd) * editorScale)
+                    if (child.transform.localPosition.z <
+                        PositionFromBeat(currentBeat - 12 - obstacleEnd) * editorScale)
                     {
                         Destroy(child.gameObject);
                     }
@@ -432,7 +465,8 @@ public class SpawnObjects : MonoBehaviour
                     {
                         foreach (Transform child in content)
                         {
-                            Vector3 cache = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
+                            Vector3 cache = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y),
+                                PositionFromBeat(noteData.b) * editorScale);
                             if (child.transform.localPosition == cache)
                                 newObject = false;
                         }
@@ -443,7 +477,8 @@ public class SpawnObjects : MonoBehaviour
                         GameObject note = Instantiate(objects[noteData.c]);
                         note.name = "NOTE_" + noteData.c + ": b=" + noteData.b;
                         note.transform.SetParent(content);
-                        note.transform.localPosition = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y), PositionFromBeat(noteData.b) * editorScale);
+                        note.transform.localPosition = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y),
+                            PositionFromBeat(noteData.b) * editorScale);
                         note.GetComponent<NoteData>().note = noteData;
                         if (noteData.d != 8)
                         {
@@ -452,7 +487,6 @@ public class SpawnObjects : MonoBehaviour
                         }
                         else note.transform.GetChild(0).gameObject.SetActive(false);
                     }
-
                 }
 
                 // Load Bomb Objects
@@ -465,7 +499,8 @@ public class SpawnObjects : MonoBehaviour
                     {
                         foreach (Transform child in content)
                         {
-                            Vector3 cache = new Vector3(bombData.x, bombData.y, PositionFromBeat(bombData.b) * editorScale);
+                            Vector3 cache = new Vector3(bombData.x, bombData.y,
+                                PositionFromBeat(bombData.b) * editorScale);
                             if (child.transform.localPosition == cache)
                                 newObject = false;
                         }
@@ -475,7 +510,8 @@ public class SpawnObjects : MonoBehaviour
                     {
                         GameObject bomb = Instantiate(objects[2]);
                         bomb.transform.SetParent(content);
-                        bomb.transform.localPosition = new Vector3(bombData.x, bombData.y, PositionFromBeat(bombData.b) * editorScale);
+                        bomb.transform.localPosition = new Vector3(bombData.x, bombData.y,
+                            PositionFromBeat(bombData.b) * editorScale);
                         bomb.GetComponent<BombData>().bomb = bombData;
                     }
                 }
@@ -490,7 +526,8 @@ public class SpawnObjects : MonoBehaviour
                     {
                         foreach (Transform child in content)
                         {
-                            Vector3 cache = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0, PositionFromBeat(timingData.b) * editorScale);
+                            Vector3 cache = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0,
+                                PositionFromBeat(timingData.b) * editorScale);
                             if (child.transform.localPosition == cache)
                                 newObject = false;
                         }
@@ -500,7 +537,8 @@ public class SpawnObjects : MonoBehaviour
                     {
                         GameObject timing = Instantiate(objects[5]);
                         timing.transform.SetParent(content);
-                        timing.transform.localPosition = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0, PositionFromBeat(timingData.b) * editorScale);
+                        timing.transform.localPosition = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0,
+                            PositionFromBeat(timingData.b) * editorScale);
                         timing.GetComponent<TimingData>().timings = timingData;
                     }
                 }
@@ -514,8 +552,12 @@ public class SpawnObjects : MonoBehaviour
                     {
                         foreach (Transform child in content)
                         {
-                            var scaleZ = (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) * editorScale;
-                            Vector3 cache = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
+                            var scaleZ =
+                                (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) *
+                                editorScale;
+                            Vector3 cache = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f,
+                                obstacleData.y + obstacleData.h / 2 - 0.5f,
+                                PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
                             if (child.transform.localPosition == cache)
                                 newObject = false;
                         }
@@ -523,10 +565,15 @@ public class SpawnObjects : MonoBehaviour
 
                     if (obstacleData.b <= latestBeat && obstacleData.b >= earliestBeat && newObject)
                     {
-                        var scaleZ = (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) * editorScale;
+                        var scaleZ =
+                            (PositionFromBeat(obstacleData.b + obstacleData.d) - PositionFromBeat(obstacleData.b)) *
+                            editorScale;
                         GameObject obstacle = Instantiate(objects[4]);
                         obstacle.transform.SetParent(content);
-                        obstacle.transform.localPosition = new Vector3(obstacleData.x + (float)obstacleData.w / 2 - 0.5f, obstacleData.y + obstacleData.h / 2 - 0.5f, PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
+                        obstacle.transform.localPosition = new Vector3(
+                            obstacleData.x + (float)obstacleData.w / 2 - 0.5f,
+                            obstacleData.y + obstacleData.h / 2 - 0.5f,
+                            PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
                         obstacle.transform.localScale = new Vector3(obstacleData.w, obstacleData.h, scaleZ);
                         obstacle.name = obstacle.name + beat;
                         obstacle.GetComponent<ObstacleData>().obstacle = obstacleData;
@@ -541,12 +588,15 @@ public class SpawnObjects : MonoBehaviour
                     {
                         GameObject bpmChange = Instantiate(objects[3]);
                         bpmChange.transform.SetParent(content);
-                        bpmChange.transform.localPosition = new Vector3(BpmChangeSpawm.position.x -0.5f, 0, PositionFromBeat(bpmChangeData.b) * editorScale);
-                        bpmChange.transform.GetChild(0).gameObject.GetComponent<TextMeshPro>().text = bpmChangeData.m.ToString();
+                        bpmChange.transform.localPosition = new Vector3(BpmChangeSpawm.position.x - 0.5f, 0,
+                            PositionFromBeat(bpmChangeData.b) * editorScale);
+                        bpmChange.transform.GetChild(0).gameObject.GetComponent<TextMeshPro>().text =
+                            bpmChangeData.m.ToString();
                         bpmChange.GetComponent<BpmEventData>().bpmEvent = bpmChangeData;
                     }
                 }
             }
+
             SelectObjects.instance.HighlightSelectedObject();
         }
     }
@@ -644,13 +694,15 @@ public class SpawnObjects : MonoBehaviour
                 return _beat;
             }
         }
+
         return _beat;
     }
 
     public float GetBpmAtBeat(float beat)
     {
         List<bpmEvents> bpms = LoadMap.instance.bpmEvents;
-        float value = ReadMapInfo.instance.info._beatsPerMinute; ;
+        float value = ReadMapInfo.instance.info._beatsPerMinute;
+        ;
 
         for (int i = 0; i < bpms.Count; i++)
         {
@@ -658,8 +710,10 @@ public class SpawnObjects : MonoBehaviour
             {
                 break;
             }
+
             value = bpms[i].m;
         }
+
         return value;
     }
 
