@@ -111,7 +111,7 @@ public class Bookmarks : MonoBehaviour
         var newBookmark = Instantiate(bookmarkPrefab, parent);
         newBookmark.gameObject.name = $"Bookmark {bookmark.n}";
         newBookmark.GetComponent<BookmarkData>().bookmark = bookmark;
-        AddEventTrigger(newBookmark);
+        //AddEventTrigger(newBookmark);
         SetBookmarkColor(newBookmark, FloatToColor(bookmark.c));
         SetBookmarkPosition(newBookmark, bookmark.b);
         bookmarks.Add(newBookmark);

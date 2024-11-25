@@ -385,8 +385,8 @@ public class Placement : MonoBehaviour
                 else if (!isPlacingWall)
                 {
                     preview.transform.localPosition =
-                        new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, 2.25f, 0);
-                    preview.transform.localScale = new Vector3(1, 4.5f, 0.125f);
+                        new Vector3(Mathf.RoundToInt(hit.point.x - 1.5f) - 0.5f, 2f, 0);
+                    preview.transform.localScale = new Vector3(1, 5f, 0.125f);
                 }
 
                 if (Input.GetMouseButtonDown(0))
