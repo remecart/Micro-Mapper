@@ -527,8 +527,26 @@ public class sliders
     public int tc;
     public float tmu;
     public int m;
+    
+    public sliders Copy()
+    {
+        return new sliders
+        {
+            b = this.b,
+            c = this.c,
+            x = this.x,
+            y = this.y,
+            d = this.d,
+            mu = this.mu,
+            tb = this.tb,
+            tx = this.tx,
+            ty = this.ty,
+            tc = this.tc,
+            tmu = this.tmu,
+            m = this.m
+        };
+    }
 }
-
 
 [System.Serializable]
 public class burstSliders
@@ -543,6 +561,23 @@ public class burstSliders
     public int ty;
     public int sc;
     public int s;
+    
+    public burstSliders Copy()
+    {
+        return new burstSliders
+        {
+            b = this.b,
+            c = this.c,
+            x = this.x,
+            y = this.y,
+            d = this.d,
+            tb = this.tb,
+            tx = this.tx,
+            ty = this.ty,
+            sc = this.sc,
+            s = this.s
+        };
+    }
 }
 
 [System.Serializable]
@@ -570,6 +605,19 @@ public class colorNotes
     public int a;
     public int c;
     public int d;
+    
+    public colorNotes Copy()
+    {
+        return new colorNotes
+        {
+            b = this.b,
+            x = this.x,
+            y = this.y,
+            a = this.a,
+            c = this.c,
+            d = this.d
+        };
+    }
 }
 
 [System.Serializable]
@@ -586,6 +634,16 @@ public class bombNotes
     public float b;
     public int x;
     public int y;
+    
+    public bombNotes Copy()
+    {
+        return new bombNotes
+        {
+            b = this.b,
+            x = this.x,
+            y = this.y
+        };
+    }
 }
 
 [System.Serializable]
@@ -597,6 +655,19 @@ public class obstacles
     public float d;
     public int h;
     public int w;
+    
+    public obstacles Copy()
+    {
+        return new obstacles
+        {
+            b = this.b,
+            x = this.x,
+            y = this.y,
+            d = this.d,
+            h = this.h,
+            w = this.w
+        };
+    }
 }
 
 
