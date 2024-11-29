@@ -155,7 +155,6 @@ public class Bookmarks : MonoBehaviour
         SpawnObjects.instance.currentBeat = bookmark.b;
         MoveSlider(bookmark.b / SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
         SpawnObjects.instance.LoadObjectsFromScratch(bookmark.b, true, true);
-        DrawLines.instance.DrawLinesFromScratch(bookmark.b, SpawnObjects.instance.precision);
     }
 
     public void MoveSlider(float value)

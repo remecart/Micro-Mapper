@@ -306,7 +306,7 @@ public class SelectObjects : MonoBehaviour
 
             // Refresh to ensure the pasted items are visible and selected
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
-            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+            DrawLines.instance.DrawLinesWhenRequired();
             HighlightSelectedObject();
         }
     }
@@ -668,7 +668,7 @@ public class SelectObjects : MonoBehaviour
             }
 
             ClearSelection();
-            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+            DrawLines.instance.DrawLinesWhenRequired();
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
         }
     }
@@ -752,7 +752,7 @@ public class SelectObjects : MonoBehaviour
                 }
             }
 
-            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+            DrawLines.instance.DrawLinesWhenRequired();
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
         }
     }
@@ -843,7 +843,6 @@ public class SelectObjects : MonoBehaviour
                 }
             }
 
-            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
         }
     }
@@ -909,7 +908,6 @@ public class SelectObjects : MonoBehaviour
 
             // Rebuild the map
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
-            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
             SpawnObjects.instance.LoadWallsBackwards();
         }
     }

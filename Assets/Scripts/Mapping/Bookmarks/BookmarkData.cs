@@ -13,9 +13,12 @@ public class BookmarkData : MonoBehaviour, IPointerClickHandler
         {
             SpawnObjects.instance.currentBeat = bookmark.b;
             SpawnObjects.instance.LoadObjectsFromScratch(bookmark.b, true, true);
-            DrawLines.instance.DrawLinesFromScratch(bookmark.b, SpawnObjects.instance.precision);
-
             Bookmarks.instance.MoveSlider(bookmark.b / SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+            if (SpawnObjects.instance.playing)
+            {
+                LoadSong.instance.StopSong();
+                LoadSong.instance.Offset(SpawnObjects.instance.GetRealTimeFromBeat(bookmark.b));
+            }
         }
 
         if (eventData.button == PointerEventData.InputButton.Middle)

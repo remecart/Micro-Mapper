@@ -31,15 +31,23 @@ public class DrawLines : MonoBehaviour
         if (LoadSong.instance.audioSource.clip != null && !audioCheckOnStart)
         {
             audioCheckOnStart = true;
-            DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+            DrawLines.instance.DrawLinesWhenRequired();
+        }
+
+        if (Mathf.FloorToInt(SpawnObjects.instance.currentBeat) != currentBeatCache)
+        {
+            DrawLinesWhenRequired();
+            currentBeatCache = Mathf.FloorToInt(SpawnObjects.instance.currentBeat);
         }
     }
 
-    public void DrawLinesFromScratch(float fbeat, float precision)
+    private int currentBeatCache = 1;
+
+    public void DrawLinesWhenRequired()
     {
         for (int i = 0; i < lines.Count; i++)
         {
-            DrawBeatsFromScratch(fbeat, precision, lines[i].beat, lines[i].precision, lines[i].width / 2);
+            DrawBeatsFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision, lines[i].beat, lines[i].precision, lines[i].width / 2);
         }
 
         FixPositions();

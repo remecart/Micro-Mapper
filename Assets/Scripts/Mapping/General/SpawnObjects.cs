@@ -45,14 +45,17 @@ public class SpawnObjects : MonoBehaviour
 
     public void ChangeTime(Slider slider)
     {
-        if (!playing)
-        {
             LoadWallsBackwards();
             currentBeat = Mathf.RoundToInt(slider.value *
                                            Mathf.RoundToInt(
                                                BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
             LoadObjectsFromScratch(currentBeat, true, true);
-            DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+            DrawLines.instance.DrawLinesWhenRequired();
+
+        if (playing)
+        {
+            LoadSong.instance.StopSong();
+            LoadSong.instance.Offset(SpawnObjects.instance.GetRealTimeFromBeat(currentBeat));
         }
     }
 
@@ -64,7 +67,7 @@ public class SpawnObjects : MonoBehaviour
         precision = a / b;
 
         LoadObjectsFromScratch(currentBeat, true, true);
-        DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+        DrawLines.instance.DrawLinesWhenRequired();
     }
 
     // Start is called before the first frame update
@@ -123,8 +126,6 @@ public class SpawnObjects : MonoBehaviour
         {
             if (currentBeat > currentBeatPlay + 1)
             {
-                DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
-                currentBeatPlay = Mathf.FloorToInt(currentBeat);
                 Metronome.instance.MetronomeSound();
             }
 
@@ -170,7 +171,7 @@ public class SpawnObjects : MonoBehaviour
                 currentBeat += scroll * precision * a;
                 LoadObjectsFromScratch(currentBeat, true, true);
                 Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
-                DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+                DrawLines.instance.DrawLinesWhenRequired();
                 if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
                 UpdateTimeline();
             }
@@ -184,7 +185,7 @@ public class SpawnObjects : MonoBehaviour
         if (length == 0 && LoadSong.instance.audioSource.clip != null)
         {
             length = LoadSong.instance.audioSource.clip.length;
-            DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+            DrawLines.instance.DrawLinesWhenRequired();
         }
 
         spawnOffset = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000) -
@@ -194,7 +195,7 @@ public class SpawnObjects : MonoBehaviour
         {
             currentBeat = currentBeat + precision;
             LoadObjectsFromScratch(currentBeat, true, true);
-            DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+            DrawLines.instance.DrawLinesWhenRequired();
             Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
             timeSlider.onValueChanged = new Slider.SliderEvent();
             timeSlider.value =
@@ -206,7 +207,7 @@ public class SpawnObjects : MonoBehaviour
         {
             currentBeat = currentBeat - precision;
             LoadObjectsFromScratch(currentBeat, true, true);
-            DrawLines.instance.DrawLinesFromScratch(currentBeat, precision);
+            DrawLines.instance.DrawLinesWhenRequired();
             Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
             timeSlider.onValueChanged = new Slider.SliderEvent();
             timeSlider.value =
@@ -215,7 +216,7 @@ public class SpawnObjects : MonoBehaviour
             LoadWallsBackwards();
         }
 
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) && !Input.GetMouseButton((int)MouseButton.Right))
+        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) && !Input.GetMouseButton((int)MouseButton.Right) && !Bookmarks.instance.openMenu)
         {
             if (!playing)
             {
@@ -278,7 +279,6 @@ public class SpawnObjects : MonoBehaviour
 
         if (GetRealTimeFromBeat(currentBeat) >= length) playing = false;
     }
-
     public void LoadWallsBackwards()
     {
         float check = 256;
@@ -291,32 +291,33 @@ public class SpawnObjects : MonoBehaviour
 
         for (int i = 0; i < check; i++)
         {
-            if (Mathf.FloorToInt(currentBeat - i) >= 0)
+            int targetBeat = Mathf.FloorToInt(currentBeat - i + Mathf.CeilToInt(spawnOffset));
+
+            // Ensure obstacles at beats 0-1 are handled
+            if (targetBeat >= 0)
             {
-                List<obstacles> obstacles = LoadMap.instance
-                    .beats[Mathf.FloorToInt(currentBeat - i  + Mathf.CeilToInt(spawnOffset))].obstacles;
+                List<obstacles> obstacles = LoadMap.instance.beats[targetBeat].obstacles;
 
                 foreach (var obstacleData in obstacles)
                 {
-                    // Calculate the start and end beats based on the duration (d can be positive or negative)
                     float obstacleStart = obstacleData.b;
                     float obstacleEnd = obstacleData.b + obstacleData.d;
 
-                    // If the duration is negative, swap the start and end
+                    // Correct start and end if duration is negative
                     if (obstacleData.d < 0)
                     {
                         (obstacleStart, obstacleEnd) = (obstacleEnd, obstacleStart);
                     }
 
-                    // Ensure that both obstacles will appear at the same time if they overlap
-                    if (obstacleEnd > currentBeat - 12 && obstacleStart < currentBeat + 12)
+                    // Allow obstacles at beat 0-1 and ensure they spawn correctly even if they overlap with beat 0
+                    if ((obstacleEnd >= 0 && obstacleStart <= currentBeat + 12) &&
+                        (obstacleEnd > currentBeat - 12 || targetBeat <= 1))
                     {
                         var scaleZ = (PositionFromBeat(obstacleEnd) - PositionFromBeat(obstacleStart)) * editorScale;
 
                         GameObject obstacle = Instantiate(objects[4]);
                         obstacle.transform.SetParent(content);
 
-                        // Positioning based on obstacle's position data (adjusting X/Y and beat-based Z)
                         obstacle.transform.localPosition = new Vector3(
                             obstacleData.x + (float)obstacleData.w / 2 - 0.5f,
                             obstacleData.y + obstacleData.h / 2 - 0.5f,
@@ -449,13 +450,13 @@ public class SpawnObjects : MonoBehaviour
         x = (x + y) * 1000f;
         return (int)x;
     }
-
     void SpawnObjectsAtBeat(int beat, float latestBeat, float earliestBeat, bool loadNewOnly)
     {
         if (LoadSong.instance.audioSource.clip != null)
         {
             if (beat <= BeatFromRealTime(LoadSong.instance.audioSource.clip.length) && beat >= 0)
             {
+                // Process Notes
                 List<colorNotes> notes = LoadMap.instance.beats[beat].colorNotes;
                 foreach (var noteData in notes)
                 {
@@ -468,7 +469,10 @@ public class SpawnObjects : MonoBehaviour
                             Vector3 cache = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y),
                                 PositionFromBeat(noteData.b) * editorScale);
                             if (child.transform.localPosition == cache)
+                            {
                                 newObject = false;
+                                break;
+                            }
                         }
                     }
 
@@ -480,16 +484,20 @@ public class SpawnObjects : MonoBehaviour
                         note.transform.localPosition = new Vector3(ConvertMEPos(noteData.x), ConvertMEPos(noteData.y),
                             PositionFromBeat(noteData.b) * editorScale);
                         note.GetComponent<NoteData>().note = noteData;
+
                         if (noteData.d != 8)
                         {
                             note.transform.rotation = Quaternion.Euler(0, 0, Rotation(noteData.d));
                             note.transform.GetChild(1).gameObject.SetActive(false);
                         }
-                        else note.transform.GetChild(0).gameObject.SetActive(false);
+                        else
+                        {
+                            note.transform.GetChild(0).gameObject.SetActive(false);
+                        }
                     }
                 }
 
-                // Load Bomb Objects
+                // Process Bombs
                 List<bombNotes> bombs = LoadMap.instance.beats[beat].bombNotes;
                 foreach (var bombData in bombs)
                 {
@@ -502,7 +510,10 @@ public class SpawnObjects : MonoBehaviour
                             Vector3 cache = new Vector3(bombData.x, bombData.y,
                                 PositionFromBeat(bombData.b) * editorScale);
                             if (child.transform.localPosition == cache)
+                            {
                                 newObject = false;
+                                break;
+                            }
                         }
                     }
 
@@ -516,33 +527,7 @@ public class SpawnObjects : MonoBehaviour
                     }
                 }
 
-                // Load Bomb Objects
-                List<timings> timings = LoadMap.instance.beats[beat].timings;
-                foreach (var timingData in timings)
-                {
-                    bool newObject = true;
-
-                    if (loadNewOnly)
-                    {
-                        foreach (Transform child in content)
-                        {
-                            Vector3 cache = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0,
-                                PositionFromBeat(timingData.b) * editorScale);
-                            if (child.transform.localPosition == cache)
-                                newObject = false;
-                        }
-                    }
-
-                    if (timingData.b <= latestBeat && timingData.b >= earliestBeat && newObject)
-                    {
-                        GameObject timing = Instantiate(objects[5]);
-                        timing.transform.SetParent(content);
-                        timing.transform.localPosition = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0,
-                            PositionFromBeat(timingData.b) * editorScale);
-                        timing.GetComponent<TimingData>().timings = timingData;
-                    }
-                }
-
+                // Process Obstacles
                 List<obstacles> obstacles = LoadMap.instance.beats[beat].obstacles;
                 foreach (var obstacleData in obstacles)
                 {
@@ -559,7 +544,10 @@ public class SpawnObjects : MonoBehaviour
                                 obstacleData.y + obstacleData.h / 2 - 0.5f,
                                 PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
                             if (child.transform.localPosition == cache)
+                            {
                                 newObject = false;
+                                break;
+                            }
                         }
                     }
 
@@ -575,12 +563,12 @@ public class SpawnObjects : MonoBehaviour
                             obstacleData.y + obstacleData.h / 2 - 0.5f,
                             PositionFromBeat(obstacleData.b) * editorScale + 0.5f * scaleZ);
                         obstacle.transform.localScale = new Vector3(obstacleData.w, obstacleData.h, scaleZ);
-                        obstacle.name = obstacle.name + beat;
+                        obstacle.name = "Obstacle_" + beat;
                         obstacle.GetComponent<ObstacleData>().obstacle = obstacleData;
                     }
                 }
 
-                // Load Bpm Objects
+                // Process BPM Events
                 List<bpmEvents> bpmChanges = LoadMap.instance.beats[beat].bpmEvents;
                 foreach (var bpmChangeData in bpmChanges)
                 {
@@ -600,6 +588,7 @@ public class SpawnObjects : MonoBehaviour
             SelectObjects.instance.HighlightSelectedObject();
         }
     }
+
 
     public int Rotation(int level)
     {

@@ -103,7 +103,7 @@ public class Placement : MonoBehaviour
         }
 
         SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
-        DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+        DrawLines.instance.DrawLinesWhenRequired();
     }
 
     void Update()
@@ -554,6 +554,7 @@ public class Placement : MonoBehaviour
 
             // Reload objects after deletion
             SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
+            DrawLines.instance.DrawLinesWhenRequired();
         }
     }
 
@@ -927,6 +928,7 @@ public class Placement : MonoBehaviour
             LoadMap.instance.bpmEvents = LoadMap.instance.bpmEvents.OrderBy(x => x.b).ToList();
         }
 
+        DrawLines.instance.DrawLinesWhenRequired();
         SpawnObjects.instance.LoadObjectsFromScratch(b + 4, false, true);
         SpawnObjects.instance.LoadObjectsFromScratch(b, true, true);
     }

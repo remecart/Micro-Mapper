@@ -151,7 +151,7 @@ public class Settings : MonoBehaviour
                 {
                     SpawnObjects.instance.editorScale = config.mapping.editorScale;
                     SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);
-                    DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+                    DrawLines.instance.DrawLinesWhenRequired();
                     InstantiateSpectrogram.instance.Reload();
                 }
                 if (ImGui.SliderInt("Song Speed", ref config.mapping.songSpeed, 1, 20))

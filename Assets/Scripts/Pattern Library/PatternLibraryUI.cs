@@ -169,6 +169,6 @@ public class PatternLibraryUI : MonoBehaviour
         }
 
         SpawnObjects.instance.LoadObjectsFromScratch(currentBeat, true, true);
-        DrawLines.instance.DrawLinesFromScratch(currentBeat, SpawnObjects.instance.precision);
+        DrawLines.instance.DrawLinesWhenRequired();
     }
 }

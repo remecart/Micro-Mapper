@@ -553,7 +553,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 310.6, y: 499.2}
-  m_SizeDelta: {x: 40, y: 40}
+  m_SizeDelta: {x: 35, y: 35}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &40919617
 MonoBehaviour:
@@ -1641,7 +1641,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 500.6, y: 499.2}
-  m_SizeDelta: {x: 45, y: 45}
+  m_SizeDelta: {x: 40, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &165585586
 MonoBehaviour:
@@ -5027,7 +5027,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &581207300
 Transform:
   m_ObjectHideFlags: 0
@@ -7600,8 +7600,8 @@ MonoBehaviour:
   - {fileID: 875902858}
   img: {fileID: 1715599235}
   textures:
-  - {fileID: 2800000, guid: 879075f0f26f5f447a478d42b6699d10, type: 3}
-  - {fileID: 2800000, guid: 8493c43099b85f1458813fbd45528fe3, type: 3}
+  - {fileID: 2800000, guid: 7c4a1b894ee0c4641aa733a32b48df85, type: 3}
+  - {fileID: 2800000, guid: fec57217004ce8049af15a3e8cd1acaf, type: 3}
   LeftSaberMaterials:
   - {fileID: 2100000, guid: bf55f3cc4e961a24ebc79a9e7cfc0aae, type: 2}
   - {fileID: 2100000, guid: ab06b7d302de68645905721a5e1f6d65, type: 2}
@@ -9884,7 +9884,8 @@ MonoBehaviour:
     _noteJumpStartBeatOffset: 0
     _beatmapColorSchemeIdx: 0
     _environmentNameIdx: 0
-  folderPath: A:\BS Version Archive\BSManager\BSInstances\1.29.1\Beat Saber_Data\CustomWIPLevels\Gaviscon
+  folderPath: C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\CustomWIPLevels\_7_
+    Altars of Apostasy - ultrakill
   loadmap: {fileID: 1093831945}
   jumpDistance: 0
   jumpDuration: 0
@@ -14582,7 +14583,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 2800000, guid: 879075f0f26f5f447a478d42b6699d10, type: 3}
+  m_Texture: {fileID: 2800000, guid: 7c4a1b894ee0c4641aa733a32b48df85, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0

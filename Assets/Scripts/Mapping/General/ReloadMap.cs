@@ -33,6 +33,6 @@ public class ReloadMap : MonoBehaviour
 
     public void Lines()
     {
-        DrawLines.instance.DrawLinesFromScratch(SpawnObjects.instance.currentBeat, SpawnObjects.instance.precision);
+        DrawLines.instance.DrawLinesWhenRequired();
     }
 }
