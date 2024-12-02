@@ -4,16 +4,14 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.IO;
-using UnityEngine.Networking;
-using System;
 
 public class LoadMapSelectionPreview : MonoBehaviour
 {
     private static readonly int SpriteTexture = Shader.PropertyToID("_MainTex");
 
     bool applied;
-    public Info info = null;
-
+    public Info info;
+    public float time;
     public RawImage cover;
     public TextMeshProUGUI songName;
     public TextMeshProUGUI songArtist;
@@ -22,17 +20,15 @@ public class LoadMapSelectionPreview : MonoBehaviour
     public GameObject difficultyPrefab;
     public Transform difficultyParent;
     public string folderPath;
-    public int seconds = 0;
+    public int seconds;
 
     void Update()
     {
-        if (!applied)
+        if (!applied && info != null)
         {
             LoadInfo();
-            if (info != null)
-            {
-                ApplyCover();
-            }
+            StartCoroutine(ApplyCoverCoroutine());
+                
             songName.text = info._songName;
             songArtist.text = info._songAuthorName;
             mapper.text = info._levelAuthorName;
@@ -75,8 +71,10 @@ public class LoadMapSelectionPreview : MonoBehaviour
         }
     }
 
-    void ApplyCover()
+    private IEnumerator ApplyCoverCoroutine()
     {
+        yield return new WaitForSeconds(time);
+
         if (File.Exists(folderPath + "\\" + info._coverImageFilename))
         {
             byte[] imageData = File.ReadAllBytes(folderPath + "\\" + info._coverImageFilename);

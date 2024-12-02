@@ -17,6 +17,7 @@ TagManager:
   - TimingGrid
   - BpmGrid
   - Tooltips
+  - FolderPath
   layers:
   - Default
   - TransparentFX

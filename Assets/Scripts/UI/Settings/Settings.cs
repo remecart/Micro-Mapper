@@ -6,16 +6,15 @@ using TMPro;
 using UnityEngine.UI;
 using Unity.VisualScripting;
 using ImGuiNET;
-using System.Xml.Schema;
 using static Spectrogram;
 using static Waveform;
 using static Visuals;
 using System;
 using static Audio;
 using UnityEditor;
-using Microsoft.Win32;
-using System.Diagnostics;
 using Skybox = Visuals.Skybox;
+using System.Linq;
+
 
 public class Settings : MonoBehaviour
 {
@@ -25,6 +24,7 @@ public class Settings : MonoBehaviour
     public Config config;
     private string file;
     public bool isHovering;
+    public bool canUseMenu;
 
     public Keybinds Keybinds;
 
@@ -93,6 +93,7 @@ public class Settings : MonoBehaviour
 
     void OnDestroy()
     {
+        config.general.folderPaths = config.general.folderPaths.Distinct().ToList();
         string raw = JsonUtility.ToJson(config, true);
         File.WriteAllText(file, raw);
     }
@@ -116,7 +117,7 @@ public class Settings : MonoBehaviour
             isShowing = !isShowing;
         }
 
-        if (isShowing && !Menu.instance.open && !Bookmarks.instance.openMenu)
+        if (isShowing && !Menu.instance.open && !Bookmarks.instance.openMenu && canUseMenu)
         {
             //ImGui.ShowDemoWindow();
             //ImGui.SetNextWindowPos(new Vector2((Screen.width - 450) / 2, (Screen.height - 650) / 2));
@@ -692,10 +693,9 @@ public class Config
 [System.Serializable]
 public class General
 {
-    public string beatSaberPath;
+    public List<string> folderPaths;
     public bool autoSave;
     public bool saveFormattedJson;
-
 }
 
 [System.Serializable]

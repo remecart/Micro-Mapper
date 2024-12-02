@@ -16,7 +16,7 @@ public class HitSoundManager : MonoBehaviour
     public int hitsoundIndex;
     private float time;
     private bool playing;
-    private bool cache;
+    public bool cache;
     private float nextNote;
     public float length;
     public AudioSource audioSource;

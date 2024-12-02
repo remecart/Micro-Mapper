@@ -55,6 +55,7 @@ public class SpawnObjects : MonoBehaviour
         if (playing)
         {
             LoadSong.instance.StopSong();
+            HitSoundManager.instance.cache = false;
             LoadSong.instance.Offset(SpawnObjects.instance.GetRealTimeFromBeat(currentBeat));
         }
     }

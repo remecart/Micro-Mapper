@@ -14,6 +14,7 @@ public class EditMetaData : MonoBehaviour
 
     void Start()
     {
+        if (GameObject.FindWithTag("FolderPath")) folderPath = GameObject.FindWithTag("FolderPath").GetComponent<FolderPath>().path;
         instance = this;
         string infoPath = "info.dat";
 

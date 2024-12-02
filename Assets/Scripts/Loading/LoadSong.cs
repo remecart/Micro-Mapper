@@ -19,8 +19,10 @@ public class LoadSong : MonoBehaviour
     void Start()
     {
         instance = this;
-        audioSource.volume = Settings.instance.config.audio.music;
-        songSpeed = Settings.instance.config.mapping.songSpeed / 10;
+        if (Settings.instance != null ) {
+            audioSource.volume = Settings.instance.config.audio.music;
+            songSpeed = Settings.instance.config.mapping.songSpeed / 10;
+        }
         SetAudioClip(audioSource);
         StopSong();
     }
@@ -29,7 +31,7 @@ public class LoadSong : MonoBehaviour
     {
         if (audioSource.clip != null && check == false) { 
             check = true;
-            LoadMap.instance.Load(audioSource);
+            if (LoadMap.instance != null) LoadMap.instance.Load(audioSource);
         }
     }
     public void SetAudioClip(AudioSource source)

@@ -117,54 +117,70 @@ public class PatternLibraryUI : MonoBehaviour
         var pattern = Library.instance.GetPattern(Library.instance.selectedPatternIndex);
         var currentBeat = SpawnObjects.instance.currentBeat;
 
-        var notes = pattern._patternNotes.Select(note =>
-        {
-            note.b += currentBeat;
-            return note;
-        });
-        var bombs = pattern._patternBombs.Select(note =>
-        {
-            note.b += currentBeat;
-            return note;
-        });
-        var obstacles = pattern._patternObstacles.Select(note =>
-        {
-            note.b += currentBeat;
-            return note;
-        });
-        var sliders = pattern._patternSliders.Select(note =>
-        {
-            note.b += currentBeat;
-            return note;
-        });
-        var burstSliders = pattern._patternBurstSliders.Select(note =>
-        {
-            note.b += currentBeat;
-            return note;
-        });
+        UndoRedoManager.instance.SaveState(LoadMap.instance.beats[40484], 40484, false);
+
+        var notes = pattern._patternNotes.Select(note => note.Copy())
+            .Select(note =>
+            {
+                note.b += currentBeat;
+                return note;
+            });
+
+        var bombs = pattern._patternBombs.Select(bomb => bomb.Copy())
+            .Select(bomb =>
+            {
+                bomb.b += currentBeat;
+                return bomb;
+            });
+
+        var obstacles = pattern._patternObstacles.Select(obstacle => obstacle.Copy())
+            .Select(obstacle =>
+            {
+                obstacle.b += currentBeat;
+                return obstacle;
+            });
+
+        var sliders = pattern._patternSliders.Select(slider => slider.Copy())
+            .Select(slider =>
+            {
+                slider.b += currentBeat;
+                return slider;
+            });
+
+        var burstSliders = pattern._patternBurstSliders.Select(burstSlider => burstSlider.Copy())
+            .Select(burstSlider =>
+            {
+                burstSlider.b += currentBeat;
+                return burstSlider;
+            });
 
         foreach (var note in notes)
         {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(note.b)], Mathf.FloorToInt(note.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
         }
 
         foreach (var bomb in bombs)
         {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)], Mathf.FloorToInt(bomb.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Add(bomb);
         }
 
         foreach (var obstacle in obstacles)
         {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)], Mathf.FloorToInt(obstacle.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)].obstacles.Add(obstacle);
         }
 
         foreach (var slider in sliders)
         {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(slider.b)], Mathf.FloorToInt(slider.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(slider.b)].sliders.Add(slider);
         }
 
         foreach (var burstSlider in burstSliders)
         {
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(burstSlider.b)], Mathf.FloorToInt(burstSlider.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(burstSlider.b)].burstSliders.Add(burstSlider);
         }
 

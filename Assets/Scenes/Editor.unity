@@ -5027,7 +5027,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &581207300
 Transform:
   m_ObjectHideFlags: 0
@@ -5484,7 +5484,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config:
     general:
-      beatSaberPath: 
+      folderPaths: []
       autoSave: 1
       saveFormattedJson: 1
     mapping:
@@ -5566,6 +5566,7 @@ MonoBehaviour:
         trailWidth: 5
         trailLength: 8
   isHovering: 0
+  canUseMenu: 1
   Keybinds:
     previewMap: 3201000068000000
     playMap: 20000000
@@ -9884,8 +9885,8 @@ MonoBehaviour:
     _noteJumpStartBeatOffset: 0
     _beatmapColorSchemeIdx: 0
     _environmentNameIdx: 0
-  folderPath: C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\CustomWIPLevels\_7_
-    Altars of Apostasy - ultrakill
+  folderPath: C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\CustomWIPLevels\_6_
+    ORDER - ultrakill
   loadmap: {fileID: 1093831945}
   jumpDistance: 0
   jumpDuration: 0
