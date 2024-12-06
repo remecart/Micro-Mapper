@@ -15,18 +15,23 @@ public class LoadCover : MonoBehaviour
     {
         if (metaData.metaData != null && !applied)
         {
-            if (File.Exists(metaData.folderPath + "\\" + metaData.metaData._coverImageFilename))
-            {
-                byte[] imageData = File.ReadAllBytes(metaData.folderPath + "\\" + metaData.metaData._coverImageFilename);
-
-                // Create a new Texture2D and load the image data
-                Texture2D texture = new Texture2D(2, 2); // Adjust the size as needed
-                texture.LoadImage(imageData);
-
-                // Set the loaded texture to the RawImage component
-                rawImage.texture = texture;
-            }
-            applied = true;
+            Cover();
         }
+    }
+
+    public void Cover()
+    {
+        if (File.Exists(metaData.folderPath + "\\" + metaData.metaData._coverImageFilename))
+        {
+            byte[] imageData = File.ReadAllBytes(metaData.folderPath + "\\" + metaData.metaData._coverImageFilename);
+
+            // Create a new Texture2D and load the image data
+            Texture2D texture = new Texture2D(2, 2); // Adjust the size as needed
+            texture.LoadImage(imageData);
+
+            // Set the loaded texture to the RawImage component
+            rawImage.texture = texture;
+        }
+        applied = true;
     }
 }

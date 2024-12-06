@@ -6,14 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/MapSelection.unity
-    guid: aee163654421c6549b807ae8a895ff34
+    path: Assets/Scenes/EditInfo.unity
+    guid: 4dbec8505699e194e928a22e1b8fda03
   - enabled: 1
     path: Assets/Scenes/Editor.unity
     guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
-    path: Assets/Scenes/EditInfo.unity
-    guid: 4dbec8505699e194e928a22e1b8fda03
+    path: Assets/Scenes/MapSelection.unity
+    guid: aee163654421c6549b807ae8a895ff34
   - enabled: 1
     path: Assets/Scenes/Krach.unity
     guid: ee257eeb064b4014fa15efba28aec230

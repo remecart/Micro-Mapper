@@ -1,12 +1,10 @@
 using SFB;
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using UnityEditor;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.Serialization;
 using static Audio;
 
 public class HitSoundManager : MonoBehaviour
@@ -20,7 +18,7 @@ public class HitSoundManager : MonoBehaviour
     private float nextNote;
     public float length;
     public AudioSource audioSource;
-    public GameObject hitsound;
+    public GameObject hitsoundPrefab;
 
     void Start()
     {
@@ -119,14 +117,15 @@ public class HitSoundManager : MonoBehaviour
             {
                 GetNextNote();
             }
-            if (time >= nextNote && cache == true)
+            if (time >= nextNote && cache)
             {
-                //audioSource.PlayOneShot(hitsounds[hitsoundIndex]);
-                GameObject go = Instantiate(hitsound);
-                go.transform.parent = this.transform;
-                go.GetComponent<AudioSource>().clip = hitsounds[hitsoundIndex];
-                go.GetComponent<AudioSource>().volume = audioSource.volume;
-                go.GetComponent<AudioSource>().Play();
+                GameObject go = Instantiate(hitsoundPrefab, this.transform);
+                go.transform.SetParent(this.transform);
+                var goAudio = go.GetComponent<AudioSource>();
+                goAudio.volume = audioSource.volume;
+                goAudio.clip = hitsounds[hitsoundIndex]; 
+                goAudio.Play();
+                // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
                 go.GetComponent<DestroyInTime>().time = hitsounds[hitsoundIndex].length + 0.125f;
                 cache = false;
             }

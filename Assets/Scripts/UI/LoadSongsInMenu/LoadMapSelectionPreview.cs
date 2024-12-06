@@ -7,9 +7,6 @@ using System.IO;
 
 public class LoadMapSelectionPreview : MonoBehaviour
 {
-    private static readonly int SpriteTexture = Shader.PropertyToID("_MainTex");
-
-    bool applied;
     public Info info;
     public float time;
     public RawImage cover;
@@ -22,48 +19,53 @@ public class LoadMapSelectionPreview : MonoBehaviour
     public string folderPath;
     public int seconds;
 
-    void Update()
+    void Start()
     {
-        if (!applied && info != null)
+        LoadData();
+    }
+
+    private void LoadData()
+    {
+        info ??= LoadInfo(folderPath);
+
+        if (info != null)
         {
-            LoadInfo();
             StartCoroutine(ApplyCoverCoroutine());
-                
             songName.text = info._songName;
             songArtist.text = info._songAuthorName;
             mapper.text = info._levelAuthorName;
             InstantiateDifficulties();
-            applied = true;
         }
     }
 
-    void LoadInfo()
+    private Info LoadInfo(string path)
     {
-        string infoPath = folderPath.Contains("info.dat") ? "info.dat" : "Info.dat";
-        if (File.Exists(Path.Combine(folderPath, infoPath))) {
-            string rawData = File.ReadAllText(Path.Combine(folderPath, infoPath));
-            info = JsonUtility.FromJson<Info>(rawData);
+        string infoPath = path.Contains("info.dat") ? "info.dat" : "Info.dat";
+        if (File.Exists(Path.Combine(path, infoPath))) {
+            string rawData = File.ReadAllText(Path.Combine(path, infoPath));
+            return JsonUtility.FromJson<Info>(rawData);
         }
+        return null;
     }
 
     void InstantiateDifficulties()
     {
-        float prefabWidth = difficultyPrefab.GetComponent<RectTransform>().rect.width;
-        int count = 0;
+        var prefabWidth = difficultyPrefab.GetComponent<RectTransform>().rect.width;
+        var count = 0;
 
         foreach (var set in info._difficultyBeatmapSets)
         {
             foreach (var beatmap in set._difficultyBeatmaps)
             {
-                GameObject newDifficulty = Instantiate(difficultyPrefab, difficultyParent);
+                var newDifficulty = Instantiate(difficultyPrefab, difficultyParent);
 
-                int colorIndex = difficulies.IndexOf(beatmap._difficulty);
+                var colorIndex = difficulies.IndexOf(beatmap._difficulty);
                 newDifficulty.GetComponent<Image>().color = colors[colorIndex];
 
-                RectTransform rectTransform = newDifficulty.GetComponent<RectTransform>();
+                var rectTransform = newDifficulty.GetComponent<RectTransform>();
                 rectTransform.anchoredPosition = new Vector2(count * -(prefabWidth + 12), rectTransform.anchoredPosition.y);
 
-                TextMeshProUGUI difficultyText = newDifficulty.GetComponentInChildren<TextMeshProUGUI>();
+                var difficultyText = newDifficulty.GetComponentInChildren<TextMeshProUGUI>();
                 difficultyText.text = difficulyNames[colorIndex];
 
                 count++;

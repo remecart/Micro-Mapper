@@ -14,36 +14,34 @@ using PatternBurstSlider = burstSliders;
 
 #endregion
 
-
 public class Library : MonoBehaviour
 {
     public static Library instance;
 
-    [HideInInspector]
-    public int selectedPatternIndex;
-    
-    [HideInInspector]
-    public string patternName;
+    [HideInInspector] public int selectedPatternIndex;
+    [HideInInspector] public string patternName;
 
-
-    private readonly string LIBRARY_PATH =
-        Path.Combine(Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "Micro Mapper",
-            "PatternLibrary.json");
-
-    private PatternLibrary _patternLibrary;
+    private readonly string LIBRARY_DIRECTORY =
+        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Micro Mapper", "Pattern Library");
 
     void Start()
     {
         instance = this;
-        _patternLibrary = new PatternLibrary(LIBRARY_PATH);
+
+        if (!Directory.Exists(LIBRARY_DIRECTORY))
+        {
+            Directory.CreateDirectory(LIBRARY_DIRECTORY);
+        }
     }
 
     public string[] GetPatternNames()
     {
-        string[] patternNames = new string[_patternLibrary._patterns.Count];
-        for (int i = 0; i < _patternLibrary._patterns.Count; i++)
+        string[] patternFiles = Directory.GetFiles(LIBRARY_DIRECTORY, "*.json");
+        string[] patternNames = new string[patternFiles.Length];
+
+        for (int i = 0; i < patternFiles.Length; i++)
         {
-            patternNames[i] = _patternLibrary._patterns[i]._name;
+            patternNames[i] = Path.GetFileNameWithoutExtension(patternFiles[i]);
         }
 
         return patternNames;
@@ -51,74 +49,41 @@ public class Library : MonoBehaviour
 
     public Pattern GetPattern(int index)
     {
-        return _patternLibrary._patterns[index];
+        string[] patternFiles = Directory.GetFiles(LIBRARY_DIRECTORY, "*.json");
+        if (index < 0 || index >= patternFiles.Length)
+        {
+            Debug.LogError("Pattern index out of range.");
+            return null;
+        }
+
+        string patternPath = patternFiles[index];
+        string jsonContent = File.ReadAllText(patternPath);
+        return JsonUtility.FromJson<Pattern>(jsonContent);
     }
 
     public int GetPatternCount()
     {
-        return _patternLibrary._patterns.Count;
+        return Directory.GetFiles(LIBRARY_DIRECTORY, "*.json").Length;
     }
 
     public void AddToLibrary(Pattern pattern)
     {
-        _patternLibrary._patterns.Add(pattern);
-        _patternLibrary.WritePatterns();
+        string patternPath = Path.Combine(LIBRARY_DIRECTORY, $"{pattern._name}.json");
+        string jsonContent = JsonUtility.ToJson(pattern, true);
+        File.WriteAllText(patternPath, jsonContent);
     }
 
     public void RemoveFromLibrary(int index)
     {
-        _patternLibrary._patterns.RemoveAt(index);
-        _patternLibrary.WritePatterns();
-    }
-}
-
-public class PatternLibrary
-{
-    private readonly string _path;
-
-    public PatternLibrary(string path)
-    {
-        _path = path;
-
-        if (!File.Exists(path))
+        string[] patternFiles = Directory.GetFiles(LIBRARY_DIRECTORY, "*.json");
+        if (index < 0 || index >= patternFiles.Length)
         {
-            WritePatterns();
+            Debug.LogError("Pattern index out of range.");
+            return;
         }
-        _patterns = ReadPatterns(path)._patterns;
-        Debug.Log(_patterns.Count);
-    }
 
-    private PatternLibrary ReadPatterns(string path)
-    {
-        string jsonContent = ReadJsonFile(path);
-        return ParseJson<PatternLibrary>(jsonContent);
+        File.Delete(patternFiles[index]);
     }
-
-    private string ReadJsonFile(string path)
-    {
-        if (File.Exists(path))
-        {
-            return File.ReadAllText(path);
-        }
-        else
-        {
-            Debug.LogError("File not found: " + path);
-            return string.Empty;
-        }
-    }
-
-    private T ParseJson<T>(string jsonContent)
-    {
-        return JsonUtility.FromJson<T>(jsonContent);
-    }
-
-    public void WritePatterns()
-    {
-        string jsonContent = JsonUtility.ToJson(this);
-        File.WriteAllText(_path, jsonContent);
-    }
-
-    public List<Pattern> _patterns;
 }
 
 [Serializable]
@@ -143,4 +108,3 @@ public class Pattern
     public List<PatternSlider> _patternSliders;
     public List<PatternBurstSlider> _patternBurstSliders;
 }
-

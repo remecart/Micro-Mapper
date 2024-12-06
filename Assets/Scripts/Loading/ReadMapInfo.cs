@@ -158,10 +158,20 @@ public class _difficultyBeatmapSets
 public class _difficultyBeatmaps
 {
     public string _difficulty;
-    public string _difficultyRank;
+    public int _difficultyRank;
     public string _beatmapFilename;
     public float _noteJumpMovementSpeed;
     public float _noteJumpStartBeatOffset;
     public int _beatmapColorSchemeIdx;
     public int _environmentNameIdx;
+    public _difficultyBeatmapsCustomData _customData;
+}
+
+[System.Serializable]
+public class _difficultyBeatmapsCustomData
+{
+    public float _editorOffset = 0;
+    public float _editorOldOffset = 0;
+    public List<string> _requirements = new List<string>();
+    public string _difficultyLabel = "";
 }

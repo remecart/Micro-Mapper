@@ -125,14 +125,11 @@ public class SpawnObjects : MonoBehaviour
 
         if (playing)
         {
-            if (currentBeat > currentBeatPlay + 1)
-            {
-                Metronome.instance.MetronomeSound();
-            }
-
             UpdateTimeline();
         }
-        else currentBeatPlay = Mathf.FloorToInt(currentBeat);
+        
+        if (currentBeatPlay < Mathf.FloorToInt(currentBeat)) Metronome.instance.MetronomeSound();
+        currentBeatPlay = Mathf.FloorToInt(currentBeat);
 
         if (Input.GetKey(KeyCode.LeftControl))
         {
@@ -573,6 +570,9 @@ public class SpawnObjects : MonoBehaviour
                 List<bpmEvents> bpmChanges = LoadMap.instance.beats[beat].bpmEvents;
                 foreach (var bpmChangeData in bpmChanges)
                 {
+                    bool newObject = true;
+
+                    
                     if (bpmChangeData.b <= latestBeat && bpmChangeData.b >= earliestBeat)
                     {
                         GameObject bpmChange = Instantiate(objects[3]);
@@ -584,6 +584,31 @@ public class SpawnObjects : MonoBehaviour
                         bpmChange.GetComponent<BpmEventData>().bpmEvent = bpmChangeData;
                     }
                 }
+                
+                // Load Timing Objects
+                List<timings> timings = LoadMap.instance.beats[beat].timings;
+                foreach (var timingData in timings)
+                {
+                    bool newObject = true;
+                    if (loadNewOnly)
+                    {
+                        foreach (Transform child in content)
+                        {
+                            Vector3 cache = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0,
+                                PositionFromBeat(timingData.b) * editorScale);
+                            if (child.transform.localPosition == cache)
+                                newObject = false;
+                        }
+                    }
+                    if (timingData.b <= latestBeat && timingData.b >= earliestBeat && newObject)
+                    {
+                        GameObject timing = Instantiate(objects[5]);
+                        timing.transform.SetParent(content);
+                        timing.transform.localPosition = new Vector3(TimingSpawn.localPosition.x + timingData.t + 1, 0,
+                            PositionFromBeat(timingData.b) * editorScale);
+                        timing.GetComponent<TimingData>().timings = timingData;
+                    }
+                } 
             }
 
             SelectObjects.instance.HighlightSelectedObject();

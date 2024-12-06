@@ -48,7 +48,7 @@ public class LoadMapsFromPath : MonoBehaviour
 
         foreach (Transform child in scroll.transform)
         {
-            if (child.GetChild(1).GetComponent<TextMeshProUGUI>().text.ToLower().Contains(search.ToLower()) || search == string.Empty)
+            if (child.name.ToLower().Contains(search.ToLower()) || search == string.Empty)
             {
                 child.gameObject.SetActive(true);
                 count += 1;
@@ -70,18 +70,40 @@ public class LoadMapsFromPath : MonoBehaviour
             GameObject.Destroy(child.gameObject);
         }
 
-        string[] directories = Directory.GetDirectories(paths[loadIndex]);
+        var directories = Directory.GetDirectories(paths[loadIndex]);
+        var count = 0;
 
-        for (int i = 0; i < directories.Length; i++)
+        for (var i = 0; i < directories.Length; i++)
         {
-            var map = Instantiate(mapPrefab, scroll);
-            map.transform.parent = scroll;
-            map.name = directories[i].Replace(paths[loadIndex], "");
-            map.GetComponent<LoadMapSelectionPreview>().folderPath = directories[i];
-            map.GetComponent<LoadMapSelectionPreview>().time = i / 25f;
-        }
+            var info = LoadInfo(directories[i]);
+            if (info != null)
+            {
+                var map = Instantiate(mapPrefab, scroll);
+                map.transform.SetParent(scroll);
+                map.name = info._songName;
+                var loadMap = map.GetComponent<LoadMapSelectionPreview>();
+                if (loadMap != null)
+                {
+                    loadMap.folderPath = directories[i];
+                    loadMap.time = i / 25f;
+                    loadMap.info = info;   
+                }
 
+                count++;
+            }
+        }
         SearchForMapByName();
-        scroll.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(950, Mathf.Clamp(directories.Length * 140, 700, float.MaxValue));
+        scroll.gameObject.GetComponent<RectTransform>().sizeDelta = new Vector2(950, Mathf.Clamp(count * 140, 700, float.MaxValue));
+    }
+
+    private Info LoadInfo(string path)
+    {
+        string infoPath = path.Contains("info.dat") ? "info.dat" : "Info.dat";
+        if (File.Exists(Path.Combine(path, infoPath)))
+        {
+            string rawData = File.ReadAllText(Path.Combine(path, infoPath));
+            return JsonUtility.FromJson<Info>(rawData);
+        }
+        return null;
     }
 }

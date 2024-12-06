@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PatternLibraryUI : MonoBehaviour
 {
+    public static PatternLibraryUI instance;
     public bool showPatternLibrary = false;
 
     private void OnEnable()
@@ -17,51 +18,53 @@ public class PatternLibraryUI : MonoBehaviour
         ImGuiUn.Layout -= CreatePatternLibraryUI;
     }
 
-    private void CreatePatternLibraryUI()
+    public void CreatePatternLibraryUI()
     {
-        if (!showPatternLibrary) return;
-
-
-        ImGui.Begin("Pattern Library", ImGuiWindowFlags.NoCollapse);
-        ImGui.SetWindowSize(new Vector2(450, 650));
-
-        ImGui.ListBox("Patterns", ref Library.instance.selectedPatternIndex, Library.instance.GetPatternNames(),
-            Library.instance.GetPatternCount(), 5);
-
-        if (ImGui.Button("Place Pattern"))
+        if (ImGui.BeginTabItem("Pattern Library"))
         {
-            PlacePattern();
-        }
+            ImGui.ListBox("Patterns", ref Library.instance.selectedPatternIndex, Library.instance.GetPatternNames(),
+                Library.instance.GetPatternCount(), 5);
 
-        if (ImGui.Button("Add Pattern"))
-        {
-            ImGui.OpenPopup("Pattern Name");
-        }
-
-        if (ImGui.BeginPopup("Pattern Name"))
-        {
-            ImGui.Text("Enter Pattern Name");
-            ImGui.InputText("Pattern Save Name", ref Library.instance.patternName, 100);
-            if (ImGui.Button("Add"))
+            if (ImGui.Button("Place Pattern"))
             {
-                if (Library.instance.patternName == "")
-                {
-                    Library.instance.patternName = "Unnamed Pattern";
-                }
-
-                AddPatternToList(Library.instance.patternName);
-                ImGui.CloseCurrentPopup();
+                PlacePattern();
             }
 
-            ImGui.EndPopup();
-        }
+            if (ImGui.Button("Add Pattern"))
+            {
+                ImGui.OpenPopup("Pattern Name");
+            }
 
-        if (ImGui.Button("Remove Pattern"))
-        {
-            Library.instance.RemoveFromLibrary(Library.instance.selectedPatternIndex);
-        }
+            if (ImGui.BeginPopup("Pattern Name"))
+            {
+                ImGui.Text("Enter Pattern Name");
+                ImGui.InputText("Pattern Save Name", ref Library.instance.patternName, 100);
+                if (ImGui.Button("Add"))
+                {
+                    if (Library.instance.patternName == "")
+                    {
+                        Library.instance.patternName = "Unnamed Pattern";
+                    }
 
-        ImGui.End();
+                    AddPatternToList(Library.instance.patternName);
+                    ImGui.CloseCurrentPopup();
+                }
+
+                ImGui.EndPopup();
+            }
+
+            if (ImGui.Button("Remove Pattern"))
+            {
+                Library.instance.RemoveFromLibrary(Library.instance.selectedPatternIndex);
+            }
+
+            ImGui.EndTabItem();
+        }
+    }
+
+    public void Start()
+    {
+        instance = this;
     }
 
     private void Update()
@@ -84,29 +87,29 @@ public class PatternLibraryUI : MonoBehaviour
             });
         var bombs = SelectObjects.instance.selectedBombNotes.Select(colorNotes => colorNotes.Copy())
             .Select(note =>
-        {
-            note.b -= lowestBeat;
-            return note;
-        });
-        var obstacles = SelectObjects.instance.selectedObstacles.Select(colorNotes => colorNotes.Copy())
-            .Select(note =>
-        {
-            note.b -= lowestBeat;
-            return note;
-        });
-        var sliders = SelectObjects.instance.selectedSliders.Select(colorNotes => colorNotes.Copy())
-            .Select(note =>
-        {
-            note.b -= lowestBeat;
-            return note;
-        });
-        var burstSliders = SelectObjects.instance.selectedBurstSliders.Select(colorNotes => colorNotes.Copy())
-            .Select(
-            note =>
             {
                 note.b -= lowestBeat;
                 return note;
             });
+        var obstacles = SelectObjects.instance.selectedObstacles.Select(colorNotes => colorNotes.Copy())
+            .Select(note =>
+            {
+                note.b -= lowestBeat;
+                return note;
+            });
+        var sliders = SelectObjects.instance.selectedSliders.Select(colorNotes => colorNotes.Copy())
+            .Select(note =>
+            {
+                note.b -= lowestBeat;
+                return note;
+            });
+        var burstSliders = SelectObjects.instance.selectedBurstSliders.Select(colorNotes => colorNotes.Copy())
+            .Select(
+                note =>
+                {
+                    note.b -= lowestBeat;
+                    return note;
+                });
 
         Library.instance.AddToLibrary(new Pattern(patternName, notes.ToList(), bombs.ToList(), obstacles.ToList(),
             sliders.ToList(), burstSliders.ToList()));
@@ -156,31 +159,36 @@ public class PatternLibraryUI : MonoBehaviour
 
         foreach (var note in notes)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(note.b)], Mathf.FloorToInt(note.b), true);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(note.b)],
+                Mathf.FloorToInt(note.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(note.b)].colorNotes.Add(note);
         }
 
         foreach (var bomb in bombs)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)], Mathf.FloorToInt(bomb.b), true);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)],
+                Mathf.FloorToInt(bomb.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(bomb.b)].bombNotes.Add(bomb);
         }
 
         foreach (var obstacle in obstacles)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)], Mathf.FloorToInt(obstacle.b), true);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)],
+                Mathf.FloorToInt(obstacle.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(obstacle.b)].obstacles.Add(obstacle);
         }
 
         foreach (var slider in sliders)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(slider.b)], Mathf.FloorToInt(slider.b), true);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(slider.b)],
+                Mathf.FloorToInt(slider.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(slider.b)].sliders.Add(slider);
         }
 
         foreach (var burstSlider in burstSliders)
         {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(burstSlider.b)], Mathf.FloorToInt(burstSlider.b), true);
+            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(burstSlider.b)],
+                Mathf.FloorToInt(burstSlider.b), true);
             LoadMap.instance.beats[Mathf.FloorToInt(burstSlider.b)].burstSliders.Add(burstSlider);
         }
 

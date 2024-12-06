@@ -8,11 +8,13 @@ using UnityEngine;
 using UnityEngine.Networking;
 using TMPro;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEngine.Serialization;
 
 public class LoadMap : MonoBehaviour
 {
     public static LoadMap instance;
-    public GameObject text;
+    public GameObject popUpPrefab;
+    public Transform popUpParent;
     public float mappingTime;
     public enum _difficulty
     {
@@ -246,8 +248,9 @@ public class LoadMap : MonoBehaviour
         string rawJson = JsonUtility.ToJson(beat, true);
         File.WriteAllText(Path.Combine(ReadMapInfo.instance.folderPath, name), rawJson);
 
-        text.GetComponent<TextMeshProUGUI>().text = "Map saved successfully!";
-        text.gameObject.GetComponent<Animator>().SetTrigger("TriggerPopUp");
+        GameObject popUp = Instantiate(popUpPrefab);
+        popUp.transform.SetParent(popUpParent);
+        popUp.GetComponent<TextMeshProUGUI>().text = "Map saved successfully!";
 
         if (closeEditor) Application.Quit();
     }

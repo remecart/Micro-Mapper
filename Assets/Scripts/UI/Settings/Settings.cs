@@ -122,7 +122,7 @@ public class Settings : MonoBehaviour
             //ImGui.ShowDemoWindow();
             //ImGui.SetNextWindowPos(new Vector2((Screen.width - 450) / 2, (Screen.height - 650) / 2));
             ImGui.Begin("Settings", ImGuiWindowFlags.NoCollapse);
-            ImGui.SetWindowSize(new Vector2(450, 650));
+            ImGui.SetWindowSize(new Vector2(450, 700));
 
             isHovering = ImGui.IsWindowHovered();
 
@@ -134,6 +134,7 @@ public class Settings : MonoBehaviour
                 Audio();
                 Controls();
                 MBot();
+                PatternLibraryUI.instance.CreatePatternLibraryUI();
             }
 
             ImGui.EndTabBar();

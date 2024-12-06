@@ -15,9 +15,11 @@ public class LoadSong : MonoBehaviour
     public float timeInBeats;
     public float songSpeed;
     private bool check;
+    public bool dontLoadAudio;
 
     void Start()
     {
+        if (dontLoadAudio) {}
         instance = this;
         if (Settings.instance != null ) {
             audioSource.volume = Settings.instance.config.audio.music;
