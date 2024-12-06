@@ -13,7 +13,7 @@ public class LoadMapsFromPath : MonoBehaviour
     public Transform scroll;
     public TMP_InputField input;
     public GameObject addPath;
-
+    public GameObject newMap;
     public void Start()
     {
         instance = this;
@@ -39,6 +39,11 @@ public class LoadMapsFromPath : MonoBehaviour
         addPath.SetActive(true);
 
         if (tmp != null) tmp.text = tmp.text.Replace("WIP", "another");
+    }
+    
+    public void OpenNewMapMenu()
+    {
+        newMap.SetActive(true);
     }
 
     public void SearchForMapByName()

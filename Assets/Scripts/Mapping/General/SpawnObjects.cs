@@ -168,10 +168,18 @@ public class SpawnObjects : MonoBehaviour
             {
                 currentBeat += scroll * precision * a;
                 LoadObjectsFromScratch(currentBeat, true, true);
-                Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
+                // Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
                 DrawLines.instance.DrawLinesWhenRequired();
                 if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
                 UpdateTimeline();
+                mBot.instance.UpdateSabers();
+                
+                // LoadWallsBackwards();
+                // currentBeat = Mathf.RoundToInt(slider.value *
+                //                                Mathf.RoundToInt(
+                //                                    BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
+                // LoadObjectsFromScratch(currentBeat, true, true);
+                // DrawLines.instance.DrawLinesWhenRequired();
             }
 
             if (currentBeat > BeatFromRealTime(length) && length != 0)
@@ -450,7 +458,7 @@ public class SpawnObjects : MonoBehaviour
     }
     void SpawnObjectsAtBeat(int beat, float latestBeat, float earliestBeat, bool loadNewOnly)
     {
-        if (LoadSong.instance.audioSource.clip != null)
+        if (LoadSong.instance.audioSource.clip)
         {
             if (beat <= BeatFromRealTime(LoadSong.instance.audioSource.clip.length) && beat >= 0)
             {

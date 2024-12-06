@@ -31,9 +31,9 @@ public class LoadSong : MonoBehaviour
 
     void Update()
     {
-        if (audioSource.clip != null && check == false) { 
+        if (audioSource.clip&& check == false) { 
             check = true;
-            if (LoadMap.instance != null) LoadMap.instance.Load(audioSource);
+            if (LoadMap.instance) LoadMap.instance.Load(audioSource);
         }
     }
     public void SetAudioClip(AudioSource source)
@@ -56,7 +56,6 @@ public class LoadSong : MonoBehaviour
             case ".wav":
                 return AudioType.WAV;
             default:
-                Debug.LogWarning("Unknown audio type for extension: " + extension);
                 return AudioType.UNKNOWN;
         }
     }
@@ -93,7 +92,7 @@ public class LoadSong : MonoBehaviour
 
     public void Offset(float offset)
     {
-        if (audioSource.clip != null)
+        if (audioSource.clip)
         {
             if (offset >= 0 && offset <= audioSource.clip.length)
             {

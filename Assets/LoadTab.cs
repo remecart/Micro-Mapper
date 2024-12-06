@@ -5,7 +5,7 @@ public class LoadTab : MonoBehaviour, IPointerClickHandler
 {
     public int index;
 
-    private void LoadSongList()
+    public void LoadSongList()
     {
         LoadMapsFromPath.instance.LoadMapFolders(index);
     }
@@ -14,6 +14,7 @@ public class LoadTab : MonoBehaviour, IPointerClickHandler
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
+            LoadMapsFromPath.instance.index = index;
             LoadSongList();
         }
         else if (eventData.button == PointerEventData.InputButton.Middle)

@@ -87,12 +87,16 @@ public class Bookmarks : MonoBehaviour
         };
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     public void LoadBookmarks()
     {
         ClearExistingBookmarks();
-        foreach (var bookmark in LoadMap.instance.bookmarks)
+        if (LoadMap.instance.bookmarks != null)
         {
-            CreateAndPlaceBookmark(bookmark);
+            foreach (var bookmark in LoadMap.instance.bookmarks)
+            {
+                CreateAndPlaceBookmark(bookmark);
+            }
         }
     }
 

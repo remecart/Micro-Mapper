@@ -4890,8 +4890,7 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1832135455928731655}
+  m_Children: []
   m_Father: {fileID: 1093831944}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &575279363
@@ -4915,7 +4914,7 @@ MonoBehaviour:
   cache: 0
   length: 0
   audioSource: {fileID: 575279364}
-  hitsoundPrefab: {fileID: 1079909465414638502}
+  hitsoundPrefab: {fileID: 6583740759473559169, guid: ca93c00688dc08443b82ffc394b2acaf, type: 3}
 --- !u!82 &575279364
 AudioSource:
   m_ObjectHideFlags: 0
@@ -9722,14 +9721,18 @@ MonoBehaviour:
     _difficultyBeatmapSets: []
   difficulty:
     _difficulty: 
-    _difficultyRank: 
+    _difficultyRank: 0
     _beatmapFilename: 
     _noteJumpMovementSpeed: 0
     _noteJumpStartBeatOffset: 0
     _beatmapColorSchemeIdx: 0
     _environmentNameIdx: 0
-  folderPath: C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Ultrakill\_0_
-    The Fire Is Gone - ultrakill
+    _customData:
+      _editorOffset: 0
+      _editorOldOffset: 0
+      _requirements: []
+      _difficultyLabel: 
+  folderPath: C:\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\CustomWIPLevels\MERGED
   loadmap: {fileID: 1093831945}
   jumpDistance: 0
   jumpDuration: 0
@@ -9992,6 +9995,7 @@ MonoBehaviour:
   timeInSeconds: 0
   timeInBeats: 0
   songSpeed: 1
+  dontLoadAudio: 0
 --- !u!1 &1098435631
 GameObject:
   m_ObjectHideFlags: 0
@@ -15123,7 +15127,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Beta 1.0_1
+  m_text: 'Beta 1.0_2
+
+'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -17059,102 +17065,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3017240929996462788}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!82 &83231021090616974
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1079909465414638502}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
 --- !u!224 &147616157834619313
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17410,24 +17320,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1805530353354351899}
   m_CullTransparentMesh: 1
---- !u!1 &1079909465414638502
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1832135455928731655}
-  - component: {fileID: 3502983194419090504}
-  - component: {fileID: 83231021090616974}
-  m_Layer: 0
-  m_Name: HitSoundPrefab
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
 --- !u!224 &1111001504663319117
 RectTransform:
   m_ObjectHideFlags: 0
@@ -17551,21 +17443,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &1832135455928731655
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1079909465414638502}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 575279362}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!23 &1865222032447544348
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -18009,19 +17886,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5646138669840965929}
   m_CullTransparentMesh: 1
---- !u!114 &3502983194419090504
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1079909465414638502}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75350e4be77ce974f883dabbefe94aa9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  time: 3289417
 --- !u!1 &3847506559794390966
 GameObject:
   m_ObjectHideFlags: 0

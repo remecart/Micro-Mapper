@@ -60,6 +60,5 @@ public class SkyboxManager : MonoBehaviour
             material.SetTexture("_Tex", cubemaps[a]);
             RenderSettings.skybox = material; // Apply the material to the skybox
         }
-        Debug.Log("Skybox index: " + a);
     }
 }

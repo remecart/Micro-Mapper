@@ -117,53 +117,53 @@ public class ReadMapInfo : MonoBehaviour
 [System.Serializable]
 public class Info
 {
-    public string _version;
-    public string _songName;
-    public string _songSubName;
-    public string _songAuthorName;
-    public string _levelAuthorName;
-    public float _beatsPerMinute;
-    public float _shuffle;
-    public float _shufflePeriod;
-    public float _previewStartTime;
-    public float _previewDuration;
-    public string _songFilename;
-    public string _coverImageFilename;
-    public string _environmentName;
-    public float _songTimeOffset;
-    public _customData _customData;
-    public List<_difficultyBeatmapSets> _difficultyBeatmapSets;
+    public string _version = "2.1.0";
+    public string _songName = "";
+    public string _songSubName = "";
+    public string _songAuthorName = "";
+    public string _levelAuthorName = "";
+    public float _beatsPerMinute = 100;
+    public float _shuffle = 0;
+    public float _shufflePeriod = 0;
+    public float _previewStartTime = 0;
+    public float _previewDuration = 10;
+    public string _songFilename = "";
+    public string _coverImageFilename = "";
+    public string _environmentName = "";
+    public float _songTimeOffset = 0;
+    public _customData _customData = new _customData();
+    public List<_difficultyBeatmapSets> _difficultyBeatmapSets = new List<_difficultyBeatmapSets>();
 }
 
 [System.Serializable]
 public class _customData
 {
-    public _editors _editors;
+    public _editors _editors = new _editors();
 }
 
 [System.Serializable]
 public class _editors
 {
-    public string _lastEditedBy;
+    public string _lastEditedBy = "Micro Mapper";
 }
 
 [System.Serializable]
 public class _difficultyBeatmapSets
 {
-    public string _beatmapCharacteristicName;
+    public string _beatmapCharacteristicName = "Standard";
     public List<_difficultyBeatmaps> _difficultyBeatmaps;
 }
 
 [System.Serializable]
 public class _difficultyBeatmaps
 {
-    public string _difficulty;
-    public int _difficultyRank;
-    public string _beatmapFilename;
-    public float _noteJumpMovementSpeed;
-    public float _noteJumpStartBeatOffset;
-    public int _beatmapColorSchemeIdx;
-    public int _environmentNameIdx;
+    public string _difficulty = "ExpertPlus";
+    public int _difficultyRank = 7;
+    public string _beatmapFilename = "ExpertPlusStandard.dat";
+    public float _noteJumpMovementSpeed = 20;
+    public float _noteJumpStartBeatOffset = 0;
+    public int _beatmapColorSchemeIdx = 0;
+    public int _environmentNameIdx = 0;
     public _difficultyBeatmapsCustomData _customData;
 }
 

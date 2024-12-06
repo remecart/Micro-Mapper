@@ -258,7 +258,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 5969472802499246274}
         m_TargetAssemblyTypeName: LoadTab, Assembly-CSharp
-        m_MethodName: LoadSong
+        m_MethodName: LoadSongList
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

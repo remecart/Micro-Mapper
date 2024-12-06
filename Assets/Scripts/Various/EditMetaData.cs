@@ -14,7 +14,9 @@ public class EditMetaData : MonoBehaviour
     public string folderPath;
     public List<TMP_InputField> inputs;
     private string infoFolderPath;
-
+    public GameObject popUpPrefab;
+    public Transform popUpParent;
+    
     void Start()
     {
         if (GameObject.FindWithTag("FolderPath")) folderPath = GameObject.FindWithTag("FolderPath").GetComponent<FolderPath>().path;
@@ -28,13 +30,18 @@ public class EditMetaData : MonoBehaviour
 
         string rawData = File.ReadAllText(Path.Combine(folderPath, infoPath));
         metaData = JsonUtility.FromJson<Info>(rawData);
-
-        File.WriteAllText(folderPath + "\\info_2.dat", JsonUtility.ToJson(metaData, true));
+        
+        // File.WriteAllText(folderPath + "\\info_2.dat", JsonUtility.ToJson(metaData, true));
 
         infoFolderPath = Path.Combine(folderPath, infoPath);
 
         // put calculate thing here
         LoadValues();
+    }
+
+    void Update()
+    {
+        if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.S)) SaveInfo();
     }
 
     void LoadValues()
@@ -66,14 +73,52 @@ public class EditMetaData : MonoBehaviour
     public void SaveInfo()
     {
         SaveValues();
-        File.WriteAllText(infoFolderPath,JsonUtility.ToJson(metaData.ToString(),true));
+        metaData._customData._editors._lastEditedBy = "Micro Mapper";
+        File.WriteAllText(infoFolderPath, JsonUtility.ToJson(metaData, true));
+        
+        GameObject popUp = Instantiate(popUpPrefab);
+        popUp.transform.SetParent(popUpParent);
+        popUp.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -400);
+        popUp.GetComponent<TextMeshProUGUI>().text = "Map saved successfully!";
+
+        for (int x = 0; x < metaData._difficultyBeatmapSets.Count; x++)
+        {
+            for (int y = 0; y < metaData._difficultyBeatmapSets[x]._difficultyBeatmaps.Count; y++)
+            {
+                var path = Path.Combine(folderPath, metaData._difficultyBeatmapSets[x]._difficultyBeatmaps[y]._beatmapFilename);
+                if (!File.Exists(path))
+                {
+                    beatsV3 beats = new beatsV3
+                    {
+                        version = "3.3.0",
+                        bpmEvents = new List<bpmEvents>(),
+                        rotationEvents = new List<rotationEvents>(),
+                        colorNotes = new List<colorNotes>(),
+                        bombNotes = new List<bombNotes>(),
+                        obstacles = new List<obstacles>(),
+                        sliders = new List<sliders>(),
+                        burstSliders = new List<burstSliders>(),
+                        basicBeatmapEvents = new List<basicBeatmapEvents>(),
+                        timings = new List<timings>(),
+                        customData = new customData(),
+                        waypoints = new List<timings>(),
+                        colorBoostBeatmapEvents = new List<timings>(),
+                        lightColorEventBoxGroups = new List<timings>(),
+                        vfxEventBoxGroups = new List<timings>(),
+                        _fxEventsCollection = new List<timings>(),
+                        basicEventTypesWithKeywords = new List<timings>(),
+                    };
+                    File.WriteAllText(path, JsonUtility.ToJson(beats, true));
+                }
+            }
+        }
     }
 
     public void PickSong()
     {
         // Define file filters for allowed extensions.
-        var extensions = new[] { 
-            new ExtensionFilter("Audio Files", "ogg", "wav", "egg") 
+        var extensions = new[] {
+            new ExtensionFilter("Audio Files", "ogg", "wav", "egg")
         };
 
         string[] paths = StandaloneFileBrowser.OpenFilePanel("Select a File", folderPath, extensions, false);
@@ -90,12 +135,12 @@ public class EditMetaData : MonoBehaviour
             }
         }
     }
-    
+
     public void PickCover()
     {
         // Define file filters for allowed extensions.
-        var extensions = new[] { 
-            new ExtensionFilter("Image Files", "png", "jpg") 
+        var extensions = new[] {
+            new ExtensionFilter("Image Files", "png", "jpg")
         };
 
         string[] paths = StandaloneFileBrowser.OpenFilePanel("Select a File", folderPath, extensions, false);

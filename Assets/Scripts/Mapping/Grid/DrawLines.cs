@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -122,7 +123,8 @@ public class DrawLines : MonoBehaviour
                     fbeat;
         int repeat = Mathf.CeilToInt(end - start);
 
-        int max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+        int max = Int32.MaxValue;
+        if (LoadSong.instance.audioSource.clip) max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
         int beat = Mathf.CeilToInt(fbeat);
 
         foreach (Transform child in BeatNumbers.instance.parent.transform)
@@ -232,10 +234,12 @@ public class DrawLines : MonoBehaviour
     public void FixPositions()
     {
         float lowerBound = 0;
-        float upperBound =
+        float upperBound = int.MinValue;
+        if (LoadSong.instance.audioSource.clip) upperBound =
             SpawnObjects.instance.PositionFromBeat(
                 SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length)) *
             SpawnObjects.instance.editorScale;
+        
 
         foreach (var item in lines)
         {

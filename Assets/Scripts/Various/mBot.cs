@@ -93,13 +93,21 @@ public class mBot : MonoBehaviour
         newLeftSaberColor.a = 1f;
         newRightSaberColor.a = 1f;
 
-        // Convert to HSV and adjust saturation if needed
+        // Convert to HSV
         Color.RGBToHSV(newLeftSaberColor, out var leftH, out var leftS, out var leftV);
         Color.RGBToHSV(newRightSaberColor, out var rightH, out var rightS, out var rightV);
 
-        if (leftS > 0.4f) leftS -= 0.4f;
-        if (rightS > 0.4f) rightS -= 0.4f;
+        // Adjust saturation if needed
+        leftS /= 2f;
+        rightS /= 2f;
 
+        // Increase brightness (V) and clamp to 1
+        // leftV = Mathf.Min((leftV + 9) / 10f, 1f); // Boost by 0.4, cap at 1
+        // rightV = Mathf.Min((rightV + 9) / 10f, 1f); // Boost by 0.4, cap at 1
+        leftV = 1;
+        rightV = 1;
+        
+        // Reconstruct colors
         newLeftSaberColor = Color.HSVToRGB(leftH, leftS, leftV);
         newRightSaberColor = Color.HSVToRGB(rightH, rightS, rightV);
 
@@ -111,7 +119,7 @@ public class mBot : MonoBehaviour
         {
             LeftSaberColor = newLeftSaberColor;
             Color.RGBToHSV(LeftSaberColor, out var H, out var S, out var V);
-            var HandleColor = Color.HSVToRGB(H, S, V - .6f);
+            var HandleColor = Color.HSVToRGB(H, S, Mathf.Clamp(V - 0.6f, 0f, 1f));
             HandleColor.a = 1f; // Ensure alpha is at max
 
             LeftSaberMaterials[0].color = LeftSaberColor;
@@ -122,13 +130,14 @@ public class mBot : MonoBehaviour
         {
             RightSaberColor = newRightSaberColor;
             Color.RGBToHSV(RightSaberColor, out var H, out var S, out var V);
-            var HandleColor = Color.HSVToRGB(H, S, V - .6f);
+            var HandleColor = Color.HSVToRGB(H, S, Mathf.Clamp(V - 0.6f, 0f, 1f));
             HandleColor.a = 1f; // Ensure alpha is at max
 
             RightSaberMaterials[0].color = RightSaberColor;
             RightSaberMaterials[1].color = HandleColor;
         }
     }
+
 
     // Update is called once per frame
     void Update()
@@ -180,8 +189,7 @@ public class mBot : MonoBehaviour
 
         if (playing)
         {
-            UpdateSaberPositionAndRotation(leftSaber, lastLeft, left);
-            UpdateSaberPositionAndRotation(rightSaber, lastRight, right);
+            UpdateSabers();
         }
 
         var leftTrail = leftSaber.transform.GetChild(0).GetChild(3).GetComponent<TrailRenderer>();
@@ -199,6 +207,12 @@ public class mBot : MonoBehaviour
             leftTrail.enabled = true;
             rightTrail.enabled = true;
         }
+    }
+
+    public void UpdateSabers()
+    {
+        UpdateSaberPositionAndRotation(leftSaber, lastLeft, left);
+        UpdateSaberPositionAndRotation(rightSaber, lastRight, right);
     }
 
     public LineRenderer test;
