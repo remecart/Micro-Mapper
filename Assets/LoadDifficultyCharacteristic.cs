@@ -1,9 +1,7 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -66,15 +64,15 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
                     if (d._difficulty == cacheDifficultyName)
                     {
                         input[0].text = d._customData._difficultyLabel;
-                        input[1].text = d._noteJumpMovementSpeed.ToString();
-                        input[2].text = d._noteJumpStartBeatOffset.ToString();
+                        input[1].text = d._noteJumpMovementSpeed.ToString(CultureInfo.InvariantCulture);
+                        input[2].text = d._noteJumpStartBeatOffset.ToString(CultureInfo.InvariantCulture);
                     }
                 }
             }
         }
     }
 
-    public void DeleteOrAddDifficulty(string name)
+    public void DeleteOrAddDifficulty(string diffName)
     {
         foreach (var diff in difficulties)
         {
@@ -86,31 +84,32 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
             {
                 foreach (var d in t._difficultyBeatmaps.ToList())
                 {
-                    if (d._difficulty == name)
+                    if (d._difficulty == diffName)
                     {
                         t._difficultyBeatmaps.Remove(d);
                         cacheDifficultyName = d._difficulty;
-                        ChangeCharacteristics(cacheCharacteristicName);
+                        ChangeCharacteristics(cacheCharacteristicName); 
                         return;
                     }
                 }
+                    
                 t._difficultyBeatmaps.Add(new _difficultyBeatmaps
                 {
-                    _difficulty = name,
+                    _difficulty = diffName,
                     _difficultyRank = 7,
-                    _beatmapFilename = name + cacheCharacteristicName + ".dat",
+                    _beatmapFilename = diffName + cacheCharacteristicName + ".dat",
                     _noteJumpStartBeatOffset = 0,
                     _noteJumpMovementSpeed = 20,
                     _customData = new _difficultyBeatmapsCustomData()
                 });
                 
-                cacheDifficultyName = name;
+                cacheDifficultyName = diffName;
                 ChangeCharacteristics(cacheCharacteristicName);
             }
         }
     }
 
-    public void ChangeDifficulties(string name)
+    public void ChangeDifficulties(string diffName)
     {
         foreach (var t in editMetaData.metaData._difficultyBeatmapSets)
         {
@@ -118,9 +117,9 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
             {
                 foreach (var d in t._difficultyBeatmaps)
                 {
-                    if (d._difficulty == name)
+                    if (d._difficulty == diffName)
                     {
-                        cacheDifficultyName = name;
+                        cacheDifficultyName = diffName;
                         LoadDifficultyData();
                         LoadBeatmapCharacteristic(t);
                     }
@@ -129,12 +128,12 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    public void ChangeCharacter(string name)
+    public void ChangeCharacter(string charName)
     {
-        ChangeCharacteristics(name, true);
+        ChangeCharacteristics(charName, true);
     }
     
-    void ChangeCharacteristics(string name, bool forceFirstDifficultyAsCache = false)
+    void ChangeCharacteristics(string charName, bool forceFirstDifficultyAsCache = false)
     {
         // Ensure difficulties list is valid
         if (difficulties == null || difficulties.Count == 0)
@@ -154,7 +153,7 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
 
         foreach (var t in editMetaData.metaData._difficultyBeatmapSets)
         {
-            if (t != null && t._beatmapCharacteristicName == name)
+            if (t != null && t._beatmapCharacteristicName == charName)
             {
                 cacheCharacteristicName = t._beatmapCharacteristicName;
 
