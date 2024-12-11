@@ -165,7 +165,7 @@ public class mBot : MonoBehaviour
             }
         }
         
-        if (!PreviewMode.instance.Enabled)
+        if (!PreviewMode.instance.previewEnabled)
         {
             if (curveLines[0].positionCount != 0)
             {
@@ -182,7 +182,7 @@ public class mBot : MonoBehaviour
                 length = LoadSong.instance.audioSource.clip.length;
         }
         
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.enableMBot))
+        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.enableMBot) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftControl))
         {
             ToggleMBot(); 
         }
@@ -418,9 +418,9 @@ public class mBot : MonoBehaviour
 
     void GetNextNote()
     {
-        left = null;
-        right = null;
-
+        float closestLeftBeat = float.MaxValue;
+        float closestRightBeat = float.MaxValue;
+        
         int beats = Mathf.FloorToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
 
         for (int i = 0; i < beats - Mathf.FloorToInt(currentBeat); i++)
@@ -434,10 +434,16 @@ public class mBot : MonoBehaviour
                 {
                     if (noteData.b > currentBeat)
                     {
-                        if (noteData.c == 0 && left == null) left = noteData;
-                        else if (noteData.c == 1 && right == null) right = noteData;
-
-                        if (left != null && right != null) return;
+                        if (noteData.c == 0 && noteData.b < closestLeftBeat)
+                        {
+                            left = noteData;
+                            closestLeftBeat = noteData.b;
+                        }
+                        else if (noteData.c == 1 && noteData.b < closestRightBeat)
+                        {
+                            right = noteData;
+                            closestRightBeat = noteData.b;
+                        }
                     }
                 }
             //}
@@ -446,8 +452,6 @@ public class mBot : MonoBehaviour
 
     void GetLastNote()
     {
-        lastLeft = null;
-        lastRight = null;
         float closestLeftBeat = float.MinValue;
         float closestRightBeat = float.MinValue;
 

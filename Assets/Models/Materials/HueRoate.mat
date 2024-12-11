@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: HueRoate
-  m_Shader: {fileID: 4800000, guid: 351e2c3f4f0ff214b87dee527986b604, type: 3}
+  m_Shader: {fileID: 4800000, guid: 39a4f88a04e0bd94e8748af4876ff6b0, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
@@ -69,6 +69,8 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 1
     - _HueShift: 0
+    - _HueShiftAmount: 0.5
+    - _HueShiftSpeed: 0.1
     - _Metallic: 0
     - _Mode: 0
     - _OcclusionStrength: 1

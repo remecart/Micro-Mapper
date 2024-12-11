@@ -5,6 +5,7 @@ using System.IO.Compression;
 
 public class ExplorerManager : MonoBehaviour
 {
+    public string ZipPath;
     public void OpenExplorerAtPath()
     {
         var path = EditMetaData.instance.folderPath;
@@ -16,7 +17,7 @@ public class ExplorerManager : MonoBehaviour
         });
     }
     
-    public static void CreateZipInFolder()
+    public void CreateZipInFolder()
     {
         var path = EditMetaData.instance.folderPath;
         
@@ -27,7 +28,7 @@ public class ExplorerManager : MonoBehaviour
         }
 
         // Create a temporary zip file path
-        string tempZipFilePath = Path.Combine(Path.GetTempPath(), EditMetaData.instance.metaData._songName, ".zip");
+        string tempZipFilePath = Path.Combine(Path.GetTempPath(), EditMetaData.instance.metaData._songName + ".zip");
 
         // If the temp zip file already exists, delete it
         if (File.Exists(tempZipFilePath))
@@ -39,11 +40,13 @@ public class ExplorerManager : MonoBehaviour
         ZipFile.CreateFromDirectory(path, tempZipFilePath);
 
         // Move the zip file into the target directory
-        string finalZipFilePath = Path.Combine(path, EditMetaData.instance.metaData._songName, ".zip");
+        string finalZipFilePath = Path.Combine(path, EditMetaData.instance.metaData._songName + ".zip");
         if (File.Exists(finalZipFilePath))
         {
             File.Delete(finalZipFilePath);
         }
         File.Move(tempZipFilePath, finalZipFilePath);
+
+        ZipPath = finalZipFilePath;
     }
 }

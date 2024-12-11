@@ -162,7 +162,7 @@ public class Settings : MonoBehaviour
                     LoadSong.instance.audioSource.Stop();
                     if (SpawnObjects.instance.playing) LoadSong.instance.Offset(SpawnObjects.instance.GetRealTimeFromBeat(SpawnObjects.instance.currentBeat));
                 }
-                if (ImGui.SliderFloat("Note Distance", ref config.mapping.noteDistance, 4, 12))
+                if (ImGui.SliderFloat("Note Distance", ref config.mapping.noteDistance, 4f, 12f))
                 {
                     SpawnObjects.instance.spawnInMs = config.mapping.noteDistance * 100;
                     SpawnObjects.instance.LoadObjectsFromScratch(SpawnObjects.instance.currentBeat, true, true);

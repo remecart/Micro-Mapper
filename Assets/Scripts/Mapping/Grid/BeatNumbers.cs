@@ -19,7 +19,7 @@ public class BeatNumbers : MonoBehaviour
 
     public void SpawnNumber(int beat)
     {
-        int length = int.MaxValue;
+        var length = int.MaxValue;
         if (LoadSong.instance.audioSource.clip) length = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
         if (beat < SpawnObjects.instance.BeatFromRealTime(length))
         {

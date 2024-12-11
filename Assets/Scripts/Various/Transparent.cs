@@ -31,25 +31,31 @@ public class Transparent : MonoBehaviour
     void Update()
     {
         if (updateColor && material[0] && material[1] && material[2]) getAllMaterials = true;
-        if (updateColor) GetColor();
+        if (getAllMaterials) GetColor();
         SetTransparent();
     }
 
     void SetTransparent()
     {
-        if (transform.position.z < grid.position.z)
+        if (transform.position.z < 0)
         {
             foreach (var item in material)
             {
                 item.SetFloat("_Transparent", 1f);
+                if (PreviewMode.instance && !PreviewMode.instance.previewEnabled)
+                {
+                    item.SetTexture("_ScreenspaceTexture", tex);
+                }
+                else
+                {
+                    item.SetTexture("_ScreenspaceTexture", tex2);
+                }
             }
         }
         else
         {
             foreach (var item in material)
             {
-                if (PreviewMode.instance != null && !PreviewMode.instance.Enabled) item.SetTexture("_ScreenspaceTexture", tex);
-                else item.SetTexture("_ScreenspaceTexture", tex2);
                 item.SetFloat("_Transparent", 0f);
             }
         }

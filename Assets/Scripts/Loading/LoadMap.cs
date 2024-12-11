@@ -53,6 +53,12 @@ public class LoadMap : MonoBehaviour
     void Start()
     {
         instance = this;
+
+        if (FolderPath.instance != null)
+        {
+            diff = FolderPath.instance.diff;
+            beatchar = FolderPath.instance.beatchar;
+        }
     }
     void Update()
     {
@@ -250,6 +256,7 @@ public class LoadMap : MonoBehaviour
 
         GameObject popUp = Instantiate(popUpPrefab);
         popUp.transform.SetParent(popUpParent);
+        popUp.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, -400);
         popUp.GetComponent<TextMeshProUGUI>().text = "Map saved successfully!";
 
         if (closeEditor) Application.Quit();

@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using System.IO;
+using UnityEngine.SceneManagement;
 
 public class Menu : MonoBehaviour
 {
@@ -32,10 +30,16 @@ public class Menu : MonoBehaviour
 
     public void SaveExit()
     {
-        LoadMap.instance.Save(true);
+        LoadMap.instance.Save();
+        SceneManager.LoadScene("EditInfo");
+    }
+    
+    public void Exit()
+    {
+        SceneManager.LoadScene("EditInfo");
     }
 
-    public void Exit()
+    public void Quit()
     {
         Application.Quit();
     }

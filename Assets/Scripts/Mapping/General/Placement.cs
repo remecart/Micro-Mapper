@@ -789,7 +789,7 @@ public class Placement : MonoBehaviour
             var itemsToRemove = new List<colorNotes>();
             foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].colorNotes)
             {
-                if (item.x == note.x && item.y == note.y && item.b == note.b)
+                if (item.x == note.x && item.y == note.y && Mathf.Approximately(item.b, note.b))
                 {
                     itemsToRemove.Add(item);
                 }
@@ -798,6 +798,7 @@ public class Placement : MonoBehaviour
             // Remove the collected items
             foreach (var item in itemsToRemove)
             {
+                Debug.Log("E");
                 LoadMap.instance.beats[Mathf.FloorToInt(item.b)].colorNotes.Remove(item);
             }
 

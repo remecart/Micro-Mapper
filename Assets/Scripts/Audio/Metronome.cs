@@ -17,8 +17,11 @@ public class Metronome : MonoBehaviour
 
     public void MetronomeSound()
     {
-        audioSource.volume = Settings.instance.config.audio.metronome;
-        audioSource.PlayOneShot(clip);
+        if (SpawnObjects.instance.playing)
+        {
+            audioSource.volume = Settings.instance.config.audio.metronome;
+            audioSource.PlayOneShot(clip);
+        }
     }
 
     public void ChangeMetronomeVolume(Slider slider)

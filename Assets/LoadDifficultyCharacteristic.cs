@@ -15,8 +15,8 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
     public List<Texture2D> addDeleteTextures;
     public List<TMP_InputField> input;
     
-    private string cacheCharacteristicName = "Standard";
-    private string cacheDifficultyName;
+    public string cacheCharacteristicName = "Standard";
+    public string cacheDifficultyName;
 
     public List<GameObject> requirementButtons;
 

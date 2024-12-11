@@ -4,6 +4,7 @@ using UnityEngine;
 using System.IO;
 using System;
 using static LoadMap;
+using Application = UnityEngine.Application;
 
 public class ReadMapInfo : MonoBehaviour
 {
@@ -25,6 +26,10 @@ public class ReadMapInfo : MonoBehaviour
     {
         instance = this;
 
+        if (FolderPath.instance != null)
+        {
+            folderPath = FolderPath.instance.path;
+        }
         string infoPath = "info.dat";
 
         if (!folderPath.Contains("info.dat"))
@@ -48,28 +53,31 @@ public class ReadMapInfo : MonoBehaviour
             string rawData = File.ReadAllText(Path.Combine(folderPath, infoPath));
             info = JsonUtility.FromJson<Info>(rawData);
 
-            if (arguments[1] != null)
+            if (arguments.Length > 1)
             {
-                for (int i = 0; i < info._difficultyBeatmapSets.Count; i++)
+                if (!string.IsNullOrEmpty(arguments[1]))
                 {
-                    for (int j = 0; j < info._difficultyBeatmapSets[i]._difficultyBeatmaps.Count; j++)
+                    for (int i = 0; i < info._difficultyBeatmapSets.Count; i++)
                     {
-                        var name = Path.GetFileName(arguments[1]);
-                        if (info._difficultyBeatmapSets[i]._difficultyBeatmaps[j]._beatmapFilename == name)
+                        for (int j = 0; j < info._difficultyBeatmapSets[i]._difficultyBeatmaps.Count; j++)
                         {
-                            string beatchar = info._difficultyBeatmapSets[i]._beatmapCharacteristicName.ToString();
+                            var name = Path.GetFileName(arguments[1]);
+                            if (info._difficultyBeatmapSets[i]._difficultyBeatmaps[j]._beatmapFilename == name)
+                            {
+                                string beatchar = info._difficultyBeatmapSets[i]._beatmapCharacteristicName.ToString();
 
-                            // i tried for like an hour to parse enum but it didnt work so i give up 
-                            if (beatchar == "Standard") loadmap.beatchar = _beatmapCharacteristicName.Standard;
-                            else if (beatchar == "Lawless") loadmap.beatchar = _beatmapCharacteristicName.Lawless;
+                                // i tried for like an hour to parse enum but it didnt work so i give up 
+                                if (beatchar == "Standard") loadmap.beatchar = _beatmapCharacteristicName.Standard;
+                                else if (beatchar == "Lawless") loadmap.beatchar = _beatmapCharacteristicName.Lawless;
 
-                            string diff = info._difficultyBeatmapSets[i]._difficultyBeatmaps[j]._difficulty.ToString();
-                            if (diff == "ExpertPlus") loadmap.diff = _difficulty.ExpertPlus;
-                            else if (diff == "Expert") loadmap.diff = _difficulty.Expert;
-                            else if (diff == "Hard") loadmap.diff = _difficulty.Hard;
-                            else if (diff == "Normal") loadmap.diff = _difficulty.Normal;
-                            else if (diff == "Easy") loadmap.diff = _difficulty.Easy;
+                                string diff = info._difficultyBeatmapSets[i]._difficultyBeatmaps[j]._difficulty.ToString();
+                                if (diff == "ExpertPlus") loadmap.diff = _difficulty.ExpertPlus;
+                                else if (diff == "Expert") loadmap.diff = _difficulty.Expert;
+                                else if (diff == "Hard") loadmap.diff = _difficulty.Hard;
+                                else if (diff == "Normal") loadmap.diff = _difficulty.Normal;
+                                else if (diff == "Easy") loadmap.diff = _difficulty.Easy;
 
+                            }
                         }
                     }
                 }

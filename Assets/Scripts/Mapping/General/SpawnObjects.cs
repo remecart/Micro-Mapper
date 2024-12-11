@@ -393,6 +393,8 @@ public class SpawnObjects : MonoBehaviour
                 SpawnObjectsAtBeat(0, fbeat + spawnOffset, fbeat - spawnOffset, false);
             }
         }
+        
+        mBot.instance.UpdateSabers();
 
         LoadWallsBackwards();
     }
@@ -404,7 +406,7 @@ public class SpawnObjects : MonoBehaviour
         {
             var obstacleData = child.GetComponent<ObstacleData>();
 
-            if (child.transform.localPosition.z < PositionFromBeat(currentBeat - 12) * editorScale)
+            if (child.transform.localPosition.z < PositionFromBeat(currentBeat - spawnOffset) * editorScale)
             {
                 if (!obstacleData)
                 {

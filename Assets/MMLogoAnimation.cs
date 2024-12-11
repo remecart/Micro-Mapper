@@ -8,9 +8,9 @@ public class HueAnimator : MonoBehaviour
 
     void Update()
     {
-        if (hueShiftMaterial != null)
-        {
-            hueShiftMaterial.SetFloat("_HueShift", hueShiftValue);
-        }
+        // if (hueShiftMaterial != null)
+        // {
+        //     hueShiftMaterial.SetFloat("_HueShift", hueShiftValue);
+        // }
     }
 }

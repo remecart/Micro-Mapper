@@ -789,6 +789,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   path: 
+  diff: 0
+  beatchar: 0
 --- !u!114 &498092028
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3567,7 +3569,6 @@ GameObject:
   - component: {fileID: 1150578051}
   - component: {fileID: 1150578054}
   - component: {fileID: 1150578053}
-  - component: {fileID: 1150578052}
   m_Layer: 5
   m_Name: Image (4)
   m_TagString: Untagged
@@ -3591,23 +3592,9 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 659, y: 129.3}
-  m_SizeDelta: {x: 100, y: 100}
+  m_AnchoredPosition: {x: 309.2, y: 221.2}
+  m_SizeDelta: {x: 60, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1150578052
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1150578050}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8f8711ce7a9a51e44b304441c1bbe366, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  hueShiftMaterial: {fileID: 2100000, guid: 26adedf42d6ada6448f37d7525c7877d, type: 2}
-  hueShiftValue: 0
 --- !u!114 &1150578053
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3628,7 +3615,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Texture: {fileID: 0}
+  m_Texture: {fileID: 2800000, guid: f2b2f718a8c6c384cba7991ea8d9ba28, type: 3}
   m_UVRect:
     serializedVersion: 2
     x: 0
@@ -5718,7 +5705,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1937103945
 RectTransform:
   m_ObjectHideFlags: 0

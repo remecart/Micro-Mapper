@@ -1,14 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 public class PreviewMode : MonoBehaviour
 {
     public static PreviewMode instance;
-    public List<GameObject> gameObjects;
+    public List<GameObject> moveAwayOnPreview;
+    public List<GameObject> moveBackOnPreview;
     public List<GameObject> uiElements;
-    public bool Enabled = true;
+    public bool previewEnabled = true;
     public RawImage img;
     public List<Texture2D> textures;
     public PlayerFly fly;
@@ -35,18 +37,23 @@ public class PreviewMode : MonoBehaviour
     private void Toggle()
     {
         int a = -100000;
-        if (Enabled) a = 100000;
-        foreach (var item in gameObjects)
+        if (previewEnabled) a = 100000;
+        foreach (var item in moveAwayOnPreview)
         {
             item.transform.localPosition = new Vector3(item.transform.localPosition.x, item.transform.localPosition.y + a, item.transform.localPosition.z);
+        }
+        
+        foreach (var item in moveBackOnPreview)
+        {
+            item.transform.localPosition = new Vector3(item.transform.localPosition.x, item.transform.localPosition.y + a * -1f, item.transform.localPosition.z);
         }
 
         foreach (var item in uiElements)
         {
-            item.SetActive(!Enabled);
+            item.SetActive(!previewEnabled);
         }
 
-        if (Enabled)
+        if (previewEnabled)
         {
             cachePos = fly.gameObject.transform.parent.position;
             cacheXRot = fly.transform.eulerAngles.x;
@@ -66,6 +73,6 @@ public class PreviewMode : MonoBehaviour
             fly.enabled = true;
         }
 
-        Enabled = !!!Enabled; // They used to be friends, until they were....
+        previewEnabled = !!!previewEnabled; // They used to be friends, until they were....
     }
 }
