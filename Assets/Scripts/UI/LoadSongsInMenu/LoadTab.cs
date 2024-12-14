@@ -21,6 +21,7 @@ public class LoadTab : MonoBehaviour, IPointerClickHandler
         {
             Settings.instance.config.general.folderPaths.Remove(LoadMapsFromPath.instance.paths[index]);
             LoadMapsFromPath.instance.paths = Settings.instance.config.general.folderPaths;
+            ReloadTabs.instance.Tabs();
             LoadMapsFromPath.instance.LoadMapFolders(0);
         }
     }

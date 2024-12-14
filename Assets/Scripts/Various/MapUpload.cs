@@ -17,7 +17,8 @@ public class MapUpload : MonoBehaviour
             Debug.LogError("File does not exist at path: " + filePath);
             return;
         }
-
+        
+        Application.OpenURL(uploadUrl);
         // StartCoroutine(UploadFileCoroutine(filePath));
     }
 

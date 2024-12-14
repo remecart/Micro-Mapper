@@ -26,9 +26,13 @@ public class NewMapFolderMenu : MonoBehaviour
         if (!Directory.Exists(newPath))
         {
             Directory.CreateDirectory(newPath);
+            File.WriteAllText(newPath + "\\Info.dat", JsonUtility.ToJson(info, true));
+            folderPath.path = newPath;
+            SceneManager.LoadScene("EditInfo");
         }
-        File.WriteAllText(newPath + "\\Info.dat", JsonUtility.ToJson(info, true));
-        folderPath.path = newPath;
-        SceneManager.LoadScene("EditInfo");
+        else
+        {
+            // put error text here
+        }
     }
 }

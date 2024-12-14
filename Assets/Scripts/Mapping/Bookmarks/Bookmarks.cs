@@ -166,7 +166,6 @@ public class Bookmarks : MonoBehaviour
     {
         Slider.SliderEvent sliderEvent = timeline.onValueChanged;
         timeline.onValueChanged = new Slider.SliderEvent();
-        Debug.Log(value);
         timeline.value = value;
         timeline.onValueChanged = sliderEvent;
     }

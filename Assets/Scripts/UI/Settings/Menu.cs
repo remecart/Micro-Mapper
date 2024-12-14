@@ -21,6 +21,7 @@ public class Menu : MonoBehaviour
     }
     public void OpenMenu()
     {
+        LoadSong.instance.audioSource.Stop();
         this.gameObject.transform.GetChild(0).gameObject.SetActive(true);
     }
     public void Continue()

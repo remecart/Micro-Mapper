@@ -29,5 +29,7 @@ public class ChangeOfScene : MonoBehaviour
                 }
             }
         }
+        
+        PopUpText.instance.Generate("Error: Cannot open map because no difficulty is selected!");
     }
 }

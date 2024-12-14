@@ -41,7 +41,7 @@ public class SelectObjects : MonoBehaviour
         GenerateText();
         HighlightSelectedObject();
 
-        if (!Settings.instance.isHovering && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu)
+        if (!Settings.instance.isHovering && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {

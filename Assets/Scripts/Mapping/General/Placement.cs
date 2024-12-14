@@ -1,13 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using TMPro;
-using Unity.Loading;
-using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.UI;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 public class Placement : MonoBehaviour
 {
@@ -35,7 +31,7 @@ public class Placement : MonoBehaviour
     public List<GameObject> Lines;
     public GameObject spectro;
     public GameObject spectroLine;
-    
+
     public bool allowDoubleTapping = true;
 
     public bool allowFusedNotePlacement = true;
@@ -49,12 +45,11 @@ public class Placement : MonoBehaviour
         MEgridSize = new Vector2Int(Settings.instance.config.mapping.mappingExtensions.gridWidth,
             Settings.instance.config.mapping.mappingExtensions.gridHeight);
 
-        input.text = ReadMapInfo.instance.info._beatsPerMinute.ToString();
         invertControls = Settings.instance.config.controls.invertNoteAngle;
         invertWallScroll = Settings.instance.config.controls.invertWallScroll;
 
         allowDoubleTapping = Settings.instance.config.mapping.allowDoubleTapping;
-        
+
         instance = this;
         foreach (GameObject item in objects)
         {
@@ -109,7 +104,7 @@ public class Placement : MonoBehaviour
     void Update()
     {
         if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting && !DrawInEditor.instance.drawing &&
-            !Menu.instance.open && !Bookmarks.instance.openMenu)
+            !Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen)
         {
             bufferTimeRunning -= Time.deltaTime;
             if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) &&
@@ -219,9 +214,9 @@ public class Placement : MonoBehaviour
             PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, previousDirection);
         }
     }
-    
+
     private bool skipNextTurn = false;
-    
+
     void Place()
     {
         Vector3 mousePosition = Input.mousePosition;
@@ -343,7 +338,7 @@ public class Placement : MonoBehaviour
                 {
                     timeSinceLastKeyPress = 0;
                 }
-                
+
                 if (Input.GetMouseButtonDown(0))
                     PlaceNote(SpawnObjects.instance.currentBeat, pos.x, pos.y, placementIndex, cd);
 
@@ -353,7 +348,6 @@ public class Placement : MonoBehaviour
                 }
 
                 skipNextTurn = cd is 4 or 5 or 6 or 7;
-
             }
             else if (placementIndex == 2)
             {
@@ -423,11 +417,10 @@ public class Placement : MonoBehaviour
 
             GameObject preview = objectParent.transform.GetChild(4).gameObject;
             preview.SetActive(true);
-            preview.transform.GetChild(0).GetComponent<TextMeshPro>().text = input.text;
             preview.transform.localPosition =
                 new Vector3(SpawnObjects.instance.BpmChangeSpawm.transform.position.x - 2f, 0.5f, 0);
 
-            if (Input.GetMouseButtonDown(0)) PlaceBpmChange(SpawnObjects.instance.currentBeat, float.Parse(input.text));
+            if (Input.GetMouseButtonDown(0)) PlaceBpmChange();
         }
         else
         {
@@ -442,8 +435,6 @@ public class Placement : MonoBehaviour
             DeleteObject();
         }
     }
-
-    public TMP_InputField input;
 
     void DeleteObject()
     {
@@ -899,40 +890,58 @@ public class Placement : MonoBehaviour
         SpawnObjects.instance.LoadObjectsFromScratch(b, true, true);
     }
 
-    void PlaceBpmChange(float b, float m)
+    void PlaceBpmChange()
     {
-        bool stackedCheck = false;
-        bpmEvents bpmEvent = new bpmEvents();
+        float maxDistance = 100f; // Maximum raycast distance
+        LayerMask layerMask; // Layer mask to filter objects
 
-        bpmEvent.b = b;
-        bpmEvent.m = m;
-
-        if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) &&
-            !allowFusedNotePlacement)
+        if (Camera.main != null)
         {
-            foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents)
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, maxDistance))
             {
-                if (item.m == bpmEvent.m && item.b == bpmEvent.b)
+                if (hit.collider.gameObject.CompareTag("BpmGrid"))
                 {
-                    stackedCheck = true;
-                    break;
+                    BpmMenu.instance.OpenMenu();   
                 }
             }
         }
-
-        if (!stackedCheck)
-        {
-            UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bpmEvent.b)],
-                Mathf.FloorToInt(bpmEvent.b), false);
-            LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents.Add(bpmEvent);
-            LoadMap.instance.bpmEvents.Add(bpmEvent);
-            LoadMap.instance.bpmEvents = LoadMap.instance.bpmEvents.OrderBy(x => x.b).ToList();
-        }
-
-        DrawLines.instance.DrawLinesWhenRequired();
-        SpawnObjects.instance.LoadObjectsFromScratch(b + 4, false, true);
-        SpawnObjects.instance.LoadObjectsFromScratch(b, true, true);
     }
+    
+    // bool stackedCheck = false;
+    // bpmEvents bpmEvent = new bpmEvents();
+    //
+    // bpmEvent.b = b;
+    // bpmEvent.m = m;
+    //
+    // if (!KeybindManager.instance.AreAllKeysHeld(Settings.instance.config.keybinds.allowFusedNotePlacement) &&
+    //     !allowFusedNotePlacement)
+    // {
+    //     foreach (var item in LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents)
+    //     {
+    //         if (item.m == bpmEvent.m && item.b == bpmEvent.b)
+    //         {
+    //             stackedCheck = true;
+    //             break;
+    //         }
+    //     }
+    // }
+    //
+    // if (!stackedCheck)
+    // {
+    //     UndoRedoManager.instance.SaveState(LoadMap.instance.beats[Mathf.FloorToInt(bpmEvent.b)],
+    //         Mathf.FloorToInt(bpmEvent.b), false);
+    //     LoadMap.instance.beats[Mathf.FloorToInt(b)].bpmEvents.Add(bpmEvent);
+    //     LoadMap.instance.bpmEvents.Add(bpmEvent);
+    //     LoadMap.instance.bpmEvents = LoadMap.instance.bpmEvents.OrderBy(x => x.b).ToList();
+    // }
+    //
+    // DrawLines.instance.DrawLinesWhenRequired();
+    // SpawnObjects.instance.LoadObjectsFromScratch(b + 4, false, true);
+    // SpawnObjects.instance.LoadObjectsFromScratch(b, true, true);
+
 
     IEnumerator PlaceWall(bool crouch)
     {

@@ -9,15 +9,15 @@ using System;
 
 public class SpawnObjects : MonoBehaviour
 {
-    private (int,int)[] precisionArray = new []
+    private (int, int)[] precisionArray = new[]
     {
         (1, 1),
         (1, 2)
     };
 
     private int currentIndex = 0;
-    
-    
+
+
     public static SpawnObjects instance;
     public float currentBeat;
     public float precision;
@@ -45,12 +45,12 @@ public class SpawnObjects : MonoBehaviour
 
     public void ChangeTime(Slider slider)
     {
-            LoadWallsBackwards();
-            currentBeat = Mathf.RoundToInt(slider.value *
-                                           Mathf.RoundToInt(
-                                               BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
-            LoadObjectsFromScratch(currentBeat, true, true);
-            DrawLines.instance.DrawLinesWhenRequired();
+        LoadWallsBackwards();
+        currentBeat = Mathf.RoundToInt(slider.value *
+                                       Mathf.RoundToInt(
+                                           BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
+        LoadObjectsFromScratch(currentBeat, true, true);
+        DrawLines.instance.DrawLinesWhenRequired();
 
         if (playing)
         {
@@ -94,197 +94,208 @@ public class SpawnObjects : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.X))
+        if (!Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen)
         {
-            currentIndex++;
-            if (currentIndex >= precisionArray.Length)
+            if (Input.GetKeyDown(KeyCode.X))
             {
-                currentIndex = 0;
-            }
-            numberator.text = precisionArray[currentIndex].Item1.ToString();
-            denominator.text = precisionArray[currentIndex].Item2.ToString();
-            
-            ChangePrecision();
-        }
-        
-        gameObject.transform.parent.parent.transform.position =
-            new Vector3(0, 0, PositionFromBeat(currentBeat) * -editorScale);
-        editorScale = Settings.instance.config.mapping.editorScale;
-        currentBeatText.text = (Mathf.FloorToInt(currentBeat / precision) * precision).ToString();
-
-        if (0 > currentBeat)
-        {
-            currentBeat = 0;
-            ReloadMap.instance.ReloadEverything();
-        }
-        else if (currentBeat > BeatFromRealTime(length) && length != 0)
-        {
-            currentBeat = BeatFromRealTime(length);
-            ReloadMap.instance.ReloadEverything();
-        }
-
-        if (playing)
-        {
-            UpdateTimeline();
-        }
-        
-        if (currentBeatPlay < Mathf.FloorToInt(currentBeat)) Metronome.instance.MetronomeSound();
-        currentBeatPlay = Mathf.FloorToInt(currentBeat);
-
-        if (Input.GetKey(KeyCode.LeftControl))
-        {
-            int prec = int.Parse(denominator.text);
-            int a = invertPrecisionScroll ? -1 : 1;
-
-            if (Input.mouseScrollDelta.y * a > 0)
-            {
-                if (Mathf.RoundToInt(prec * 2) <= 99)
+                currentIndex++;
+                if (currentIndex >= precisionArray.Length)
                 {
-                    prec = Mathf.RoundToInt(prec * 2);
-                    denominator.text = prec.ToString();
-                    precisionArray[currentIndex] = (int.Parse(numberator.text), prec);
-                    ChangePrecision();
+                    currentIndex = 0;
                 }
+
+                numberator.text = precisionArray[currentIndex].Item1.ToString();
+                denominator.text = precisionArray[currentIndex].Item2.ToString();
+
+                ChangePrecision();
             }
 
-            if (Input.mouseScrollDelta.y * a < 0)
+            gameObject.transform.parent.parent.transform.position =
+                new Vector3(0, 0, PositionFromBeat(currentBeat) * -editorScale);
+            editorScale = Settings.instance.config.mapping.editorScale;
+            currentBeatText.text = (Mathf.FloorToInt(currentBeat / precision) * precision).ToString();
+
+            if (0 > currentBeat)
             {
-                if (Mathf.RoundToInt(prec / 2) >= 1)
-                {
-                    prec = Mathf.RoundToInt(prec / 2);
-                    denominator.text = prec.ToString();
-                    precisionArray[currentIndex] = (int.Parse(numberator.text), prec);
-                    ChangePrecision();
-                }
+                currentBeat = 0;
+                ReloadMap.instance.ReloadEverything();
             }
-        }
-
-        if (Input.mouseScrollDelta.y != 0 && !playing && !Input.GetKey(KeyCode.LeftShift) &&
-            !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl))
-        {
-            float scroll = Input.mouseScrollDelta.y;
-            int a = invertTimelineScroll ? -1 : 1;
-            if (currentBeat + scroll * precision * a >= 0)
-            {
-                currentBeat += scroll * precision * a;
-                LoadObjectsFromScratch(currentBeat, true, true);
-                // Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
-                DrawLines.instance.DrawLinesWhenRequired();
-                if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
-                UpdateTimeline();
-                mBot.instance.UpdateSabers();
-                
-                // LoadWallsBackwards();
-                // currentBeat = Mathf.RoundToInt(slider.value *
-                //                                Mathf.RoundToInt(
-                //                                    BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
-                // LoadObjectsFromScratch(currentBeat, true, true);
-                // DrawLines.instance.DrawLinesWhenRequired();
-            }
-
-            if (currentBeat > BeatFromRealTime(length) && length != 0)
+            else if (currentBeat > BeatFromRealTime(length) && length != 0)
             {
                 currentBeat = BeatFromRealTime(length);
+                ReloadMap.instance.ReloadEverything();
             }
-        }
 
-        if (length == 0 && LoadSong.instance.audioSource.clip != null)
-        {
-            length = LoadSong.instance.audioSource.clip.length;
-            DrawLines.instance.DrawLinesWhenRequired();
-        }
-
-        spawnOffset = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000) -
-                      BeatFromRealTime(GetRealTimeFromBeat(currentBeat));
-
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepForward))
-        {
-            currentBeat = currentBeat + precision;
-            LoadObjectsFromScratch(currentBeat, true, true);
-            DrawLines.instance.DrawLinesWhenRequired();
-            Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
-            timeSlider.onValueChanged = new Slider.SliderEvent();
-            timeSlider.value =
-                currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
-            timeSlider.onValueChanged = sliderEvent;
-        }
-
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepBackward))
-        {
-            currentBeat = currentBeat - precision;
-            LoadObjectsFromScratch(currentBeat, true, true);
-            DrawLines.instance.DrawLinesWhenRequired();
-            Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
-            timeSlider.onValueChanged = new Slider.SliderEvent();
-            timeSlider.value =
-                currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
-            timeSlider.onValueChanged = sliderEvent;
-            LoadWallsBackwards();
-        }
-
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) && !Input.GetMouseButton((int)MouseButton.Right) && !Bookmarks.instance.openMenu)
-        {
-            if (!playing)
+            if (playing)
             {
-                if (GetRealTimeFromBeat(currentBeat) <= LoadSong.instance.audioSource.clip.length)
+                UpdateTimeline();
+            }
+
+            if (currentBeatPlay < Mathf.FloorToInt(currentBeat)) Metronome.instance.MetronomeSound();
+            currentBeatPlay = Mathf.FloorToInt(currentBeat);
+
+            if (Input.GetKey(KeyCode.LeftControl))
+            {
+                int prec = int.Parse(denominator.text);
+                int a = invertPrecisionScroll ? -1 : 1;
+
+                if (Input.mouseScrollDelta.y * a > 0)
                 {
-                    LoadSong.instance.Offset(GetRealTimeFromBeat(currentBeat));
-                    playing = true;
+                    if (Mathf.RoundToInt(prec * 2) <= 99)
+                    {
+                        prec = Mathf.RoundToInt(prec * 2);
+                        denominator.text = prec.ToString();
+                        precisionArray[currentIndex] = (int.Parse(numberator.text), prec);
+                        ChangePrecision();
+                    }
+                }
+
+                if (Input.mouseScrollDelta.y * a < 0)
+                {
+                    if (Mathf.RoundToInt(prec / 2) >= 1)
+                    {
+                        prec = Mathf.RoundToInt(prec / 2);
+                        denominator.text = prec.ToString();
+                        precisionArray[currentIndex] = (int.Parse(numberator.text), prec);
+                        ChangePrecision();
+                    }
                 }
             }
-            else if (playing)
+
+            if (Input.mouseScrollDelta.y != 0 && !playing && !Input.GetKey(KeyCode.LeftShift) &&
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.LeftControl))
             {
-                LoadSong.instance.StopSong();
-                playing = false;
-                currentBeat = Mathf.RoundToInt(currentBeat / precision) * precision;
+                float scroll = Input.mouseScrollDelta.y;
+                int a = invertTimelineScroll ? -1 : 1;
+                if (currentBeat + scroll * precision * a >= 0)
+                {
+                    currentBeat += scroll * precision * a;
+                    LoadObjectsFromScratch(currentBeat, true, true);
+                    // Grid.localPosition = new Vector3(2, 0, PositionFromBeat(currentBeat) * editorScale);
+                    DrawLines.instance.DrawLinesWhenRequired();
+                    if (Input.mouseScrollDelta.y < 0) LoadWallsBackwards();
+                    UpdateTimeline();
+                    mBot.instance.UpdateSabers();
+
+                    // LoadWallsBackwards();
+                    // currentBeat = Mathf.RoundToInt(slider.value *
+                    //                                Mathf.RoundToInt(
+                    //                                    BeatFromRealTime(LoadSong.instance.audioSource.clip.length)));
+                    // LoadObjectsFromScratch(currentBeat, true, true);
+                    // DrawLines.instance.DrawLinesWhenRequired();
+                }
+
+                if (currentBeat > BeatFromRealTime(length) && length != 0)
+                {
+                    currentBeat = BeatFromRealTime(length);
+                }
+            }
+
+            if (length == 0 && LoadSong.instance.audioSource.clip != null)
+            {
+                length = LoadSong.instance.audioSource.clip.length;
+                DrawLines.instance.DrawLinesWhenRequired();
+            }
+
+            spawnOffset = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000) -
+                          BeatFromRealTime(GetRealTimeFromBeat(currentBeat));
+
+            if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepForward))
+            {
+                currentBeat = currentBeat + precision;
                 LoadObjectsFromScratch(currentBeat, true, true);
+                DrawLines.instance.DrawLinesWhenRequired();
+                Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
+                timeSlider.onValueChanged = new Slider.SliderEvent();
+                timeSlider.value =
+                    currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+                timeSlider.onValueChanged = sliderEvent;
             }
-        }
 
-        if (playing)
+            if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.stepBackward))
+            {
+                currentBeat = currentBeat - precision;
+                LoadObjectsFromScratch(currentBeat, true, true);
+                DrawLines.instance.DrawLinesWhenRequired();
+                Slider.SliderEvent sliderEvent = timeSlider.onValueChanged;
+                timeSlider.onValueChanged = new Slider.SliderEvent();
+                timeSlider.value =
+                    currentBeat / Mathf.CeilToInt(BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+                timeSlider.onValueChanged = sliderEvent;
+                LoadWallsBackwards();
+            }
+
+            if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) &&
+                !Input.GetMouseButton((int)MouseButton.Right) && !Bookmarks.instance.openMenu)
+            {
+                if (!playing)
+                {
+                    if (GetRealTimeFromBeat(currentBeat) <= LoadSong.instance.audioSource.clip.length)
+                    {
+                        LoadSong.instance.Offset(GetRealTimeFromBeat(currentBeat));
+                        playing = true;
+                    }
+                }
+                else if (playing)
+                {
+                    LoadSong.instance.StopSong();
+                    playing = false;
+                    currentBeat = Mathf.RoundToInt(currentBeat / precision) * precision;
+                    LoadObjectsFromScratch(currentBeat, true, true);
+                }
+            }
+
+            if (playing)
+            {
+                double deltaTime = Time.deltaTime;
+                double remainingTime = deltaTime;
+                double updatedBeat = (double)currentBeat;
+
+                while (remainingTime > 0)
+                {
+                    double currentBpm = GetBpmAtBeat((float)updatedBeat); // Get BPM at the current updatedBeat
+                    double nextBpmEventBeat = GetNextBpmEventBeat((float)updatedBeat); // Get the next BPM event beat
+
+                    // Calculate the time to the next BPM event
+                    double timeToNextBpmEvent = (nextBpmEventBeat - updatedBeat) * (60f / currentBpm);
+
+                    // Determine if we should update up to the next BPM event or consume all the remaining time
+                    double timeStep = Mathf.Min((float)remainingTime, (float)timeToNextBpmEvent);
+                    double beatIncrement = (timeStep / 60f) * currentBpm;
+
+                    // Update the beat and remaining time
+                    updatedBeat += beatIncrement * Settings.instance.config.mapping.songSpeed / 10;
+                    remainingTime -= timeStep;
+                }
+
+                // Update currentBeat after processing all time steps
+                currentBeat = (float)updatedBeat;
+
+                // Proceed with other logic
+                float nextRealTime = GetRealTimeFromBeat(currentBeat);
+                float nextBeat = BeatFromRealTime(nextRealTime);
+
+                float offset = spawnOffset - offsetCache;
+                offsetCache = spawnOffset;
+
+                LoadObjectsWithinDuration(lastBeat,
+                    BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000));
+                lastBeat = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000);
+
+                if (currentBeat > beatCache + precision)
+                {
+                    beatCache = currentBeat;
+                }
+            }
+
+            if (GetRealTimeFromBeat(currentBeat) >= length) playing = false;
+        }
+        else
         {
-            double deltaTime = Time.deltaTime;
-            double remainingTime = deltaTime;
-            double updatedBeat = (double)currentBeat;
-
-            while (remainingTime > 0)
-            {
-                double currentBpm = GetBpmAtBeat((float)updatedBeat); // Get BPM at the current updatedBeat
-                double nextBpmEventBeat = GetNextBpmEventBeat((float)updatedBeat); // Get the next BPM event beat
-
-                // Calculate the time to the next BPM event
-                double timeToNextBpmEvent = (nextBpmEventBeat - updatedBeat) * (60f / currentBpm);
-
-                // Determine if we should update up to the next BPM event or consume all the remaining time
-                double timeStep = Mathf.Min((float)remainingTime, (float)timeToNextBpmEvent);
-                double beatIncrement = (timeStep / 60f) * currentBpm;
-
-                // Update the beat and remaining time
-                updatedBeat += beatIncrement * Settings.instance.config.mapping.songSpeed / 10;
-                remainingTime -= timeStep;
-            }
-
-            // Update currentBeat after processing all time steps
-            currentBeat = (float)updatedBeat;
-
-            // Proceed with other logic
-            float nextRealTime = GetRealTimeFromBeat(currentBeat);
-            float nextBeat = BeatFromRealTime(nextRealTime);
-
-            float offset = spawnOffset - offsetCache;
-            offsetCache = spawnOffset;
-
-            LoadObjectsWithinDuration(lastBeat, BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000));
-            lastBeat = BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + spawnInMs / 1000);
-
-            if (currentBeat > beatCache + precision)
-            {
-                beatCache = currentBeat;
-            }
+            playing = false;
         }
-
-        if (GetRealTimeFromBeat(currentBeat) >= length) playing = false;
     }
+
     public void LoadWallsBackwards()
     {
         float check = 256;
@@ -393,7 +404,7 @@ public class SpawnObjects : MonoBehaviour
                 SpawnObjectsAtBeat(0, fbeat + spawnOffset, fbeat - spawnOffset, false);
             }
         }
-        
+
         mBot.instance.UpdateSabers();
 
         LoadWallsBackwards();
@@ -458,6 +469,7 @@ public class SpawnObjects : MonoBehaviour
         x = (x + y) * 1000f;
         return (int)x;
     }
+
     void SpawnObjectsAtBeat(int beat, float latestBeat, float earliestBeat, bool loadNewOnly)
     {
         if (LoadSong.instance.audioSource.clip)
@@ -582,7 +594,7 @@ public class SpawnObjects : MonoBehaviour
                 {
                     bool newObject = true;
 
-                    
+
                     if (bpmChangeData.b <= latestBeat && bpmChangeData.b >= earliestBeat)
                     {
                         GameObject bpmChange = Instantiate(objects[3]);
@@ -594,7 +606,7 @@ public class SpawnObjects : MonoBehaviour
                         bpmChange.GetComponent<BpmEventData>().bpmEvent = bpmChangeData;
                     }
                 }
-                
+
                 // Load Timing Objects
                 List<timings> timings = LoadMap.instance.beats[beat].timings;
                 foreach (var timingData in timings)
@@ -610,6 +622,7 @@ public class SpawnObjects : MonoBehaviour
                                 newObject = false;
                         }
                     }
+
                     if (timingData.b <= latestBeat && timingData.b >= earliestBeat && newObject)
                     {
                         GameObject timing = Instantiate(objects[5]);
@@ -618,7 +631,7 @@ public class SpawnObjects : MonoBehaviour
                             PositionFromBeat(timingData.b) * editorScale);
                         timing.GetComponent<TimingData>().timings = timingData;
                     }
-                } 
+                }
             }
 
             SelectObjects.instance.HighlightSelectedObject();

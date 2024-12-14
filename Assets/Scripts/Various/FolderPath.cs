@@ -17,6 +17,12 @@ public class FolderPath : MonoBehaviour
 
     private void Start()
     {
+        if (instance != null && instance != this)
+        {
+            Destroy(this.gameObject); // Destroy duplicate GameObject
+            return;
+        }
+        
         instance = this;
         
         if (argumentsProcessed)

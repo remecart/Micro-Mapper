@@ -79,10 +79,8 @@ public class mBot : MonoBehaviour
 
     private Color LeftSaberColor;
     private Color RightSaberColor;
-    [SerializeField]
-    private Material[] LeftSaberMaterials;
-    [SerializeField]
-    private Material[] RightSaberMaterials;
+    [SerializeField] private Material[] LeftSaberMaterials;
+    [SerializeField] private Material[] RightSaberMaterials;
 
     private void SetSaberColor()
     {
@@ -106,7 +104,7 @@ public class mBot : MonoBehaviour
         // rightV = Mathf.Min((rightV + 9) / 10f, 1f); // Boost by 0.4, cap at 1
         leftV = 1;
         rightV = 1;
-        
+
         // Reconstruct colors
         newLeftSaberColor = Color.HSVToRGB(leftH, leftS, leftV);
         newRightSaberColor = Color.HSVToRGB(rightH, rightS, rightV);
@@ -146,7 +144,8 @@ public class mBot : MonoBehaviour
         planeLine.gameObject.SetActive(visualizeSwings);
         if (visualizeSwings)
         {
-            planeLine.gameObject.transform.localPosition = new Vector3(0, Settings.instance.config.mBot.mBotSettings.planeOffset * -1f, 0);
+            planeLine.gameObject.transform.localPosition =
+                new Vector3(0, Settings.instance.config.mBot.mBotSettings.planeOffset * -1f, 0);
             int verticies = 24;
 
             curveLines[0].positionCount = verticies;
@@ -164,7 +163,7 @@ public class mBot : MonoBehaviour
                 //curveLines[0].positionCount += 3;
             }
         }
-        
+
         if (!PreviewMode.instance.previewEnabled)
         {
             if (curveLines[0].positionCount != 0)
@@ -181,10 +180,11 @@ public class mBot : MonoBehaviour
             if (LoadSong.instance.audioSource.clip)
                 length = LoadSong.instance.audioSource.clip.length;
         }
-        
-        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.enableMBot) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftControl))
+
+        if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.enableMBot) &&
+            !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftControl))
         {
-            ToggleMBot(); 
+            ToggleMBot();
         }
 
         if (playing)
@@ -268,8 +268,12 @@ public class mBot : MonoBehaviour
             if (noteData.b == nextNote.b) foundNotes.Add(noteData);
         }
 
-        Vector3 lastPos = new Vector3(SpawnObjects.instance.ConvertMEPos(lastNote.x), SpawnObjects.instance.ConvertMEPos(lastNote.y), SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
-        Vector3 nextPos = new Vector3(SpawnObjects.instance.ConvertMEPos(nextNote.x), SpawnObjects.instance.ConvertMEPos(nextNote.y), SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 lastPos = new Vector3(SpawnObjects.instance.ConvertMEPos(lastNote.x),
+            SpawnObjects.instance.ConvertMEPos(lastNote.y),
+            SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 nextPos = new Vector3(SpawnObjects.instance.ConvertMEPos(nextNote.x),
+            SpawnObjects.instance.ConvertMEPos(nextNote.y),
+            SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
 
 
         Vector3 CalculatedPos;
@@ -302,8 +306,10 @@ public class mBot : MonoBehaviour
 
         saber.transform.GetChild(0).transform.localPosition = new Vector3(0, 0, zOffset / 5f);
 
-        saber.transform.GetChild(0).GetChild(saber.transform.GetChild(0).childCount - 1).GetComponent<TrailRenderer>().time = trailLength / 100f;
-        saber.transform.GetChild(0).GetChild(saber.transform.GetChild(0).childCount - 1).GetComponent<TrailRenderer>().widthMultiplier = trailWidth / 100f +0.01f;
+        saber.transform.GetChild(0).GetChild(saber.transform.GetChild(0).childCount - 1).GetComponent<TrailRenderer>()
+            .time = trailLength / 100f;
+        saber.transform.GetChild(0).GetChild(saber.transform.GetChild(0).childCount - 1).GetComponent<TrailRenderer>()
+            .widthMultiplier = trailWidth / 100f + 0.01f;
 
         //intensity* Time.deltaTime* rotationSpeed
 
@@ -312,7 +318,9 @@ public class mBot : MonoBehaviour
         {
             xoffset = 1.1f;
         }
-        saber.transform.localPosition = new Vector3((CalculatedPos.x - 2) * positionMultiplier / 10 + xoffset, CalculatedPos.y * positionMultiplier / 10 + 1f, saber.transform.localPosition.z);
+
+        saber.transform.localPosition = new Vector3((CalculatedPos.x - 2) * positionMultiplier / 10 + xoffset,
+            CalculatedPos.y * positionMultiplier / 10 + 1f, saber.transform.localPosition.z);
     }
 
 
@@ -361,8 +369,12 @@ public class mBot : MonoBehaviour
             if (noteData.b == nextNote.b) foundNotes.Add(noteData);
         }
 
-        Vector3 lastPos = new Vector3(SpawnObjects.instance.ConvertMEPos(lastNote.x), SpawnObjects.instance.ConvertMEPos(lastNote.y), SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
-        Vector3 nextPos = new Vector3(SpawnObjects.instance.ConvertMEPos(nextNote.x), SpawnObjects.instance.ConvertMEPos(nextNote.y), SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 lastPos = new Vector3(SpawnObjects.instance.ConvertMEPos(lastNote.x),
+            SpawnObjects.instance.ConvertMEPos(lastNote.y),
+            SpawnObjects.instance.PositionFromBeat(lastNote.b) * SpawnObjects.instance.editorScale);
+        Vector3 nextPos = new Vector3(SpawnObjects.instance.ConvertMEPos(nextNote.x),
+            SpawnObjects.instance.ConvertMEPos(nextNote.y),
+            SpawnObjects.instance.PositionFromBeat(nextNote.b) * SpawnObjects.instance.editorScale);
 
         Vector3 CalculatedPos;
 
@@ -388,17 +400,18 @@ public class mBot : MonoBehaviour
         float handleLengthA = distance * 0.3f * intensity + overshoot; // Additive overshoot
         float handleLengthB = distance * 0.3f * intensity + overshoot; // Additive overshoot
 
-        Vector2 controlPointA = pointA + new Vector2(Mathf.Cos(angleA * Mathf.Deg2Rad), Mathf.Sin(angleA * Mathf.Deg2Rad)) * handleLengthA;
-        Vector2 controlPointB = pointB + new Vector2(Mathf.Cos(angleB * Mathf.Deg2Rad), Mathf.Sin(angleB * Mathf.Deg2Rad)) * handleLengthB;
+        Vector2 controlPointA = pointA +
+                                new Vector2(Mathf.Cos(angleA * Mathf.Deg2Rad), Mathf.Sin(angleA * Mathf.Deg2Rad)) *
+                                handleLengthA;
+        Vector2 controlPointB = pointB +
+                                new Vector2(Mathf.Cos(angleB * Mathf.Deg2Rad), Mathf.Sin(angleB * Mathf.Deg2Rad)) *
+                                handleLengthB;
 
         return Mathf.Pow(1 - time, 3) * pointA +
                3 * Mathf.Pow(1 - time, 2) * time * controlPointA +
                3 * (1 - time) * Mathf.Pow(time, 2) * controlPointB +
                Mathf.Pow(time, 3) * pointB;
     }
-
-
-
 
     void RemoveFirstPosition()
     {
@@ -408,6 +421,7 @@ public class mBot : MonoBehaviour
             {
                 test.SetPosition(i, test.GetPosition(i + 1));
             }
+
             test.positionCount--;
         }
         else if (test.positionCount == 1)
@@ -420,32 +434,34 @@ public class mBot : MonoBehaviour
     {
         float closestLeftBeat = float.MaxValue;
         float closestRightBeat = float.MaxValue;
-        
-        int beats = Mathf.FloorToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+
+        int beats = LoadSong.instance.audioSource.clip != null
+            ? Mathf.FloorToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length))
+            : 10;
 
         for (int i = 0; i < beats - Mathf.FloorToInt(currentBeat); i++)
         {
             //if (currentBeat + i <= SpawnObjects.instance.BeatFromRealTime(length) && currentBeat + i >= 0)
             //{
-                List<colorNotes> notes = LoadMap.instance.beats[Mathf.FloorToInt(currentBeat + i)].colorNotes;
+            List<colorNotes> notes = LoadMap.instance.beats[Mathf.FloorToInt(currentBeat + i)].colorNotes;
 
 
-                foreach (var noteData in notes)
+            foreach (var noteData in notes)
+            {
+                if (noteData.b > currentBeat)
                 {
-                    if (noteData.b > currentBeat)
+                    if (noteData.c == 0 && noteData.b < closestLeftBeat)
                     {
-                        if (noteData.c == 0 && noteData.b < closestLeftBeat)
-                        {
-                            left = noteData;
-                            closestLeftBeat = noteData.b;
-                        }
-                        else if (noteData.c == 1 && noteData.b < closestRightBeat)
-                        {
-                            right = noteData;
-                            closestRightBeat = noteData.b;
-                        }
+                        left = noteData;
+                        closestLeftBeat = noteData.b;
+                    }
+                    else if (noteData.c == 1 && noteData.b < closestRightBeat)
+                    {
+                        right = noteData;
+                        closestRightBeat = noteData.b;
                     }
                 }
+            }
             //}
         }
     }
@@ -455,28 +471,37 @@ public class mBot : MonoBehaviour
         float closestLeftBeat = float.MinValue;
         float closestRightBeat = float.MinValue;
 
-        for (int i = 0; i < Mathf.FloorToInt(currentBeat); i++)
+        int startIndex = Mathf.FloorToInt(currentBeat);
+        for (int i = 0; i <= startIndex; i++)
         {
-            //if (i < LoadMap.instance.beats.Count)
-            //{
-                List<colorNotes> notes = LoadMap.instance.beats[Mathf.FloorToInt(currentBeat) - i + 1].colorNotes;
-                foreach (var noteData in notes)
+            int index = startIndex - i + 1;
+
+            // Validate the index to ensure it's within the bounds of the beats list
+            if (index < 0 || index >= LoadMap.instance.beats.Count)
+            {
+                Debug.LogWarning($"Invalid index: {index}, beats.Count: {LoadMap.instance.beats.Count}");
+                continue;
+            }
+
+            List<colorNotes> notes = LoadMap.instance.beats[index].colorNotes;
+
+            foreach (var noteData in notes)
+            {
+                if (noteData.b <= currentBeat)
                 {
-                    if (noteData.b <= currentBeat)
+                    if (noteData.c == 0 && noteData.b > closestLeftBeat)
                     {
-                        if (noteData.c == 0 && noteData.b > closestLeftBeat)
-                        {
-                            lastLeft = noteData;
-                            closestLeftBeat = noteData.b;
-                        }
-                        else if (noteData.c == 1 && noteData.b > closestRightBeat)
-                        {
-                            lastRight = noteData;
-                            closestRightBeat = noteData.b;
-                        }
+                        lastLeft = noteData;
+                        closestLeftBeat = noteData.b;
+                    }
+                    else if (noteData.c == 1 && noteData.b > closestRightBeat)
+                    {
+                        lastRight = noteData;
+                        closestRightBeat = noteData.b;
                     }
                 }
-            //}
+            }
         }
     }
+    
 }

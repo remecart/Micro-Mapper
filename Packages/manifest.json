@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "com.lachee.discordrpc": "https://github.com/Lachee/discord-rpc-unity.git",
     "com.realgames.dear-imgui": "file:C:/ImGUI/dear-imgui-unity",
     "com.unity.burst": "1.8.16",
     "com.unity.collab-proxy": "2.4.3",
@@ -40,5 +41,14 @@
     "com.unity.modules.vr": "1.0.0",
     "com.unity.modules.wind": "1.0.0",
     "com.unity.modules.xr": "1.0.0"
-  }
+  },
+  "scopedRegistries": [
+    {
+      "name": "Hourai Teahouse",
+      "url": "https://upm.houraiteahouse.net",
+      "scopes": [
+        "com.discord"
+      ]
+    }
+  ]
 }
