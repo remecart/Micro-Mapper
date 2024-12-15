@@ -1,16 +1,19 @@
 using System.Collections;
-using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using TMPro;
 
 public class MappingTime : MonoBehaviour
 {
-    public LoadMap loadMap;
+    public LoadMap loadMap;  // Reference to LoadMap
     public GameObject minuteHand;
     public GameObject secondHand;
     public TextMeshProUGUI text;
 
-    // Update is called once per frame
+    void Start()
+    {
+        StartCoroutine(IncreaseMappingTime());
+    }
+
     void FixedUpdate()
     {
         // Mapping loadMap time to seconds
@@ -27,6 +30,16 @@ public class MappingTime : MonoBehaviour
         int minutes = Mathf.FloorToInt(currentTime / 60f) % 60;
         int seconds = Mathf.FloorToInt(currentTime) % 60;
 
-        text.text = $" {hours:D2}:{minutes:D2}:{seconds:D2}";
+        text.text = $"{hours:D2}:{minutes:D2}:{seconds:D2}";
+    }
+
+    IEnumerator IncreaseMappingTime()
+    {
+        while (true)
+        {
+            // Increment mappingTime by 1/60th of a minute each frame
+            loadMap.mappingTime += 1f / 60f;
+            yield return new WaitForSecondsRealtime(1f);  // Wait for one second in real-time
+        }
     }
 }

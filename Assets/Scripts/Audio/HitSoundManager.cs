@@ -19,6 +19,7 @@ public class HitSoundManager : MonoBehaviour
     public float length;
     public AudioSource audioSource;
     public GameObject hitsoundPrefab;
+    public float audioDelay;
 
     void Start()
     {
@@ -34,6 +35,8 @@ public class HitSoundManager : MonoBehaviour
 
         AudioType type = LoadSong.instance.GetAudioTypeFromExtension(Settings.instance.config.audio.customSoundPath);
         StartCoroutine(LoadAudioFile(Settings.instance.config.audio.customSoundPath, type));
+
+        audioDelay = Settings.instance.config.audio.audioDelay;
     }
 
     public void OpenFilePicker()
@@ -62,7 +65,8 @@ public class HitSoundManager : MonoBehaviour
         {
             yield return www.SendWebRequest();
 
-            if (www.result == UnityWebRequest.Result.ConnectionError || www.result == UnityWebRequest.Result.ProtocolError)
+            if (www.result == UnityWebRequest.Result.ConnectionError ||
+                www.result == UnityWebRequest.Result.ProtocolError)
             {
                 yield break;
             }
@@ -73,7 +77,6 @@ public class HitSoundManager : MonoBehaviour
                 hitsounds[3] = clip;
                 Settings.instance.config.audio.customSoundPath = path;
             }
-
         }
     }
 
@@ -101,10 +104,19 @@ public class HitSoundManager : MonoBehaviour
             cachevolume = audioSource.volume;
         }
 
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            for (int i = this.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(this.transform.GetChild(i).gameObject);
+            }
+        }
+
         playing = SpawnObjects.instance.playing;
 
         //time = SpawnObjects.instance.currentBeat;
-        time = SpawnObjects.instance.BeatFromRealTime(SpawnObjects.instance.GetRealTimeFromBeat(SpawnObjects.instance.currentBeat) + 0.185f);
+        time = SpawnObjects.instance.BeatFromRealTime(
+            SpawnObjects.instance.GetRealTimeFromBeat(SpawnObjects.instance.currentBeat) + 0.185f + audioDelay);
 
         if (length == 0)
         {
@@ -117,13 +129,14 @@ public class HitSoundManager : MonoBehaviour
             {
                 GetNextNote();
             }
+
             if (time >= nextNote && cache)
             {
                 GameObject go = Instantiate(hitsoundPrefab, this.transform);
                 go.transform.SetParent(this.transform);
                 var goAudio = go.GetComponent<AudioSource>();
                 goAudio.volume = audioSource.volume;
-                goAudio.clip = hitsounds[hitsoundIndex]; 
+                goAudio.clip = hitsounds[hitsoundIndex];
                 goAudio.Play();
                 // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
                 go.GetComponent<DestroyInTime>().time = hitsounds[hitsoundIndex].length + 0.125f;

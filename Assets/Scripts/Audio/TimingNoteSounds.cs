@@ -21,6 +21,7 @@ public class TimingNoteManager : MonoBehaviour
     public AudioSource audioSource;
     public GameObject hitsound;
     float cachevolume;
+    public float audioDelay;
 
     void Start()
     {
@@ -36,6 +37,8 @@ public class TimingNoteManager : MonoBehaviour
 
         AudioType type = LoadSong.instance.GetAudioTypeFromExtension(Settings.instance.config.audio.customTimingSoundPath);
         StartCoroutine(LoadAudioFile(Settings.instance.config.audio.customTimingSoundPath, type));
+        
+        audioDelay = Settings.instance.config.audio.audioDelay;
     }
 
     public void OpenFilePicker()
@@ -93,13 +96,21 @@ public class TimingNoteManager : MonoBehaviour
         playing = SpawnObjects.instance.playing;
 
         //time = SpawnObjects.instance.currentBeat;
-        time = SpawnObjects.instance.BeatFromRealTime(SpawnObjects.instance.GetRealTimeFromBeat(SpawnObjects.instance.currentBeat) + 0.185f);
+        time = SpawnObjects.instance.BeatFromRealTime(SpawnObjects.instance.GetRealTimeFromBeat(SpawnObjects.instance.currentBeat) + 0.185f + audioDelay);
 
         if (length == 0)
         {
             if (LoadSong.instance.audioSource.clip) length = LoadSong.instance.audioSource.clip.length;
         }
 
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            for (int i = this.transform.childCount - 1; i >= 0; i--)
+            {
+                Destroy(this.transform.GetChild(i).gameObject);
+            }
+        }
+        
         if (playing)
         {
             if (cache == false)

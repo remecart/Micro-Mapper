@@ -131,8 +131,8 @@ public class SpawnObjects : MonoBehaviour
                 UpdateTimeline();
             }
 
-            if (currentBeatPlay < Mathf.FloorToInt(currentBeat)) Metronome.instance.MetronomeSound();
-            currentBeatPlay = Mathf.FloorToInt(currentBeat);
+            if (currentBeatPlay < Mathf.FloorToInt(BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + Metronome.instance.audioDelay))) Metronome.instance.MetronomeSound();
+            currentBeatPlay = Mathf.FloorToInt(BeatFromRealTime(GetRealTimeFromBeat(currentBeat) + Metronome.instance.audioDelay));
 
             if (Input.GetKey(KeyCode.LeftControl))
             {

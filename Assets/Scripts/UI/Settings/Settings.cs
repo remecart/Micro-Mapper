@@ -538,6 +538,18 @@ public class Settings : MonoBehaviour
     {
         if (ImGui.BeginTabItem("Audio"))
         {
+            if (ImGui.TreeNodeEx("Latency", ImGuiTreeNodeFlags.DefaultOpen))
+            {
+                if (ImGui.SliderFloat("Audio delay", ref config.audio.audioDelay, 0, 0.5f))
+                {
+                    LoadSong.instance.audioDelay = config.audio.audioDelay;
+                    HitSoundManager.instance.audioDelay = config.audio.audioDelay;
+                    TimingNoteManager.instance.audioDelay = config.audio.audioDelay;
+                    Metronome.instance.audioDelay = config.audio.audioDelay;
+                }
+
+                ImGui.TreePop();
+            }
             if (ImGui.TreeNodeEx("Volume", ImGuiTreeNodeFlags.DefaultOpen))
             {
                 if (ImGui.SliderFloat("Music", ref config.audio.music, 0, 1))
@@ -779,6 +791,7 @@ public class MBotSaber
 [System.Serializable]
 public class Audio
 {
+    public float audioDelay;
     public float music;
     public float hitsound;
     public float timing;

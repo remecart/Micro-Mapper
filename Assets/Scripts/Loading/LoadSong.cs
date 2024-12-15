@@ -16,14 +16,16 @@ public class LoadSong : MonoBehaviour
     public float songSpeed;
     private bool check;
     public bool dontLoadAudio;
-
+    public float audioDelay;
+    
     void Start()
     {
         if (dontLoadAudio) {}
         instance = this;
         if (Settings.instance != null ) {
             audioSource.volume = Settings.instance.config.audio.music;
-            songSpeed = Settings.instance.config.mapping.songSpeed / 10;
+            songSpeed = Settings.instance.config.mapping.songSpeed / 10f;
+            audioDelay = Settings.instance.config.audio.audioDelay;
         }
         SetAudioClip(audioSource);
         StopSong();
@@ -96,7 +98,7 @@ public class LoadSong : MonoBehaviour
         {
             if (offset >= 0 && offset <= audioSource.clip.length)
             {
-                audioSource.time = offset;
+                audioSource.time = offset + audioDelay;
                 audioSource.Play();
                 audioSource.pitch = songSpeed; // Set the playback speed
             }

@@ -66,8 +66,6 @@ public class LoadMap : MonoBehaviour
         {
             Save();
         }
-
-        mappingTime += Time.unscaledDeltaTime / 60f;
     }
 
     public void Save(bool closeEditor = false)

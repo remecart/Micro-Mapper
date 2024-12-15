@@ -128,11 +128,19 @@ public class EditMetaData : MonoBehaviour
 
         if (paths.Length > 0)
         {
-            string path = paths[0];
+            string sourcePath = paths[0];
 
-            if (File.Exists(path))
+            if (File.Exists(sourcePath))
             {
-                var fileName = path.Replace(folderPath + "\\", "");
+                string fileName = Path.GetFileName(sourcePath);
+                string destinationPath = Path.Combine(folderPath, fileName);
+
+                // Copy the file to the folderPath if it doesn't already exist.
+                if (!File.Exists(destinationPath))
+                {
+                    File.Copy(sourcePath, destinationPath);
+                }
+
                 metaData._songFilename = fileName;
                 inputs[7].text = fileName;
             }
@@ -151,15 +159,24 @@ public class EditMetaData : MonoBehaviour
 
         if (paths.Length > 0)
         {
-            string path = paths[0];
+            string sourcePath = paths[0];
 
-            if (File.Exists(path))
+            if (File.Exists(sourcePath))
             {
-                var fileName = path.Replace(folderPath + "\\", "");
+                string fileName = Path.GetFileName(sourcePath);
+                string destinationPath = Path.Combine(folderPath, fileName);
+
+                // Copy the file to the folderPath if it doesn't already exist.
+                if (!File.Exists(destinationPath))
+                {
+                    File.Copy(sourcePath, destinationPath);
+                }
+
                 metaData._coverImageFilename = fileName;
                 inputs[8].text = fileName;
                 loadCover.Cover();
             }
         }
     }
+
 }

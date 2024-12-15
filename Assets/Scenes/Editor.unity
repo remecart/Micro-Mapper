@@ -2094,7 +2094,7 @@ MonoBehaviour:
   audioSource: {fileID: 1093831946}
   seconds: 0
   rawTime: 0
-  spawnOffset: 6
+  spawnOffset: 4
   despawnOffset: 2
   length: 0
   spectroChunk: {fileID: 5647514547928820572, guid: ff915bebe4ce5ba4da5fbdd09bfe3a61, type: 3}
@@ -3634,6 +3634,50 @@ Transform:
   m_Children: []
   m_Father: {fileID: 835735985}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &337400548
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 337400550}
+  - component: {fileID: 337400549}
+  m_Layer: 0
+  m_Name: Discord rpc
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &337400549
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337400548}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3562cff1035273849a3ac9f05e8815f7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &337400550
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 337400548}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1.2792655, y: -12.641804, z: 16.721455}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &352366507
 GameObject:
   m_ObjectHideFlags: 0
@@ -5027,8 +5071,8 @@ Transform:
   m_GameObject: {fileID: 470190245}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -4.496, y: 0.04799843, z: -0.0009995232}
-  m_LocalScale: {x: 0.3, y: 0.030000001, z: 0.002}
+  m_LocalPosition: {x: -4.496, y: 0.064, z: -0.0009995232}
+  m_LocalScale: {x: 0.3, y: 0.030000001, z: 0.004}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2107896865}
@@ -5965,6 +6009,7 @@ MonoBehaviour:
   length: 0
   audioSource: {fileID: 575279364}
   hitsoundPrefab: {fileID: 6583740759473559169, guid: ca93c00688dc08443b82ffc394b2acaf, type: 3}
+  audioDelay: 0
 --- !u!82 &575279364
 AudioSource:
   m_ObjectHideFlags: 0
@@ -6575,6 +6620,7 @@ MonoBehaviour:
         bloom: 0
       vsync: 0
     audio:
+      audioDelay: 0
       music: 0.5
       hitsound: 0.5
       timing: 0.5
@@ -7584,6 +7630,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   audioSource: {fileID: 704755087}
   clip: {fileID: 8300000, guid: a8df47cebcb32b94c917167e787847b8, type: 3}
+  audioDelay: 0
 --- !u!1 &705174950
 GameObject:
   m_ObjectHideFlags: 0
@@ -11523,6 +11570,7 @@ MonoBehaviour:
   timeInBeats: 0
   songSpeed: 1
   dontLoadAudio: 0
+  audioDelay: 0
 --- !u!1 &1098435631
 GameObject:
   m_ObjectHideFlags: 0
@@ -16327,6 +16375,7 @@ MonoBehaviour:
   length: 0
   audioSource: {fileID: 1707848493}
   hitsound: {fileID: 6583740759473559169, guid: ca93c00688dc08443b82ffc394b2acaf, type: 3}
+  audioDelay: 0
 --- !u!1 &1710119733
 GameObject:
   m_ObjectHideFlags: 0
@@ -21474,3 +21523,4 @@ SceneRoots:
   - {fileID: 705507995}
   - {fileID: 1397836542}
   - {fileID: 1208370863}
+  - {fileID: 337400550}
