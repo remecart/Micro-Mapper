@@ -1,4 +1,4 @@
-Shader "SPR/QuadFrame"
+Shader "SPR/CubeWireframe"
 {
     Properties
     {
@@ -6,23 +6,22 @@ Shader "SPR/QuadFrame"
         _WireframeColor("Wireframe Color", color) = (1.0, 1.0, 1.0, 1.0)
         _WireframeAliasing("Wireframe aliasing", float) = 1.5
     }
-        SubShader
+    SubShader
+    {
+        Tags { "RenderType" = "Opaque" "Queue" = "Geometry"}
+        LOD 100
+        Blend SrcAlpha OneMinusSrcAlpha
+        ZWrite On
+
+        Pass
         {
-            Tags { "RenderType" = "Opaque" "Queue" = "Transparent"}
-            LOD 100
-            Blend SrcAlpha OneMinusSrcAlpha
-
-            Pass
-            {
-                // Removes the front facing triangles, this enables us to create the wireframe for those behind.
-                Cull Front
-                CGPROGRAM
-                #pragma vertex vert
-                #pragma fragment frag
-                #pragma geometry geom
-            // make fog work
+            // Cull front faces to allow the wireframe to be seen from the back
+            Cull Front
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma geometry geom
             #pragma multi_compile_fog
-
             #include "UnityCG.cginc"
 
             struct appdata
@@ -38,7 +37,6 @@ Shader "SPR/QuadFrame"
                 float4 vertex : SV_POSITION;
             };
 
-            // We add our barycentric variables to the geometry struct.
             struct g2f {
                 float4 pos : SV_POSITION;
                 float3 barycentric : TEXCOORD0;
@@ -50,23 +48,20 @@ Shader "SPR/QuadFrame"
             v2f vert(appdata v)
             {
                 v2f o;
-                // We push the conversion to ClipPos into the geom function as we need 
-                // the mesh vertex values for the edge culling.
-                //o.vertex = UnityObjectToClipPos(v.vertex);
                 o.vertex = v.vertex;
                 o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
+                UNITY_TRANSFER_FOG(o, o.vertex);
                 return o;
             }
 
-            // This applies the barycentric coordinates to each vertex in a triangle.
             [maxvertexcount(3)]
-            void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream) {
+            void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream)
+            {
                 float edgeLengthX = length(IN[1].vertex - IN[2].vertex);
                 float edgeLengthY = length(IN[0].vertex - IN[2].vertex);
                 float edgeLengthZ = length(IN[0].vertex - IN[1].vertex);
                 float3 modifier = float3(0.0, 0.0, 0.0);
-                // We're fine using if statments it's a trivial function.
+
                 if ((edgeLengthX > edgeLengthY) && (edgeLengthX > edgeLengthZ)) {
                     modifier = float3(1.0, 0.0, 0.0);
                 }
@@ -81,9 +76,11 @@ Shader "SPR/QuadFrame"
                 o.pos = UnityObjectToClipPos(IN[0].vertex);
                 o.barycentric = float3(1.0, 0.0, 0.0) + modifier;
                 triStream.Append(o);
+
                 o.pos = UnityObjectToClipPos(IN[1].vertex);
                 o.barycentric = float3(0.0, 1.0, 0.0) + modifier;
                 triStream.Append(o);
+
                 o.pos = UnityObjectToClipPos(IN[2].vertex);
                 o.barycentric = float3(0.0, 0.0, 1.0) + modifier;
                 triStream.Append(o);
@@ -100,104 +97,105 @@ Shader "SPR/QuadFrame"
                 float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * _WireframeAliasing, i.barycentric);
                 // Use the coordinate closest to the edge.
                 float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
-                // Set to our backwards facing wireframe colour.
-                return fixed4(_WireframeColor.r, _WireframeColor.g, _WireframeColor.b, alpha);
+                
+                // Only render the wireframe by ensuring transparency for the rest
+                if (alpha < 0.01)
+                    discard;
+
+                return fixed4(_WireframeColor.rgb, alpha);  // Set wireframe color and alpha
             }
             ENDCG
         }
 
         Pass
         {
-                // Removes the back facing triangles.
-                Cull Back
-                CGPROGRAM
-                #pragma vertex vert
-                #pragma fragment frag
-                #pragma geometry geom
-                // make fog work
-                #pragma multi_compile_fog
+            // Cull back faces to allow the wireframe to be seen from the front
+            Cull Back
+            CGPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #pragma geometry geom
+            #pragma multi_compile_fog
+            #include "UnityCG.cginc"
 
-                #include "UnityCG.cginc"
+            struct appdata
+            {
+                float4 vertex : POSITION;
+                float2 uv : TEXCOORD0;
+            };
 
-                struct appdata
-                {
-                    float4 vertex : POSITION;
-                    float2 uv : TEXCOORD0;
-                };
+            struct v2f
+            {
+                float2 uv : TEXCOORD0;
+                UNITY_FOG_COORDS(1)
+                float4 vertex : SV_POSITION;
+            };
 
-                struct v2f
-                {
-                    float2 uv : TEXCOORD0;
-                    UNITY_FOG_COORDS(1)
-                    float4 vertex : SV_POSITION;
-                };
+            struct g2f {
+                float4 pos : SV_POSITION;
+                float3 barycentric : TEXCOORD0;
+            };
 
-                // We add our barycentric variables to the geometry struct.
-                struct g2f {
-                    float4 pos : SV_POSITION;
-                    float3 barycentric : TEXCOORD0;
-                };
+            sampler2D _MainTex;
+            float4 _MainTex_ST;
 
-                sampler2D _MainTex;
-                float4 _MainTex_ST;
-
-                v2f vert(appdata v)
-                {
-                    v2f o;
-                    // We push the conversion to ClipPos into the geom function as we need 
-                    // the mesh vertex values for the edge culling.
-                    //o.vertex = UnityObjectToClipPos(v.vertex);
-                    o.vertex = v.vertex;
-                    o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                    UNITY_TRANSFER_FOG(o,o.vertex);
-                    return o;
-                }
-
-                // This applies the barycentric coordinates to each vertex in a triangle.
-                [maxvertexcount(3)]
-                void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream) {
-                    float edgeLengthX = length(IN[1].vertex - IN[2].vertex);
-                    float edgeLengthY = length(IN[0].vertex - IN[2].vertex);
-                    float edgeLengthZ = length(IN[0].vertex - IN[1].vertex);
-                    float3 modifier = float3(0.0, 0.0, 0.0);
-                    // We're fine using if statments it's a trivial function.
-                    if ((edgeLengthX > edgeLengthY) && (edgeLengthX > edgeLengthZ)) {
-                        modifier = float3(1.0, 0.0, 0.0);
-                    }
-                    else if ((edgeLengthY > edgeLengthX) && (edgeLengthY > edgeLengthZ)) {
-                        modifier = float3(0.0, 1.0, 0.0);
-                    }
-                    else if ((edgeLengthZ > edgeLengthX) && (edgeLengthZ > edgeLengthY)) {
-                        modifier = float3(0.0, 0.0, 1.0);
-                    }
-
-                    g2f o;
-                    o.pos = UnityObjectToClipPos(IN[0].vertex);
-                    o.barycentric = float3(1.0, 0.0, 0.0) + modifier;
-                    triStream.Append(o);
-                    o.pos = UnityObjectToClipPos(IN[1].vertex);
-                    o.barycentric = float3(0.0, 1.0, 0.0) + modifier;
-                    triStream.Append(o);
-                    o.pos = UnityObjectToClipPos(IN[2].vertex);
-                    o.barycentric = float3(0.0, 0.0, 1.0) + modifier;
-                    triStream.Append(o);
-                }
-
-                fixed4 _WireframeColor;
-                float _WireframeAliasing;
-
-                fixed4 frag(g2f i) : SV_Target
-                {
-                    // Calculate the unit width based on triangle size.
-                    float3 unitWidth = fwidth(i.barycentric);
-                    // Alias the line a bit.
-                    float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * _WireframeAliasing, i.barycentric);
-                    // Use the coordinate closest to the edge.
-                    float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
-                    // Set to our forwards facing wireframe colour.
-                    return fixed4(_WireframeColor.r, _WireframeColor.g, _WireframeColor.b, alpha);
-                }
-                ENDCG
+            v2f vert(appdata v)
+            {
+                v2f o;
+                o.vertex = v.vertex;
+                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+                UNITY_TRANSFER_FOG(o, o.vertex);
+                return o;
             }
+
+            [maxvertexcount(3)]
+            void geom(triangle v2f IN[3], inout TriangleStream<g2f> triStream)
+            {
+                float edgeLengthX = length(IN[1].vertex - IN[2].vertex);
+                float edgeLengthY = length(IN[0].vertex - IN[2].vertex);
+                float edgeLengthZ = length(IN[0].vertex - IN[1].vertex);
+                float3 modifier = float3(0.0, 0.0, 0.0);
+
+                if ((edgeLengthX > edgeLengthY) && (edgeLengthX > edgeLengthZ)) {
+                    modifier = float3(1.0, 0.0, 0.0);
+                }
+                else if ((edgeLengthY > edgeLengthX) && (edgeLengthY > edgeLengthZ)) {
+                    modifier = float3(0.0, 1.0, 0.0);
+                }
+                else if ((edgeLengthZ > edgeLengthX) && (edgeLengthZ > edgeLengthY)) {
+                    modifier = float3(0.0, 0.0, 1.0);
+                }
+
+                g2f o;
+                o.pos = UnityObjectToClipPos(IN[0].vertex);
+                o.barycentric = float3(1.0, 0.0, 0.0) + modifier;
+                triStream.Append(o);
+
+                o.pos = UnityObjectToClipPos(IN[1].vertex);
+                o.barycentric = float3(0.0, 1.0, 0.0) + modifier;
+                triStream.Append(o);
+
+                o.pos = UnityObjectToClipPos(IN[2].vertex);
+                o.barycentric = float3(0.0, 0.0, 1.0) + modifier;
+                triStream.Append(o);
+            }
+
+            fixed4 _WireframeColor;
+            float _WireframeAliasing;
+
+            fixed4 frag(g2f i) : SV_Target
+            {
+                float3 unitWidth = fwidth(i.barycentric);
+                float3 aliased = smoothstep(float3(0.0, 0.0, 0.0), unitWidth * _WireframeAliasing, i.barycentric);
+                float alpha = 1 - min(aliased.x, min(aliased.y, aliased.z));
+                
+                // Only render the wireframe by ensuring transparency for the rest
+                if (alpha < 0.01)
+                    discard;
+
+                return fixed4(_WireframeColor.rgb, alpha);  // Set wireframe color and alpha
+            }
+            ENDCG
         }
+    }
 }

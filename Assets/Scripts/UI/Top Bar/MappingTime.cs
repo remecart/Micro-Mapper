@@ -9,6 +9,8 @@ public class MappingTime : MonoBehaviour
     public GameObject secondHand;
     public TextMeshProUGUI text;
 
+    private bool isIncrementingTime = true;
+
     void Start()
     {
         StartCoroutine(IncreaseMappingTime());
@@ -16,6 +18,9 @@ public class MappingTime : MonoBehaviour
 
     void FixedUpdate()
     {
+        // Check if the application is focused
+        isIncrementingTime = Application.isFocused;
+
         // Mapping loadMap time to seconds
         float currentTime = loadMap.mappingTime * 60;
 
@@ -37,8 +42,11 @@ public class MappingTime : MonoBehaviour
     {
         while (true)
         {
-            // Increment mappingTime by 1/60th of a minute each frame
-            loadMap.mappingTime += 1f / 60f;
+            if (isIncrementingTime)
+            {
+                // Increment mappingTime by 1/60th of a minute each second
+                loadMap.mappingTime += 1f / 60f;
+            }
             yield return new WaitForSecondsRealtime(1f);  // Wait for one second in real-time
         }
     }

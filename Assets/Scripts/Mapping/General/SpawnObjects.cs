@@ -62,14 +62,23 @@ public class SpawnObjects : MonoBehaviour
 
     public void ChangePrecision()
     {
-        float a = int.Parse(numberator.text);
-        float b = int.Parse(denominator.text);
+        var a = int.Parse(numberator.text);
+        var b = int.Parse(denominator.text);
 
-        precision = a / b;
+        if (b == 0)
+        {
+            Debug.LogError("Denominator cannot be zero!");
+            return;
+        }
+
+        precision = (float)a / b;
+
+        precisionArray[currentIndex] = (a, b);
 
         LoadObjectsFromScratch(currentBeat, true, true);
         DrawLines.instance.DrawLinesWhenRequired();
     }
+
 
     // Start is called before the first frame update
     void Start()
@@ -109,9 +118,7 @@ public class SpawnObjects : MonoBehaviour
 
                 ChangePrecision();
             }
-
-            gameObject.transform.parent.parent.transform.position =
-                new Vector3(0, 0, PositionFromBeat(currentBeat) * -editorScale);
+            
             editorScale = Settings.instance.config.mapping.editorScale;
             currentBeatText.text = (Mathf.FloorToInt(currentBeat / precision) * precision).ToString();
 
@@ -225,26 +232,6 @@ public class SpawnObjects : MonoBehaviour
                 LoadWallsBackwards();
             }
 
-            if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) &&
-                !Input.GetMouseButton((int)MouseButton.Right) && !Bookmarks.instance.openMenu)
-            {
-                if (!playing)
-                {
-                    if (GetRealTimeFromBeat(currentBeat) <= LoadSong.instance.audioSource.clip.length)
-                    {
-                        LoadSong.instance.Offset(GetRealTimeFromBeat(currentBeat));
-                        playing = true;
-                    }
-                }
-                else if (playing)
-                {
-                    LoadSong.instance.StopSong();
-                    playing = false;
-                    currentBeat = Mathf.RoundToInt(currentBeat / precision) * precision;
-                    LoadObjectsFromScratch(currentBeat, true, true);
-                }
-            }
-
             if (playing)
             {
                 double deltaTime = Time.deltaTime;
@@ -289,6 +276,26 @@ public class SpawnObjects : MonoBehaviour
             }
 
             if (GetRealTimeFromBeat(currentBeat) >= length) playing = false;
+            
+            if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.playMap) &&
+                !Input.GetMouseButton((int)MouseButton.Right) && !Bookmarks.instance.openMenu)
+            {
+                if (!playing)
+                {
+                    if (GetRealTimeFromBeat(currentBeat) <= LoadSong.instance.audioSource.clip.length)
+                    {
+                        LoadSong.instance.Offset(GetRealTimeFromBeat(currentBeat));
+                        playing = true;
+                    }
+                }
+                else if (playing)
+                {
+                    LoadSong.instance.StopSong();
+                    playing = false;
+                    currentBeat = Mathf.RoundToInt(currentBeat / precision) * precision;
+                    LoadObjectsFromScratch(currentBeat, true, true);
+                }
+            }
         }
         else
         {
@@ -352,6 +359,7 @@ public class SpawnObjects : MonoBehaviour
         SelectObjects.instance.HighlightSelectedObject();
     }
 
+    public GameObject mb;
 
     public void LoadObjectsFromScratch(float fbeat, bool resetGridPos, bool fromScratch)
     {
@@ -387,7 +395,11 @@ public class SpawnObjects : MonoBehaviour
             }
         }
 
-        if (resetGridPos) Grid.localPosition = new Vector3(2, 0, PositionFromBeat(fbeat) * editorScale);
+        if (resetGridPos)
+        {
+            Grid.localPosition = new Vector3(2, 0, PositionFromBeat(fbeat) * editorScale);
+            mb.transform.position = new Vector3(2, 0, PositionFromBeat(fbeat) * -editorScale);
+        }
 
         int beat = Mathf.FloorToInt(fbeat);
 

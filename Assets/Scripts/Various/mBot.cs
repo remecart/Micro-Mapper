@@ -102,8 +102,8 @@ public class mBot : MonoBehaviour
         // Increase brightness (V) and clamp to 1
         // leftV = Mathf.Min((leftV + 9) / 10f, 1f); // Boost by 0.4, cap at 1
         // rightV = Mathf.Min((rightV + 9) / 10f, 1f); // Boost by 0.4, cap at 1
-        leftV = 1;
-        rightV = 1;
+        leftV = 1.25f;
+        rightV = 1.25f;
 
         // Reconstruct colors
         newLeftSaberColor = Color.HSVToRGB(leftH, leftS, leftV);
@@ -117,7 +117,7 @@ public class mBot : MonoBehaviour
         {
             LeftSaberColor = newLeftSaberColor;
             Color.RGBToHSV(LeftSaberColor, out var H, out var S, out var V);
-            var HandleColor = Color.HSVToRGB(H, S, Mathf.Clamp(V - 0.6f, 0f, 1f));
+            var HandleColor = Color.HSVToRGB(H, S * 1.5f, Mathf.Clamp(V - 0.8f, 0f, 1f));
             HandleColor.a = 1f; // Ensure alpha is at max
 
             LeftSaberMaterials[0].color = LeftSaberColor;

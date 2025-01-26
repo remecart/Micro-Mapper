@@ -1,17 +1,11 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
-using TMPro;
-using UnityEngine.UI;
-using Unity.VisualScripting;
 using ImGuiNET;
 using static Spectrogram;
 using static Waveform;
 using static Visuals;
-using System;
 using static Audio;
-using UnityEditor;
 using Skybox = Visuals.Skybox;
 using System.Linq;
 
@@ -268,8 +262,6 @@ public class Settings : MonoBehaviour
                     _ => 3
                 };
 
-                HitSoundManager.instance.hitsoundIndex = index;
-
                 if (ImGui.Combo("Pick Skybox", ref index, _resNames, _resNames.Length))
                 {
                     switch (_resNames[index])
@@ -481,11 +473,11 @@ public class Settings : MonoBehaviour
         {
             if (ImGui.TreeNodeEx("Swing Settings", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if (ImGui.SliderFloat("Intensity", ref config.mBot.mBotSettings.intensity, 0.25f, 3))
+                if (ImGui.SliderFloat("Intensity", ref config.mBot.mBotSettings.intensity, 0.25f, 4))
                 {
                     mBot.instance.intensity = config.mBot.mBotSettings.intensity;
                 }
-                if (ImGui.SliderFloat("Plane Offset", ref config.mBot.mBotSettings.planeOffset, -1, 1))
+                if (ImGui.SliderFloat("Plane Offset", ref config.mBot.mBotSettings.planeOffset, -1, 2))
                 {
                     mBot.instance.planeOffset = config.mBot.mBotSettings.planeOffset;
                 }
@@ -511,7 +503,7 @@ public class Settings : MonoBehaviour
 
             if (ImGui.TreeNodeEx("Sabers", ImGuiTreeNodeFlags.DefaultOpen))
             {
-                if (ImGui.SliderFloat("Saber Width", ref config.mBot.mBotSaber.saberWidth, 1, 10))
+                if (ImGui.SliderFloat("Saber Width", ref config.mBot.mBotSaber.saberWidth, 1, 15))
                 {
                     mBot.instance.saberWidth = config.mBot.mBotSaber.saberWidth;
                 }

@@ -3868,14 +3868,14 @@ MonoBehaviour:
   m_VerticalScrollbarEventHandler: {fileID: 0}
   m_LayoutGroup: {fileID: 0}
   m_ScrollSensitivity: 1
-  m_ContentType: 0
+  m_ContentType: 4
   m_InputType: 0
   m_AsteriskChar: 42
-  m_KeyboardType: 0
+  m_KeyboardType: 1
   m_LineType: 0
   m_HideMobileInput: 0
   m_HideSoftKeyboard: 0
-  m_CharacterValidation: 0
+  m_CharacterValidation: 4
   m_RegexValue: 
   m_GlobalPointSize: 14
   m_CharacterLimit: 0
@@ -4889,7 +4889,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1678306442
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4929,7 +4929,9 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: This directory does not exist!
+  m_text: 'Directory already exists.
+
+    Please enter a different name!'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: fbaa3a39353e2564c9aab178f35631dd, type: 2}
   m_sharedMaterial: {fileID: 2836333136872437393, guid: fbaa3a39353e2564c9aab178f35631dd, type: 2}
@@ -6531,6 +6533,7 @@ MonoBehaviour:
         bloom: 0
       vsync: 0
     audio:
+      audioDelay: 0
       music: 0.5
       hitsound: 0.5
       timing: 0.5

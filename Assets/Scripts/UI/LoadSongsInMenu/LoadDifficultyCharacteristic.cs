@@ -82,6 +82,12 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
         {
             if (t._beatmapCharacteristicName == cacheCharacteristicName)
             {
+                if (t._difficultyBeatmaps == null)
+                {
+                    t._difficultyBeatmaps = new List<_difficultyBeatmaps>();
+                }
+
+                // Check if the difficulty exists and remove it
                 foreach (var d in t._difficultyBeatmaps.ToList())
                 {
                     if (d._difficulty == diffName)
@@ -92,7 +98,8 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
                         return;
                     }
                 }
-                    
+
+                // If it doesn't exist, add the difficulty
                 t._difficultyBeatmaps.Add(new _difficultyBeatmaps
                 {
                     _difficulty = diffName,
@@ -102,12 +109,13 @@ public class LoadDifficultyCharacteristic : MonoBehaviour, IPointerClickHandler
                     _noteJumpMovementSpeed = 20,
                     _customData = new _difficultyBeatmapsCustomData()
                 });
-                
+            
                 cacheDifficultyName = diffName;
                 ChangeCharacteristics(cacheCharacteristicName);
             }
         }
     }
+
 
     public void ChangeDifficulties(string diffName)
     {

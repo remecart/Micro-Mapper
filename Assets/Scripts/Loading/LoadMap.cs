@@ -475,6 +475,19 @@ public class v3Info
 }
 
 [System.Serializable]
+public class _fxEventsCollection
+{
+    public List<timings> _il = new List<timings>();
+    public List<timings> _fl = new List<timings>();
+}
+
+[System.Serializable]
+public class basicEventTypesWithKeywords
+{
+    public List<timings> d = new List<timings>();
+}
+
+[System.Serializable]
 public class beatsV3
 {
     public string version;
@@ -491,25 +504,40 @@ public class beatsV3
     public List<timings> waypoints = new List<timings>();
     public List<timings> colorBoostBeatmapEvents = new List<timings>();
     public List<timings> lightColorEventBoxGroups = new List<timings>();
+    public List<timings> lightRotationEventBoxGroups = new List<timings>();
+    public List<timings> lightTranslationEventBoxGroups = new List<timings>();
     public List<timings> vfxEventBoxGroups = new List<timings>();
-    public List<timings> _fxEventsCollection = new List<timings>();
-    public List<timings> basicEventTypesWithKeywords = new List<timings>();
+    public _fxEventsCollection _fxEventsCollection = new _fxEventsCollection();
+    public basicEventTypesWithKeywords basicEventTypesWithKeywords = new basicEventTypesWithKeywords();
 
+    // Deep Clone Method
     // Deep Clone Method
     public beatsV3 Clone()
     {
-        // Clone the lists
         return new beatsV3
         {
+            version = this.version,
             bpmEvents = this.bpmEvents,
+            rotationEvents = this.rotationEvents,
             colorNotes = this.colorNotes,
             bombNotes = this.bombNotes,
             obstacles = this.obstacles,
             sliders = this.sliders,
             burstSliders = this.burstSliders,
-            timings = this.timings
+            basicBeatmapEvents = this.basicBeatmapEvents,
+            timings = this.timings,
+            customData = this.customData,
+            waypoints = this.waypoints,
+            colorBoostBeatmapEvents = this.colorBoostBeatmapEvents,
+            lightColorEventBoxGroups = this.lightColorEventBoxGroups,
+            lightRotationEventBoxGroups = this.lightRotationEventBoxGroups,
+            lightTranslationEventBoxGroups = this.lightTranslationEventBoxGroups,
+            vfxEventBoxGroups = this.vfxEventBoxGroups,
+            _fxEventsCollection = this._fxEventsCollection,
+            basicEventTypesWithKeywords = this.basicEventTypesWithKeywords
         };
     }
+
 }
 
 [System.Serializable]
@@ -602,6 +630,15 @@ public class bpmEvents
 {
     public float b;
     public float m;
+    
+    public bpmEvents Copy()
+    {
+        return new bpmEvents
+        {
+            b = this.b,
+            m = this.m
+        };
+    }
 }
 
 [System.Serializable]
@@ -633,6 +670,15 @@ public class timings
 {
     public float b;
     public int t;
+    
+    public timings Copy()
+    {
+        return new timings
+        {
+            b = this.b,
+            t = this.t
+        };
+    }
 }
 
 

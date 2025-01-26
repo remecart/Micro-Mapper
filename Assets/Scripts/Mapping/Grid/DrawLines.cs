@@ -98,7 +98,7 @@ public class DrawLines : MonoBehaviour
             }
         }
 
-        BeatNumbers.instance.SpawnNumber(beat - repeat / 2 + 1);
+        // BeatNumbers.instance.SpawnNumber(beat - repeat / 2 + 1);
 
         lineRenderer.positionCount = lineRenderer.positionCount + 1;
         lineRenderer.SetPosition(lineRenderer.positionCount - 1, new Vector3(0, 0, lineRenderer.GetPosition(0).z));

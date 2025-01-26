@@ -64,7 +64,9 @@ public class LoadSong : MonoBehaviour
 
     public IEnumerator LoadAudioClip(string path, AudioSource src, AudioType audioType)
     {
-        string url = "file:///" + path;
+        // Ensure the file path is in the correct format
+        string formattedPath = path.Replace("\\", "/"); // Replace backslashes with forward slashes
+        string url = "file:///" + formattedPath;
 
         using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(url, audioType))
         {
@@ -81,15 +83,12 @@ public class LoadSong : MonoBehaviour
 
                 timeInSeconds = src.clip.length;
 
-                //if (LoadMap.instance != null)
-                //{
-                //    LoadMap.instance.Load(src);
-                //}
-
                 ApplySongSpeed(); // Apply speed settings once the audio is loaded
             }
         }
     }
+
+
 
 
     public void Offset(float offset)

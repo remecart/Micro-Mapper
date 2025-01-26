@@ -7,6 +7,7 @@ public class PatternLibraryUI : MonoBehaviour
 {
     public static PatternLibraryUI instance;
     public bool showPatternLibrary = false;
+    public bool addingPattern;
 
     private void OnEnable()
     {
@@ -37,6 +38,8 @@ public class PatternLibraryUI : MonoBehaviour
 
             if (ImGui.BeginPopup("Pattern Name"))
             {
+                addingPattern = true;
+                
                 ImGui.Text("Enter Pattern Name");
                 ImGui.InputText("Pattern Save Name", ref Library.instance.patternName, 100);
                 if (ImGui.Button("Add"))
@@ -52,6 +55,7 @@ public class PatternLibraryUI : MonoBehaviour
 
                 ImGui.EndPopup();
             }
+            else addingPattern = false;
 
             if (ImGui.Button("Remove Pattern"))
             {

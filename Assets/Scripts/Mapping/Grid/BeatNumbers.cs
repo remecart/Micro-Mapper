@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -19,9 +20,10 @@ public class BeatNumbers : MonoBehaviour
 
     public void SpawnNumber(int beat)
     {
-        var length = int.MaxValue;
-        if (LoadSong.instance.audioSource.clip) length = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
-        if (beat < SpawnObjects.instance.BeatFromRealTime(length))
+        var max = Int32.MaxValue;
+        if (LoadSong.instance.audioSource.clip) max = Mathf.CeilToInt(SpawnObjects.instance.BeatFromRealTime(LoadSong.instance.audioSource.clip.length));
+        
+        if (beat < max)
         {
             if (beat >= 0)
             {

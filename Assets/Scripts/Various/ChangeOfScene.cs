@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Linq;
 using UnityEngine.SceneManagement;
 
+using System.IO;
+
 public class ChangeOfScene : MonoBehaviour
 {
     public EditMetaData editMetaData;
@@ -10,6 +12,17 @@ public class ChangeOfScene : MonoBehaviour
     
     public void ButtonPressed()
     {
+        if (!File.Exists($"{editMetaData.folderPath}\\{editMetaData.metaData._songFilename}"))
+        {
+            PopUpText.instance.Generate("Error: Cannot open map because no song has been selected!");
+            return;
+        }
+        if (!File.Exists($"{editMetaData.folderPath}\\{editMetaData.metaData._coverImageFilename}"))
+        {
+            PopUpText.instance.Generate("Error: Cannot open map because no cover has been selected!");
+            return;
+        }
+            
         foreach (var t in editMetaData.metaData._difficultyBeatmapSets)
         {
             if (t._beatmapCharacteristicName == loadDiffChar.cacheCharacteristicName)

@@ -44,6 +44,7 @@ public class LoadMapsFromPath : MonoBehaviour
     public void OpenNewMapMenu()
     {
         newMap.SetActive(true);
+        newMap.transform.GetChild(1).GetChild(2).gameObject.SetActive(false);
     }
 
     public void SearchForMapByName()
@@ -53,14 +54,28 @@ public class LoadMapsFromPath : MonoBehaviour
 
         foreach (Transform child in scroll.transform)
         {
-            if (child.name.ToLower().Contains(search.ToLower()) || search == string.Empty)
+            if (search != string.Empty)
             {
-                child.gameObject.SetActive(true);
-                count += 1;
-            }
-            else
-            {
-                child.gameObject.SetActive(false);
+                var searchLower = search.ToLower();
+                if (child.GetComponent<LoadMapSelectionPreview>().info._songName.ToLower().Contains(searchLower))
+                {
+                    child.gameObject.SetActive(true);
+                    count += 1;
+                }
+                else if (child.GetComponent<LoadMapSelectionPreview>().info._songAuthorName.ToLower().Contains(searchLower))
+                {
+                    child.gameObject.SetActive(true);
+                    count += 1;
+                }
+                else if (child.GetComponent<LoadMapSelectionPreview>().info._levelAuthorName.ToLower().Contains(searchLower))
+                {
+                    child.gameObject.SetActive(true);
+                    count += 1;
+                }
+                else
+                {
+                    child.gameObject.SetActive(false);
+                }
             }
         }
 

@@ -104,7 +104,7 @@ public class Placement : MonoBehaviour
     void Update()
     {
         if (!Settings.instance.isHovering && !SelectObjects.instance.isSelecting && !DrawInEditor.instance.drawing &&
-            !Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen)
+            !Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen && !PatternLibraryUI.instance.addingPattern)
         {
             bufferTimeRunning -= Time.deltaTime;
             if (!Input.GetMouseButton(1) && !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftAlt) &&

@@ -59,6 +59,7 @@ public class Bookmarks : MonoBehaviour
     }
     public void ToggleBookmark()
     {
+        LoadSong.instance.StopSong();
         bookmarkMenu.SetActive(true);
         openMenu = true;
     }

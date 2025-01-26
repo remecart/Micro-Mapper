@@ -31,7 +31,6 @@ public class PreviewMode : MonoBehaviour
         if (KeybindManager.instance.AreAllKeysPressed(Settings.instance.config.keybinds.previewMap)) {
             Toggle();
         }
-
     }
 
     private void Toggle()
@@ -73,6 +72,6 @@ public class PreviewMode : MonoBehaviour
             fly.enabled = true;
         }
 
-        previewEnabled = !!!previewEnabled; // They used to be friends, until they were....
+        previewEnabled = !!!previewEnabled; // They used to be friends, until they werent....
     }
 }

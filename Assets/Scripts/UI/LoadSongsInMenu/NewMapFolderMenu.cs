@@ -32,7 +32,7 @@ public class NewMapFolderMenu : MonoBehaviour
         }
         else
         {
-            // put error text here
+            this.transform.GetChild(1).GetChild(2).gameObject.SetActive(true);
         }
     }
 }

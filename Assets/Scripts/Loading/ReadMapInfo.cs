@@ -137,7 +137,7 @@ public class Info
     public float _previewDuration = 10;
     public string _songFilename = "";
     public string _coverImageFilename = "";
-    public string _environmentName = "";
+    public string _environmentName = "DefaultEnvironment";
     public float _songTimeOffset = 0;
     public _customData _customData = new _customData();
     public List<_difficultyBeatmapSets> _difficultyBeatmapSets = new List<_difficultyBeatmapSets>();
@@ -178,8 +178,6 @@ public class _difficultyBeatmaps
 [System.Serializable]
 public class _difficultyBeatmapsCustomData
 {
-    public float _editorOffset = 0;
-    public float _editorOldOffset = 0;
     public List<string> _requirements = new List<string>();
     public string _difficultyLabel = "";
 }

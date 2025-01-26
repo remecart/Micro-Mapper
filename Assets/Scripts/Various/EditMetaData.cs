@@ -72,6 +72,7 @@ public class EditMetaData : MonoBehaviour
     {
         SaveValues();
         metaData._customData._editors._lastEditedBy = "Micro Mapper";
+        metaData._environmentName = "DefaultEnvironment";
         File.WriteAllText(infoFolderPath, JsonUtility.ToJson(metaData, true));
 
         PopUpText.instance.Generate(text);
@@ -105,8 +106,8 @@ public class EditMetaData : MonoBehaviour
                                 colorBoostBeatmapEvents = new List<timings>(),
                                 lightColorEventBoxGroups = new List<timings>(),
                                 vfxEventBoxGroups = new List<timings>(),
-                                _fxEventsCollection = new List<timings>(),
-                                basicEventTypesWithKeywords = new List<timings>(),
+                                _fxEventsCollection = new _fxEventsCollection(),
+                                basicEventTypesWithKeywords = new basicEventTypesWithKeywords(),
                             };
                             File.WriteAllText(path, JsonUtility.ToJson(beats, true));
                         }

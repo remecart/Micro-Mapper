@@ -41,7 +41,7 @@ public class SelectObjects : MonoBehaviour
         GenerateText();
         HighlightSelectedObject();
 
-        if (!Settings.instance.isHovering && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen)
+        if (!Settings.instance.isHovering && !DrawInEditor.instance.drawing && !Menu.instance.open && !Bookmarks.instance.openMenu && !BpmMenu.instance.menuOpen && !PatternLibraryUI.instance.addingPattern)
         {
             if (Input.GetKey(KeyCode.LeftShift))
             {
@@ -165,60 +165,36 @@ public class SelectObjects : MonoBehaviour
         // Manually copy each item and adjust `b`
         foreach (var item in selectedColorNotes)
         {
-            colorNotes adjustedItem = new colorNotes
-            {
-                b = item.b - lowestBeat,
-                x = item.x,
-                y = item.y,
-                a = item.a,
-                c = item.c,
-                d = item.d
-            };
+            colorNotes adjustedItem = item.Copy();
+            adjustedItem.b = item.b - lowestBeat;
             copiedObjects.colorNotes.Add(adjustedItem);
         }
 
         foreach (var item in selectedBombNotes)
         {
-            bombNotes adjustedItem = new bombNotes
-            {
-                b = item.b - lowestBeat,
-                x = item.x,
-                y = item.y
-            };
+            bombNotes adjustedItem = item.Copy();
+            adjustedItem.b = item.b - lowestBeat;
             copiedObjects.bombNotes.Add(adjustedItem);
         }
 
         foreach (var item in selectedTimings)
         {
-            timings adjustedItem = new timings
-            {
-                b = item.b - lowestBeat,
-                t = item.t
-            };
+            timings adjustedItem = item.Copy();
+            adjustedItem.b = item.b - lowestBeat;
             copiedObjects.timings.Add(adjustedItem);
         }
 
         foreach (var item in selectedBpmEvents)
         {
-            bpmEvents adjustedItem = new bpmEvents
-            {
-                b = item.b - lowestBeat,
-                m = item.m
-            };
+            bpmEvents adjustedItem = item.Copy();
+            adjustedItem.b = item.b - lowestBeat;
             copiedObjects.bpmEvents.Add(adjustedItem);
         }
 
         foreach (var item in selectedObstacles)
         {
-            obstacles adjustedItem = new obstacles
-            {
-                b = item.b - lowestBeat,
-                x = item.x,
-                y = item.y,
-                d = item.d,
-                h = item.h,
-                w = item.w
-            };
+            obstacles adjustedItem = item.Copy();
+            adjustedItem.b = item.b - lowestBeat;
             copiedObjects.obstacles.Add(adjustedItem);
         }
 
